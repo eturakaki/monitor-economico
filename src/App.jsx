@@ -1,22 +1,33 @@
+import { StatCard } from './components/StatCard'
+
 function App() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      
-      {/* Tarjeta de bienvenida */}
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-blue-600 mb-4">
-          Monitor Económico Argentina 🇦🇷
-        </h1>
-        <p className="text-gray-600 text-lg">
-          Bienvenido Iñaki. Tu entorno profesional está listo para despegar.
-        </p>
-        
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <span className="font-semibold text-blue-800">Estado del sistema:</span>
-          <span className="ml-2 text-green-600 font-bold">● Operativo</span>
-        </div>
-      </div>
+      {/* Título de la Sección */}
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">
+        Monitor Económico
+      </h1>
 
+      {/* Contenedor de Tarjetas */}
+      <div className="flex flex-wrap gap-4">
+        <StatCard
+          titulo="Dólar Blue"
+          valor="$1.200"
+          variacion="+2.5%"
+        />
+
+        <StatCard
+          titulo="Inflación Mensual"
+          valor="12.4%"
+          variacion="-0.5%"
+        />
+        <StatCard
+          titulo="Reservas BCRA"
+          valor="US$ 24.000M"
+          variacion="+1.2%"
+        />
+
+      </div>
     </div>
   )
 }
