@@ -1,33 +1,137 @@
 import { StatCard } from './components/StatCard'
+import { Grid } from './components/Grid'
+import { DollarSign, TrendingUp, TrendingDown, Briefcase, Activity, Factory } from 'lucide-react';
 
 function App() {
+
+  // --- BASE DE DATOS 1: FINANZAS ---
+  const datosFinancieros = [
+    { 
+      titulo: "Dólar Blue", 
+      valor: "$1.200", 
+      variacion: 2.5, 
+      esInverso: true, 
+      Icono: DollarSign, 
+      subtexto: "Brecha: 20%" 
+    },
+    { 
+      titulo: "Riesgo País", 
+      valor: "1.450 pts", 
+      variacion: -2.1, 
+      esInverso: true, 
+      Icono: Activity 
+    },
+    { 
+      titulo: "Reservas BCRA", 
+      valor: "US$ 24.000M", 
+      variacion: 1.2, 
+      Icono: Briefcase,
+      subtexto: "Objetivo: 30MM"
+    },
+    { 
+      titulo: "Merval (S&P)", 
+      valor: "1.120.500", 
+      variacion: 3.4, 
+      // Si no pongo Icono, usa el default
+    },
+  ];
+
+  // --- BASE DE DATOS 2: ECONOMÍA REAL ---
+  const datosEcoReal = [
+    { 
+      titulo: "Inflación Mensual", 
+      valor: "12.4%", 
+      variacion: -0.5, 
+      esInverso: true, 
+      Icono: TrendingDown,
+      subtexto: "Interanual: 210%"
+    },
+    { 
+      titulo: "Superávit Fiscal", 
+      valor: "$518.000M", 
+      variacion: 0.8,
+      // Sin icono -> Usará el default (Activity)
+    },
+    { 
+      titulo: "Desempleo", 
+      valor: "6.2%", 
+      variacion: 0.1, 
+      esInverso: true, 
+      // Sin icono -> Usará el default
+    },
+    { 
+      titulo: "Actividad Industrial", 
+      valor: "-12.0%", 
+      variacion: -1.5, 
+      Icono: Factory
+    }
+  ];
+
+
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       {/* Título de la Sección */}
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        Monitor Económico
+      <h1 className="text-3xl font-bold text-center text-gray-800 pt-8 pb-2">
+        Monitor Económico Argentina
       </h1>
-
-      {/* Contenedor de Tarjetas */}
-      <div className="flex flex-wrap gap-4">
-        <StatCard
-          titulo="Dólar Blue"
-          valor="$1.200"
-          variacion="+2.5%"
-        />
-
-        <StatCard
-          titulo="Inflación Mensual"
-          valor="12.4%"
-          variacion="-0.5%"
-        />
-        <StatCard
-          titulo="Reservas BCRA"
-          valor="US$ 24.000M"
-          variacion="+1.2%"
-        />
-
+      {/* --- REFERENCIA  Logica  "semantica" color --- */}
+      <div className="flex justify-center gap-4 mb-8 text-sm font-medium">
+        <span className="flex items-center text-gray-600">
+          <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+          Mejora para el País
+        </span>
+        <span className="flex items-center text-gray-600">
+          <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+          Empeora para el País
+        </span>
       </div>
+      <h2 className="text-xl font-bold text-gray-700 ml-4 md:ml-10 mb-4 max-w-5xl mx-auto">
+        Dashboard Macroeconómico
+      </h2>
+
+      {/* --- SECCIÓN 1: FINANZAS --- */}
+      <h3 className="text-xl font-bold text-gray-700 ml-4 md:ml-10 mb-4 max-w-5xl mx-auto">
+        Variables Financieras
+      </h3>
+      {/* Contenedor de Tarjetas */}
+      <Grid>
+      {/*AUTOMATIZACIÓN basasa en Base de datos */}
+        {datosFinancieros.map((item, index) => (
+          <StatCard 
+            key={index} // React necesita un ID único para no perderse
+            titulo={item.titulo}
+            valor={item.valor}
+            variacion={item.variacion}
+            esInverso={item.esInverso}
+            Icono={item.Icono}
+            subtexto={item.subtexto}
+          />
+        ))}
+      </Grid>
+
+      {/* --- SECCIÓN 2: ECONOMÍA REAL --- */}
+      <h3 className="text-xl font-bold text-gray-700 ml-4 md:ml-10 mt-10 mb-4 max-w-5xl mx-auto">
+        Economía Real
+      </h3>
+
+      <Grid>
+        {/*AUTOMATIZACIÓN basasa en Base de datos */}
+        {datosEcoReal.map((item, index) => (
+          <StatCard 
+            key={index} // React necesita un ID único para no perderse
+            titulo={item.titulo}
+            valor={item.valor}
+            variacion={item.variacion}
+            esInverso={item.esInverso}
+            Icono={item.Icono}
+            subtexto={item.subtexto}
+          />
+        ))}
+      </Grid>
+
+      
+      
     </div>
   )
 }
