@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Home } from './pages/Home'; // Importamos la página que acabamos de crear
 import { Layout } from './components/Layout';
+import { DetalleIndicador } from './pages/DetalleIndicador'; // <--- 1. IMPORTAR
+import { Categoria } from './pages/Categorias';
 
 
 function App() {
@@ -15,9 +17,11 @@ function App() {
           {/* Todas estas rutas van ADENTRO del Layout (donde está el Outlet) */}
           <Route path="/" element={<Home />} />
           
-          {/* Próximamente... */}
-          {/* <Route path="/mercados" element={<Mercados />} /> */}
+         {/* Ruta para ver un Sector completo (ej: Fiscal) */}
+          <Route path="/categoria/:id" element={<Categoria />} />
           
+          {/* Ruta para el Detalle de un Indicador (ej: Dólar Blue) */}
+          <Route path="/indicador/:id" element={<DetalleIndicador />} />
         </Route>
 
       </Routes>

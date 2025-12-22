@@ -40,3 +40,12 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Utilidad para ocultar la barra de scroll pero mantener la funcionalidad */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
