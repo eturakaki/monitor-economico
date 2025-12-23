@@ -17,36 +17,45 @@ export function Home() {
   const destacadosFinancieros = datosFinancieros.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    // CLAVE: "pt-8" agrega el espacio gris arriba para separarlo del Header global
+    <div className="min-h-screen bg-gray-50 pt-8 pb-20">
       
-      {/* --- HEADER --- */}
-      <div className="pt-10 pb-6 text-center">
-        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
-          Monitor Económico Argentina
-        </h1>
-        <p className="text-gray-500 mt-2">Tablero de control macroeconómico en tiempo real</p>
-      </div>
+      {/* --- ENCABEZADO DE LA PÁGINA (Tarjeta Flotante) --- */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+        
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            
+            {/* Izquierda: Título y Bajada */}
+            <div>
+              <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                Monitor Económico
+              </h1>
+              <p className="text-lg text-gray-500 mt-2">
+                Tablero de control macroeconómico en tiempo real.
+              </p>
+            </div>
+
+            {/* Derecha: Referencias (Pastilla gris ordenada) */}
+            <div className="inline-flex items-center bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700">
+              <span className="mr-3 text-gray-400">Referencias:</span>
+              
+              <div className="flex items-center mr-4">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2 ring-2 ring-emerald-100"></span>
+                Mejora
+              </div>
+              
+              <div className="flex items-center">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 mr-2 ring-2 ring-red-100"></span>
+                Empeora
+              </div>
+            </div>
+
+          </div>
+        </div>
       
-     
 
-      {/* --- SECCIÓN 1: INDICADORES CLAVE (KPIs) --- */}
-      <div className="max-w-7xl mx-auto px-4 mb-12">
-        <h2 className="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-          Dashboard Macroeconómico
-        </h2>
-        <p className="text-gray-500 mt-2">Indicadores económicos principales de Argentina</p>
-
-         {/* Referencia de colores (Semáforo) */}
-      <div className="flex justify-center gap-4 mb-10 text-sm font-medium">
-        <span className="flex items-center text-emerald-600">
-          <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
-          Mejora
-        </span>
-        <span className="flex items-center text-red-600">
-          <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-          Empeora
-        </span>
-      </div>
+      {/* --- FIN DEL ENCABEZADO --- */}
         <Grid>
           {destacadosFinancieros.map((item) => (
             <StatCard key={item.id} {...item} />
