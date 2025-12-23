@@ -2,6 +2,7 @@
 import { useParams, Link } from 'react-router-dom'; // 1. Importamos las herramientas de navegación
 import { ArrowLeft } from 'lucide-react'; // 2. Importamos una flechita para volver
 import { misIndicadores } from '../data/monitores';
+import { HistoricoChart } from '../components/HistoricoChart';
 
 
 
@@ -36,31 +37,96 @@ export function DetalleIndicador() {
       </div>
     );
   }
+  // Definimos el color del gráfico según si sube o baja (verde o rojo)
+  // Si no tiene variación, usamos gris.
+  const colorGrafico = indicador.variacion >= 0 ? "#10b981" : "#ef4444"; // Verde o Rojo
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+ return (
+    <div className="min-h-screen bg-gray-50 pb-20">
       
-      {/* Botón para Volver Atrás */}
-      <Link to="/" className="inline-flex items-center text-emerald-600 font-medium mb-6 hover:underline">
-        <ArrowLeft size={20} className="mr-2" />
-        Volver al Panel
-      </Link>
+      {/* Encabezado con fondo blanco */}
+      <div className="bg-white border-b border-gray-200 pt-8 pb-12">
+        <div className="max-w-4xl mx-auto px-4">
+          
+          {/* Botón Volver */}
+          <Link to="/" className="inline-flex items-center text-gray-500 hover:text-emerald-600 mb-6 transition-colors font-medium">
+            <ArrowLeft size={18} className="mr-2" />
+            Volver al inicio
+          </Link>
 
-      {/* Tarjeta Principal */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-        
-        {/* Título Dinámico: Muestra el ID que leímos de la URL */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 capitalize">
-          {id.replace(/-/g, ' ')} {/* Esto cambia los guiones por espacios */}
-        </h1>
-        
-        <p className="text-gray-500 mb-8">
-          Análisis detallado y gráficos históricos de {id}.
-        </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            {/* Títulos */}
+            <div>
+              <span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold uppercase tracking-wider mb-3">
+                {indicador.categoria.toUpperCase()}
+              </span>
+              <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">
+                {indicador.titulo}
+              </h1>
+              <p className="text-lg text-gray-500 max-w-xl">
+                {indicador.descripcion || "Información detallada y evolución histórica de este indicador."}
+              </p>
+            </div>
 
-        {/* Espacio para el Gráfico (Lo llenaremos en la Fase 3) */}
-        <div className="h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400">
-          Acá irá el gráfico de: {id}
+            {/* Precio Gigante */}
+            <div className="text-right">
+              <div className="text-5xl font-black text-gray-900 tracking-tighter">
+                {indicador.valor}
+              </div>
+              <div className={`text-lg font-bold mt-1 flex items-center justify-end gap-1 ${indicador.variacion >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                {indicador.variacion > 0 ? '+' : ''}{indicador.variacion}%
+                <span className="text-gray-400 text-sm font-normal ml-1">vs. ayer</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenido Principal */}
+      <div className="max-w-4xl mx-auto px-4 -mt-8">
+        
+        {/* Tarjeta del Gráfico (Flotando sobre el borde) */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-gray-800">Evolución Histórica</h3>
+            {/* Selector de fechas falso (Visual) */}
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              {['1M', '3M', '6M', '1A', 'Todo'].map((label) => (
+                <button key={label} className="px-3 py-1 text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm rounded-md transition-all">
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ACÁ ESTÁ EL GRÁFICO NUEVO */}
+          <HistoricoChart datos={indicador.historial} color={colorGrafico} />
+        </div>
+
+        {/* Ficha Técnica (Placeholder para Fase 4) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <h3 className="font-bold text-gray-900 mb-4">Acerca de este indicador</h3>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li className="flex justify-between border-b border-gray-100 pb-2">
+                <span>Fuente:</span> <span className="font-medium text-gray-900">Oficial / Estimado</span>
+              </li>
+              <li className="flex justify-between border-b border-gray-100 pb-2">
+                <span>Frecuencia:</span> <span className="font-medium text-gray-900">Diaria</span>
+              </li>
+              <li className="flex justify-between border-b border-gray-100 pb-2">
+                <span>Última act.:</span> <span className="font-medium text-gray-900">Hoy</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-100 flex flex-col justify-center items-center text-center">
+            <p className="font-bold text-emerald-800 mb-2">¿Necesitás la serie histórica?</p>
+            <p className="text-sm text-emerald-600 mb-4">Descargá los datos completos en Excel/CSV.</p>
+            <button className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-700 transition-colors shadow-sm">
+              Descargar Datos
+            </button>
+          </div>
         </div>
 
       </div>

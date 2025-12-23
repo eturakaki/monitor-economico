@@ -32,8 +32,10 @@ export function Home() {
       {/* --- SECCIÓN 1: INDICADORES CLAVE (KPIs) --- */}
       <div className="max-w-7xl mx-auto px-4 mb-12">
         <h2 className="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-          🔥 Principales Indicadores
+          Dashboard Macroeconómico
         </h2>
+        <p className="text-gray-500 mt-2">Indicadores económicos principales de Argentina</p>
+
          {/* Referencia de colores (Semáforo) */}
       <div className="flex justify-center gap-4 mb-10 text-sm font-medium">
         <span className="flex items-center text-emerald-600">

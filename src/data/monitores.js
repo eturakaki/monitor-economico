@@ -11,7 +11,15 @@ export const misIndicadores = [
     esInverso: true, 
     Icono: DollarSign, 
     subtexto: "Brecha: 20%",
-    descripcion: "Cotización del dólar en el mercado informal de cambios."
+    descripcion: "Cotización del dólar en el mercado informal de cambios.",
+    historial: [
+      { fecha: 'Ene', valor: 1000 },
+      { fecha: 'Feb', valor: 1050 },
+      { fecha: 'Mar', valor: 1020 },
+      { fecha: 'Abr', valor: 1080 },
+      { fecha: 'May', valor: 1150 },
+      { fecha: 'Jun', valor: 1200 },
+    ]
   },
   { 
     id: "dolar-mep", 
@@ -32,7 +40,15 @@ export const misIndicadores = [
     variacion: -2.1, 
     esInverso: true, 
     Icono: Activity,
-    descripcion: "Índice que mide la sobretasa que paga Argentina."
+    descripcion: "Índice que mide la sobretasa que paga Argentina.",
+    historial: [
+      { fecha: 'Ene', valor: 1600 },
+      { fecha: 'Feb', valor: 1550 },
+      { fecha: 'Mar', valor: 1500 },
+      { fecha: 'Abr', valor: 1480 },
+      { fecha: 'May', valor: 1460 },
+      { fecha: 'Jun', valor: 1450 },
+    ]
   },
   { 
     id: "merval", 
