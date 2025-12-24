@@ -21,7 +21,7 @@ export function Home() {
 
   return (
     // CLAVE: "pt-8" agrega el espacio gris arriba para separarlo del Header global
-    <div className="min-h-screen bg-gray-50 pt-8 pb-20">
+    <div className="min-h-screen bg-white dark:bg-[#0B1121] transition-colors duration-300 pt-8 pb-20">
       
       {/* --- ENCABEZADO DE LA PÁGINA (Tarjeta Flotante) --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">

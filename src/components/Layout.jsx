@@ -33,7 +33,7 @@ export function Layout() {
     <div className="flex flex-col min-h-screen font-sans bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
       
       {/* --- HEADER --- */}
-      <header className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm relative transition-colors duration-300">
+      <header className="bg-slate-950 border-black dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm relative transition-colors duration-300">
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
@@ -43,7 +43,7 @@ export function Layout() {
               <LineChart className="text-white" size={24} />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white leading-none">
+              <span className="font-bold text-xl tracking-tight text-white dark:text-white leading-none">
                 Monitor<span className="text-emerald-600">Eco</span>
               </span>
               <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-0.5 hidden sm:block">

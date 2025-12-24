@@ -28,7 +28,7 @@ function App() {
           <Route 
             path="/exportar" 
             element={
-              <div className="bg-gray-50 min-h-screen pt-4">
+              <div className="bg-gray-50 min-h-screen bg-white dark:bg-[#0B1121] transition-colors duration-300">
                 {/* 2. Corregí el nombre aquí también (con M) */}
                 <DescargaPremium /> 
               </div>
@@ -37,7 +37,7 @@ function App() {
           <Route 
             path="/planes" 
             element={
-              <div className="bg-gray-50 min-h-screen pt-4">
+              <div className="bg-gray-50 min-h-screen pt-4 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
                 {/* 2. Corregí el nombre aquí también (con M) */}
                 <Planes /> 
               </div>
