@@ -1,8 +1,9 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Home } from './pages/Home'; // Importamos la página que acabamos de crear
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { Home } from './pages/Home';
 import { Layout } from './components/Layout';
-import { DetalleIndicador } from './pages/DetalleIndicador'; // <--- 1. IMPORTAR
-import { Categoria } from './pages/Categorias';
+import { DetalleIndicador } from './pages/DetalleIndicador';
+import { Categorias } from './pages/Categorias';
+import { Glosario } from './pages/Glosario';
 
 
 function App() {
@@ -10,18 +11,29 @@ function App() {
     <BrowserRouter>
       <Routes>
         
-        {/* ENVOLTORIO PRINCIPAL */}
-        {/* Le decimos: "Usá el Layout como padre de todo" */}
+        {/* ENVOLTORIO PRINCIPAL (Layout) */}
         <Route element={<Layout />}>
           
-          {/* Todas estas rutas van ADENTRO del Layout (donde está el Outlet) */}
+          {/* 1. PAGINA DE INICIO */}
           <Route path="/" element={<Home />} />
           
-         {/* Ruta para ver un Sector completo (ej: Fiscal) */}
-          <Route path="/categoria/:id" element={<Categoria />} />
+          {/* 2. GLOSARIO (Ruta limpia, separada de categorías) */}
+          <Route path="/glosario" element={<Glosario />} />
           
-          {/* Ruta para el Detalle de un Indicador (ej: Dólar Blue) */}
+          {/* 3. RUTAS DINÁMICAS (Categorías y Detalles) */}
+          <Route path="/categoria/:id" element={<Categorias />} />
           <Route path="/indicador/:id" element={<DetalleIndicador />} />
+          
+          {/* 4. CATCH-ALL (Error 404) */}
+          <Route path="*" element={
+            <div className="text-center py-20">
+                <h2 className="text-2xl font-bold text-gray-700">Página no encontrada</h2>
+                <Link to="/" className="text-emerald-600 font-bold hover:underline">
+                  Volver al inicio
+                </Link>
+            </div>
+          } />
+
         </Route>
 
       </Routes>

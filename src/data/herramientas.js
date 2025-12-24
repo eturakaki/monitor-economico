@@ -13,7 +13,7 @@ export const herramientas = [
   { 
     id: "glosario", 
     titulo: "Glosario", 
-    ruta: "/categoria/glosario", 
+    ruta: "/glosario", 
     Icono: BookOpen, 
     color: "blue",
     descripcion: "Diccionario de términos económicos."
