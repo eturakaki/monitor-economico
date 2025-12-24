@@ -4,6 +4,7 @@ import { Grid } from '../components/Grid';
 import { StatCard } from '../components/StatCard';
 import { misIndicadores } from '../data/monitores';
 import { sectores } from '../data/sectores'; // <--- 1. Importamos los sectores
+import { herramientas } from '../data/herramientas';
 
 export function Home() {
   
@@ -86,7 +87,7 @@ export function Home() {
                 <div className={`p-3 rounded-lg bg-${sector.color}-50 text-${sector.color}-600 group-hover:scale-110 transition-transform`}>
                   <Icono size={24} />
                 </div>
-                
+
                 {/* Textos */}
                 <div className="flex-1">
                   <h3 className="font-bold text-gray-900 group-hover:text-emerald-700 transition-colors">
@@ -105,8 +106,49 @@ export function Home() {
         </div>
       </div>
 
-      {/* --- SECCIÓN 3:  pensar*/}
 
-    </div>
-  )
+      {/* --- SECCIÓN 3: Herramientas y Recursos --- */}
+      <div className="max-w-7xl mx-auto px-4 mb-16">
+        
+        {/* Encabezado de la Sección (Separado de la grilla) */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-700">Herramientas</h2>
+        </div>
+
+        {/* Grilla de Tarjetas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {herramientas.map((herramienta) => {
+            const Icono = herramienta.Icono;
+            
+            return (
+              <Link 
+                key={herramienta.id} 
+                to={herramienta.ruta} // Usamos .ruta (definido en herramientas.js)
+                className="group bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all flex items-center gap-4"
+              >
+                {/* Ícono */}
+                <div className={`p-3 rounded-lg bg-${herramienta.color}-50 text-${herramienta.color}-600 group-hover:scale-110 transition-transform`}>
+                  <Icono size={24} />
+                </div>
+                
+                {/* Textos */}
+                <div className="flex-1">
+                  <h3 className="font-bold text-gray-900 group-hover:text-emerald-700 transition-colors">
+                    {herramienta.titulo}
+                  </h3>
+                  <p className="text-xs text-gray-500 line-clamp-1">
+                    {/* CORRECCIÓN: Usamos 'descripcion', no 'subtitulo' */}
+                    {herramienta.descripcion}
+                  </p>
+                </div>
+
+                {/* Flecha */}
+                <ArrowRight size={16} className="text-gray-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </div> // <--- CIERRE DE LA PÁGINA (Este div envuelve TODO)
+  );
 }

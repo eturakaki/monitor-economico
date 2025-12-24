@@ -10,8 +10,10 @@ export const misIndicadores = [
     variacion: 2.5, 
     esInverso: true, 
     Icono: DollarSign, 
-    subtexto: "Brecha: 20%",
     descripcion: "Cotización del dólar en el mercado informal de cambios.",
+    datoAnterior: "$1.170",   // El precio de ayer
+    cambioAbsoluto: "$30",    // Cuántos pesos subió (nominal)
+    subtexto: "BYMA",
     historial: [
       { fecha: 'Ene', valor: 1000 },
       { fecha: 'Feb', valor: 1050 },

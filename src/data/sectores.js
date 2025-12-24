@@ -1,13 +1,9 @@
 import { 
-  Banknote, 
-  Landmark, 
+  Banknote,  
   Scale, 
   ShoppingBag, 
   Factory, 
   Users, 
-  BookOpen, 
-  BrainCircuit, 
-  Database,
   CircleDollarSign, // <--- NUEVO ICONO PARA CAMBIARIO
   LineChart         // <--- NUEVO ICONO PARA FINANCIERO
 } from 'lucide-react';
@@ -71,29 +67,4 @@ export const sectores = [
     color: "emerald"
   },
 
-  // --- HERRAMIENTAS ---
-  {
-    id: "analytics",
-    titulo: "Analytics & IA",
-    subtitulo: "Análisis avanzado",
-    descripcion: "Proyecciones y análisis de tendencias.",
-    Icono: BrainCircuit,
-    color: "violet"
-  },
-  {
-    id: "glosario",
-    titulo: "Glosario",
-    subtitulo: "Diccionario",
-    descripcion: "Definiciones de términos económicos.",
-    Icono: BookOpen,
-    color: "teal"
-  },
-  {
-    id: "base-datos",
-    titulo: "Exportar",
-    subtitulo: "Datos Premium",
-    descripcion: "Descarga de series históricas.",
-    Icono: Database,
-    color: "slate"
-  }
 ];
