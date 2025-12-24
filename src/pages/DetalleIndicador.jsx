@@ -37,11 +37,15 @@ export function DetalleIndicador() {
       </div>
     );
   }
+
   // Definimos el color del gráfico según si sube o baja (verde o rojo)
   // Si no tiene variación, usamos gris.
   const colorGrafico = indicador.variacion >= 0 ? "#10b981" : "#ef4444"; // Verde o Rojo
-
- return (
+  
+  // 🌟 NUEVO: Detectamos si el valor usa "%" (como Inflación) o no (como Dólar)
+  const tienePorcentaje = indicador.valor.includes('%');
+  
+  return (
     <div className="min-h-screen bg-gray-50 pb-20">
       
       {/* Encabezado con fondo blanco */}
@@ -87,12 +91,16 @@ export function DetalleIndicador() {
         
         {/* Tarjeta del Gráfico (Flotando sobre el borde) */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-gray-800">Evolución Histórica</h3>
+           
             {/* Selector de fechas falso (Visual) */}
             <div className="flex bg-gray-100 rounded-lg p-1">
               {['1M', '3M', '6M', '1A', 'Todo'].map((label) => (
-                <button key={label} className="px-3 py-1 text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm rounded-md transition-all">
+                <button 
+                key={label} 
+                className="px-3 py-1 text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm rounded-md transition-all">
                   {label}
                 </button>
               ))}
@@ -100,8 +108,15 @@ export function DetalleIndicador() {
           </div>
 
           {/* ACÁ ESTÁ EL GRÁFICO NUEVO */}
-          <HistoricoChart datos={indicador.historial} color={colorGrafico} />
+          <div className="h-[350px] min-h-[350px] w-full">
+            <HistoricoChart 
+              datos={indicador.historial} 
+              color={colorGrafico} 
+              esPorcentaje={tienePorcentaje} 
+            />
+          </div>
         </div>
+          
 
         {/* Ficha Técnica (Placeholder para Fase 4) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

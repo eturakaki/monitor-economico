@@ -4,7 +4,7 @@ import { Grid } from '../components/Grid';
 import { StatCard } from '../components/StatCard';
 import { sectores } from '../data/sectores';      // Tu lista de metadatos (colores, iconos)
 import { misIndicadores } from '../data/monitores'; // Tu base de datos simulada
-//import { StatCard } from '../components/StatCard';  // La tarjeta pro que diseñamos
+
 
 
 export function Categorias() {

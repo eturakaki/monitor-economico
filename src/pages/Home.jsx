@@ -5,6 +5,8 @@ import { StatCard } from '../components/StatCard';
 import { misIndicadores } from '../data/monitores';
 import { sectores } from '../data/sectores'; // <--- 1. Importamos los sectores
 import { herramientas } from '../data/herramientas';
+import { ResumenIA } from '../components/ResumenIA'; // <--- Componentes IA
+
 
 export function Home() {
   
@@ -43,12 +45,12 @@ export function Home() {
               
               <div className="flex items-center mr-4">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2 ring-2 ring-emerald-100"></span>
-                Mejora
+                Mejora de dato para el país
               </div>
               
               <div className="flex items-center">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-500 mr-2 ring-2 ring-red-100"></span>
-                Empeora
+                Empeora de dato para el país
               </div>
             </div>
 
@@ -64,7 +66,14 @@ export function Home() {
         </Grid>
       </div>
 
-      {/* --- SECCIÓN 2: NAVEGACIÓN POR SECTORES (NUEVO) --- */}
+        {/* 🌟 NUEVO: RESUMEN DE IA 🌟 */}
+      <div className="max-w-7xl mx-auto px-4 mt-8 mb-12">
+        <ResumenIA />
+      </div>
+      {/* --------------------------- */}
+
+
+      {/* --- SECCIÓN 3: NAVEGACIÓN POR SECTORES (NUEVO) --- */}
       <div className="max-w-7xl mx-auto px-4 mb-16">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-700">Explorar por Sectores</h2>
@@ -107,7 +116,7 @@ export function Home() {
       </div>
 
 
-      {/* --- SECCIÓN 3: Herramientas y Recursos --- */}
+      {/* --- SECCIÓN 4: Herramientas y Recursos --- */}
       <div className="max-w-7xl mx-auto px-4 mb-16">
         
         {/* Encabezado de la Sección (Separado de la grilla) */}

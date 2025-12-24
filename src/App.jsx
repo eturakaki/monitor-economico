@@ -3,15 +3,19 @@ import { Home } from './pages/Home';
 import { Layout } from './components/Layout';
 import { DetalleIndicador } from './pages/DetalleIndicador';
 import { Categorias } from './pages/Categorias';
-import { Glosario } from './pages/Glosario';
-
+import { Glosario } from './pages/TEMP_Glosario';
+import { DescargaPremium } from './pages/DescargaPremiun';
+import { Planes } from './pages/Planes';
+import { NotFound } from './pages/NotFound';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         
-        {/* ENVOLTORIO PRINCIPAL (Layout) */}
+        {/* ENVOLTORIO PRINCIPAL (Layout) 
+            Todo lo que esté acá adentro va a tener Navbar y Footer automáticos. 
+        */}
         <Route element={<Layout />}>
           
           {/* 1. PAGINA DE INICIO */}
@@ -19,20 +23,38 @@ function App() {
           
           {/* 2. GLOSARIO (Ruta limpia, separada de categorías) */}
           <Route path="/glosario" element={<Glosario />} />
+          {/* 3. Descarga de datps (Ruta limpia, separada de categorías) */}
+          <Route 
+            path="/exportar" 
+            element={
+              <div className="bg-gray-50 min-h-screen pt-4">
+                {/* 2. Corregí el nombre aquí también (con M) */}
+                <DescargaPremium /> 
+              </div>
+            } 
+          />
+          <Route 
+            path="/planes" 
+            element={
+              <div className="bg-gray-50 min-h-screen pt-4">
+                {/* 2. Corregí el nombre aquí también (con M) */}
+                <Planes /> 
+              </div>
+            } 
+          />
+
+
           
-          {/* 3. RUTAS DINÁMICAS (Categorías y Detalles) */}
+          {/* 5. RUTAS DINÁMICAS (Categorías y Detalles) */}
           <Route path="/categoria/:id" element={<Categorias />} />
           <Route path="/indicador/:id" element={<DetalleIndicador />} />
           
-          {/* 4. CATCH-ALL (Error 404) */}
-          <Route path="*" element={
-            <div className="text-center py-20">
-                <h2 className="text-2xl font-bold text-gray-700">Página no encontrada</h2>
-                <Link to="/" className="text-emerald-600 font-bold hover:underline">
-                  Volver al inicio
-                </Link>
-            </div>
-          } />
+
+          
+          {/* 5. CATCH-ALL (Error 404) 
+              Si el usuario escribe una URL que no existe, cae acá. 
+          */}
+          <Route path="*" element={<NotFound />} />
 
         </Route>
 

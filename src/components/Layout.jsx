@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { 
-  LineChart, 
-  Home, 
-  Menu,       
-  X,          
+import {
+  LineChart,
+  Home,
+  Menu,
+  X,
   ChevronRight,
-  // Importamos iconos nuevos para las herramientas
+  //iconos nuevos para las herramientas
   BookOpen,     // Glosario
   BarChart2,    // Analytics
   Download,     // Exportar
@@ -208,14 +208,43 @@ export function Layout() {
                                     })}
                                 </div>
                                 
-                                {/* Banner Promocional Falso para rellenar espacio */}
-                                <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 text-white shadow-lg">
-                                    <p className="font-bold text-sm mb-1">🚀 Modo Pro</p>
-                                    <p className="text-xs text-gray-400 mb-3">Descarga series históricas completas.</p>
-                                    <button className="text-xs font-bold bg-white text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors w-full">
-                                        Ver planes
-                                    </button>
-                                </div>
+{/* ==BANNER PROMOCIONAL MODO PRO================= */}
+
+<div className="mt-auto pt-6 px-2"> {/* mt-auto lo empuja hacia el fondo del menú */}
+  <Link
+    to="/planes"
+    onClick={closeMenu}
+    className="block relative overflow-hidden group rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 p-5 shadow-xl transition-all hover:scale-[1.02] active:scale-95"
+  >
+    {/* Efecto decorativo: Círculo de luz de fondo */}
+    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500 rounded-full mix-blend-overlay filter blur-2xl opacity-20 -translate-y-8 translate-x-8 group-hover:opacity-40 transition-opacity"></div>
+
+    <div className="relative z-10">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-xl">🚀</span>
+        <h3 className="font-black text-white text-sm uppercase tracking-wider">
+          Modo Pro
+        </h3>
+      </div>
+      
+      <p className="text-slate-400 text-xs mb-4 leading-relaxed">
+        Desbloqueá descargas ilimitadas y acceso a series históricas completas.
+      </p>
+
+      {/* Usamos un <span> con estilo de botón para evitar el error de 
+          "button inside anchor" pero manteniendo la misma estética. 
+      */}
+      <div className="w-full py-2 bg-white text-slate-900 text-[11px] font-black text-center rounded-lg group-hover:bg-blue-50 transition-colors uppercase tracking-tighter">
+        Ver planes disponibles
+      </div>
+    </div>
+  </Link>
+  
+  {/* Texto legal muy pequeño opcional */}
+  <p className="text-[10px] text-center text-gray-400 mt-3 opacity-50 uppercase tracking-tighter">
+    MonitorEco Pro © 2025
+  </p>
+</div>
                             </div>
 
                         </div>
@@ -226,11 +255,61 @@ export function Layout() {
 
       </header>
       <main className="flex-1"><Outlet /></main>
-      <footer className="bg-gray-900 text-white border-t border-gray-800 mt-auto">
+        <footer className="bg-gray-900 text-white border-t border-gray-800 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center md:text-left text-xs text-gray-500">
-                <p>© 2025 Iñaki Etura. Todos los derechos reservados.</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            
+            {/* Columna 1: Marca */}
+            <div className="col-span-1">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="bg-emerald-600 p-1.5 rounded-lg">
+                  <LineChart className="text-white" size={20} />
+                </div>
+                <span className="font-bold text-lg tracking-tight">
+                  Monitor<span className="text-emerald-500">Eco</span>
+                </span>
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Datos macroeconómicos de Argentina en tiempo real. Análisis profesional para la toma de decisiones.
+              </p>
             </div>
+
+            {/* Columna 2: Sectores Rápidos */}
+            <div className="col-span-1 md:col-span-2">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
+                Acceso Rápido
+              </h3>
+              <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                {sectores.slice(0, 6).map((sector) => (
+                  <Link 
+                    key={sector.id} 
+                    to={`/categoria/${sector.id}`} 
+                    className="text-gray-400 hover:text-emerald-400 text-sm transition-colors flex items-center gap-2"
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full bg-${sector.color}-500`}></span>
+                    {sector.titulo}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Columna 3: Legales */}
+            <div className="col-span-1">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
+                Info
+              </h3>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li><Link to="/categoria/glosario" className="hover:text-white">Glosario</Link></li>
+                <li><Link to="/categoria/base-datos" className="hover:text-white">API Docs</Link></li>
+                <li><a href="#" className="hover:text-white">Términos de uso</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+            <p>© 2025 Iñaki Etura. Todos los derechos reservados.</p>
+            <p className="mt-2 md:mt-0">Desarrollado en Argentina.</p>
+          </div>
         </div>
       </footer>
     </div>
