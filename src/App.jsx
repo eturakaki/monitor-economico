@@ -7,6 +7,7 @@ import { Glosario } from './pages/TEMP_Glosario';
 import { DescargaPremium } from './pages/DescargaPremiun';
 import { Planes } from './pages/Planes';
 import { NotFound } from './pages/NotFound';
+import { SobreMi } from './pages/SobreMi';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
               </div>
             } 
           />
+          <Route path="/sobre-mi" element={<SobreMi />} />
 
 
           
