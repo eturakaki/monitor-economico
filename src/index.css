@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Regla #1 de tus imágenes: Base Font Size = 16px */
+  html {
+    font-size: 16px; 
+    /* Regla #2: Line Height 150% para texto general */
+    line-height: 1.5; 
+    /* Suavizado de fuentes para que se vea premium */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Regla #3: Los títulos tienen menos interlineado y tracking negativo */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-black tracking-tight leading-tight text-slate-900 dark:text-white;
+  }
+}

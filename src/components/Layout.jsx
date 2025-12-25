@@ -30,11 +30,10 @@ export function Layout() {
 
 
   return (
-    <div className="flex flex-col min-h-screen font-sans bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+    <div className="flex flex-col min-h-screen font-sans  dark:bg-slate-950 transition-colors duration-100">
       
       {/* --- HEADER --- */}
-      <header className="bg-slate-950 border-black dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm relative transition-colors duration-300">
-        
+      <header className="sticky top-0 z-50 w-full border-b backdrop-blur-md transition-all duration-300 bg-slate-950/90 border-slate-200 dark:bg-slate-950/80 dark:border-white/5">  
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           {/* Logo */}
@@ -57,7 +56,7 @@ export function Layout() {
             
             <div className="hidden md:block text-right border-r border-gray-200 dark:border-gray-700 pr-4 mr-1">
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Actualizado</p>
-              <p className="text-xs font-bold text-gray-700 dark:text-gray-300">
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-300">
                 {new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })} • 
                 <span className="ml-1 text-emerald-600">En tiempo real</span>
               </p>
@@ -117,7 +116,7 @@ export function Layout() {
 
         {/* --- MEGA MENÚ DESPLEGABLE (Diseño Grid para Laptops) --- */}
         {isMenuOpen && (
-            <div className="2xl:hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-xl z-40 animate-in slide-in-from-top-5 fade-in duration-200">
+            <div className="2xl:hidden absolute top-full left-0 w-full backdrop-blur-md bg-stone-950/99 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-xl z-40 animate-in slide-in-from-top-5 fade-in duration-200">
                 <div className="max-h-[85vh] overflow-y-auto">
                     <div className="max-w-4xl mx-auto p-6"> {/* Centrado y con margen */}
                         
@@ -128,7 +127,7 @@ export function Layout() {
                                 onClick={closeMenu}
                                 className={`flex items-center p-4 rounded-xl border transition-all shadow-sm group
                                     ${isActive('/') 
-                                        ? 'bg-emerald-50 border-emerald-400 dark:bg-emerald-900/10 dark:border-emerald-800' 
+                                        ? 'bg-slate-950/90 border-emerald-400 dark:bg-emerald-900/10 dark:border-emerald-800' 
                                         : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 hover:border-emerald-200 hover:shadow-md'
                                     }`}
                             >
@@ -136,8 +135,8 @@ export function Layout() {
                                     <Home size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-lg">Inicio / Dashboard</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Resumen general del mercado en tiempo real.</p>
+                                    <h3 className="font-bold text-white dark:text-white text-lg">Inicio / Dashboard</h3>
+                                    <p className="text-sm text-gray-400 dark:text-gray-400">Resumen general del mercado en tiempo real.</p>
                                 </div>
                             </Link>
                         </div>
@@ -146,7 +145,7 @@ export function Layout() {
                             
                             {/* 2. COLUMNA SECTORES (GRID) */}
                             <div>
-                                <h3 className="text-xs font-bold text-black-500 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <h3 className="text-xs font-bold text-white dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
                                     <LineChart size={14} /> Sectores Económicos
                                 </h3>
                                 
@@ -167,13 +166,13 @@ export function Layout() {
                                                     flex items-center gap-3 p-3 rounded-xl border transition-all
                                                     ${activo 
                                                         ? `bg-${sector.color}-50 border-${sector.color}-100 ring-1 ring-${sector.color}-100 dark:bg-${sector.color}-900/20 dark:border-${sector.color}-800` 
-                                                        : 'bg-white dark:bg-slate-800 border-emerald-600 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600 hover:shadow-sm'}
+                                                        : 'bg-slate-950/90 backdrop-blur-xl dark:bg-slate-800 border-emerald-600 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600 hover:shadow-sm'}
                                                 `}
                                             >
                                                 <div className={`p-2 rounded-lg ${activo ? 'bg-white dark:bg-slate-900' : 'bg-gray-50 dark:bg-slate-700'}`}>
-                                                    <Icono size={18} className={activo ? `text-${sector.color}-600` : 'text-gray-500 dark:text-gray-400'} />
+                                                    <Icono size={18} className={activo ? `text-${sector.color}-600` : 'text-emerald-600 dark:text-gray-400'} />
                                                 </div>
-                                                <span className={`font-medium text-sm ${activo ? `text-${sector.color}-900 dark:text-${sector.color}-300` : 'text-gray-700 dark:text-gray-300'}`}>
+                                                <span className={`font-medium text-sm ${activo ? `text-${sector.color}-900 dark:text-${sector.color}-300` : 'text-white dark:text-gray-300'}`}>
                                                     {sector.titulo}
                                                 </span>
                                             </Link>
@@ -184,7 +183,7 @@ export function Layout() {
 
                             {/* 3. COLUMNA HERRAMIENTAS (NUEVO) */}
                             <div>
-                                <h3 className="text-xs font-bold text-black-500 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <h3 className="text-xs font-bold text-white dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
                                     <Calculator size={14} /> Herramientas & Recursos
                                 </h3>
                                 <div className="grid grid-cols-1 gap-3 ">
@@ -195,14 +194,14 @@ export function Layout() {
                                                 key={tool.id}
                                                 to={tool.ruta}
                                                 onClick={closeMenu}
-                                                className="flex items-center justify-between p-3 rounded-xl border border-emerald-600 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-gray-300 hover:shadow-sm transition-all group"
+                                                className="flex items-center justify-between p-3 rounded-xl border border-emerald-600 dark:border-slate-700 bg-slate-950/90 dark:bg-slate-800 hover:border-gray-300 hover:shadow-sm transition-all group"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`p-2 rounded-lg bg-${tool.color}-50 dark:bg-${tool.color}-900/20 text-${tool.color}-600 group-hover:scale-110 transition-transform`}>
+                                                    <div className={`p-2 rounded-lg bg-white dark:bg-${tool.color}-900/20 text-${tool.color}-600 group-hover:scale-110 transition-transform`}>
                                                         <Icono size={18} />
                                                     </div>
                                                     <div>
-                                                        <span className="font-medium text-gray-700 dark:text-gray-300 block">{tool.titulo}</span>
+                                                        <span className="font-medium text-white dark:text-gray-300 block">{tool.titulo}</span>
                                                         <span className="text-[10px] text-gray-400 hidden sm:block">{tool.descripcion}</span>
                                                     </div>
                                                 </div>
