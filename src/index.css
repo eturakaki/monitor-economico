@@ -3,18 +3,24 @@
 @tailwind utilities;
 
 @layer base {
-  /* Regla #1 de tus imágenes: Base Font Size = 16px */
+  /* Regla #1: Base Font Size = 16px y FONDO BASE */
   html {
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 16px; 
-    /* Regla #2: Line Height 150% para texto general */
-    line-height: 1.5; 
-    /* Suavizado de fuentes para que se vea premium */
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* 👇 AQUÍ ESTÁ LA CLAVE: Pintamos el fondo raíz */
+    @apply bg-slate-50 dark:bg-slate-950 transition-colors duration-300;
   }
 
-  /* Regla #3: Los títulos tienen menos interlineado y tracking negativo */
+  /* Regla #2: Títulos con alto contraste y tracking apretado */
   h1, h2, h3, h4, h5, h6 {
     @apply font-black tracking-tight leading-tight text-slate-900 dark:text-white;
+  }
+  
+  /* Regla #3: El cuerpo hereda el texto, el fondo ya lo pone 'html' */
+  body {
+    @apply text-slate-600 dark:text-slate-300;
   }
 }

@@ -31,6 +31,8 @@ export const misIndicadores = [
     variacion: 1.8, 
     Icono: DollarSign, 
     subtexto: "Bolsa",
+    datoAnterior: "$1.170",
+    cambioAbsoluto: "$30",
     historial: [
       { fecha: 'Ene', valor: 1000 },
       { fecha: 'Feb', valor: 1050 },
@@ -50,6 +52,8 @@ export const misIndicadores = [
     variacion: -2.1, 
     esInverso: true, 
     Icono: Activity,
+    datoAnterior: "$1.170",
+    cambioAbsoluto: "$30",
     descripcion: "Índice que mide la sobretasa que paga Argentina.",
     historial: [
       { fecha: 'Ene', valor: 1600 },
@@ -67,6 +71,8 @@ export const misIndicadores = [
     valor: "1.120.500", 
     variacion: 3.4, 
     Icono: TrendingUp,
+    datoAnterior: "$1.170",
+    cambioAbsoluto: "$30",
     historial: [
       { fecha: 'Ene', valor: 1000 },
       { fecha: 'Feb', valor: 1050 },
@@ -86,6 +92,8 @@ export const misIndicadores = [
     variacion: 1.2, 
     Icono: Briefcase, 
     subtexto: "Objetivo: 30MM",
+    datoAnterior: "$1.170",
+    cambioAbsoluto: "$30",
     historial: [
       { fecha: 'Ene', valor: 1000 },
       { fecha: 'Feb', valor: 1050 },
@@ -103,6 +111,8 @@ export const misIndicadores = [
     variacion: 0, 
     Icono: Percent, // Importante: Asegurate de importar 'Percent' arriba si querés este ícono, o usá Scale
     subtexto: "TNA",
+    datoAnterior: "$1.170",
+    cambioAbsoluto: "$30",
     historial: [
       { fecha: 'Ene', valor: 1000 },
       { fecha: 'Feb', valor: 1050 },
@@ -123,6 +133,8 @@ export const misIndicadores = [
     esInverso: true, 
     Icono: TrendingDown, 
     subtexto: "Interanual: 210%",
+    datoAnterior: "$1.170",
+    cambioAbsoluto: "$30",
     historial: [
       { fecha: 'Ene', valor: 1000 },
       { fecha: 'Feb', valor: 1050 },

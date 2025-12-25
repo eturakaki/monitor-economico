@@ -1,68 +1,87 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+// --- LÓGICA & UTILIDADES ---
+import { AuthProvider } from './context/AuthContext'; // El cerebro de la sesión
+import ScrollToTop from './components/ScrollToTop';   // UX: Resetea scroll al navegar
+
+// --- LAYOUTS ---
+import { Layout } from './components/Layout'; // Contiene Navbar y Footer
+
+// --- PÁGINAS (APP PRINCIPAL) ---
 import { Home } from './pages/Home';
-import { Layout } from './components/Layout';
 import { DetalleIndicador } from './pages/DetalleIndicador';
 import { Categorias } from './pages/Categorias';
 import { Glosario } from './pages/TEMP_Glosario';
-import { DescargaPremium } from './pages/DescargaPremiun';
+import { DescargaPremium } from './pages/DescargaPremiun'; 
 import { Planes } from './pages/Planes';
 import { NotFound } from './pages/NotFound';
 import { SobreMi } from './pages/SobreMi';
+import { Contacto } from './pages/Contacto';
+
+// --- PÁGINAS (AUTH) ---
+import { Login } from './pages/Login';       
+import { Register } from './pages/Register'; 
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    // 1. AuthProvider envuelve TODO para proveer estado global
+    <AuthProvider>
+      <BrowserRouter>
+        <ScrollToTop />
         
-        {/* ENVOLTORIO PRINCIPAL (Layout) 
-            Todo lo que esté acá adentro va a tener Navbar y Footer automáticos. 
-        */}
-        <Route element={<Layout />}>
+        <Routes>
           
-          {/* 1. PAGINA DE INICIO */}
-          <Route path="/" element={<Home />} />
-          
-          {/* 2. GLOSARIO (Ruta limpia, separada de categorías) */}
-          <Route path="/glosario" element={<Glosario />} />
-          {/* 3. Descarga de datps (Ruta limpia, separada de categorías) */}
-          <Route 
-            path="/exportar" 
-            element={
-              <div className="bg-gray-50 min-h-screen bg-white dark:bg-[#0B1121] transition-colors duration-300">
-                {/* 2. Corregí el nombre aquí también (con M) */}
-                <DescargaPremium /> 
-              </div>
-            } 
-          />
-          <Route 
-            path="/planes" 
-            element={
-              <div className="bg-gray-50 min-h-screen pt-4 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
-                {/* 2. Corregí el nombre aquí también (con M) */}
-                <Planes /> 
-              </div>
-            } 
-          />
-          <Route path="/sobre-mi" element={<SobreMi />} />
+          {/* =======================================================
+              ZONA A: PÁGINAS "STANDALONE" (Sin Navbar ni Footer)
+              Diseño limpio para maximizar conversión (Login/Registro)
+              ======================================================= */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
 
-          
-          {/* 5. RUTAS DINÁMICAS (Categorías y Detalles) */}
-          <Route path="/categoria/:id" element={<Categorias />} />
-          <Route path="/indicador/:id" element={<DetalleIndicador />} />
-          
+          {/* =======================================================
+              ZONA B: APLICACIÓN PRINCIPAL (Con Navbar y Footer)
+              Usamos un "Wrapper" (Layout) que persiste en la navegación.
+              ======================================================= */}
+          <Route element={<Layout />}> {/* <--- APERTURA DEL LAYOUT */}
+            
+            <Route path="/" element={<Home />} />
+            <Route path="/glosario" element={<Glosario />} />
+            <Route path="/sobre-mi" element={<SobreMi />} />
+            <Route path="/contacto" element={<Contacto />} />
 
-          
-          {/* 5. CATCH-ALL (Error 404) 
-              Si el usuario escribe una URL que no existe, cae acá. 
-          */}
-          <Route path="*" element={<NotFound />} />
+            {/* Rutas con contenedores especiales para modo oscuro/claro */}
+            <Route 
+              path="/exportar" 
+              element={
+                <div className="bg-gray-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
+                  <DescargaPremium /> 
+                </div>
+              } 
+            />
 
-        </Route>
+            <Route 
+              path="/planes" 
+              element={
+                <div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300">
+                  <Planes /> 
+                </div>
+              } 
+            />
+            
+            {/* Rutas Dinámicas (Detectan ID en la URL) */}
+            <Route path="/categoria/:id" element={<Categorias />} />
+            <Route path="/indicador/:id" element={<DetalleIndicador />} />
+            
+            {/* Catch-All (Error 404 dentro del Layout) */}
+            <Route path="*" element={<NotFound />} />
 
-      </Routes>
-    </BrowserRouter>
-  )
+          </Route> {/* <--- CIERRE DEL LAYOUT (¡Esto faltaba antes!) */}
+
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
 }
 
 export default App;
