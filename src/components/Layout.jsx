@@ -391,11 +391,14 @@ export function Layout() {
                 Info
               </h3>
               <ul className="space-y-2 text-sm text-gray-400">
+                {/* Enlaces Informativos */}
                 <li><Link to="/glosario" className="hover:text-white">Glosario</Link></li>
                 <li><Link to="/sobre-mi" className="hover:text-white">Acerca de mí</Link></li>
                 <li><Link to="/contacto" className="hover:text-white transition-colors">Contacto</Link></li>
-                <li><Link to="#" className="hover:text-white">API Docs</Link></li>
-                <li><a href="#" className="hover:text-white">Términos de uso</a></li>
+                
+                {/* Enlaces Técnicos y Legales  */}
+                <li><Link to="/apidocs" className="hover:text-white">API Docs</Link></li>
+                <li><Link to="/terminosdeuso" className="hover:text-white">Términos de uso</Link></li>
               </ul>
             </div>
           </div>
