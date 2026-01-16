@@ -234,7 +234,7 @@ export function Layout() {
                                 className={`flex items-center p-4 rounded-xl border transition-all shadow-sm group
                                     ${isActive('/') 
                                         ? 'bg-slate-950/90 border-emerald-400 dark:bg-emerald-900/10 dark:border-emerald-800' 
-                                        : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 hover:border-emerald-200 hover:shadow-md'
+                                        : 'bg-slate-950/90 dark:bg-slate-800 border-gray-100 dark:border-slate-700 hover:border-emerald-200 hover:shadow-md'
                                     }`}
                             >
                                 <div className={`p-3 rounded-lg mr-4 ${isActive('/') ? 'bg-white dark:bg-slate-900 text-emerald-600' : 'bg-gray dark:bg-slate-700 text-gray-500 dark:text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-600'}`}>
