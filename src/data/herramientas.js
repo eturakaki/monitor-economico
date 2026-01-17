@@ -28,8 +28,8 @@ export const herramientas = [
   },
   { 
     id: "calculadora", 
-    titulo: "Calculadora", 
-    ruta: "/calculadora", 
+    titulo: "Herramientas Financieras", 
+    ruta: "/herramientas", 
     Icono: Calculator, 
     color: "emerald",
     descripcion: "Conversor de monedas y ajustes por inflación."

@@ -1,5 +1,6 @@
 import { 
   TrendingUp, 
+  TrendingDown, // Agregado para Inflación USD
   PieChart, 
   ArrowRightLeft, 
   Banknote, 
@@ -39,12 +40,17 @@ import {
   CarFront,
   ShoppingBag,
   BrainCircuit,
-  BarChart4
+  BarChart4,
+  // --- NUEVOS ICONOS AGREGADOS ---
+  Calendar,
+  CalendarCheck,
+  Activity,
+  ListFilter
 } from 'lucide-react';
 
 /**
  * TOOLS REGISTRY (MASTER LIST)
- * Catálogo centralizado de las 40+ herramientas de MonitorEco.
+ * Catálogo centralizado de las herramientas de MonitorEco.
  */
 
 export const toolsRegistry = [
@@ -116,8 +122,91 @@ export const toolsRegistry = [
   },
 
   // ===========================================================================
-  // MÓDULO II: INVERSIONES, TASAS Y ARBITRAJE
+  // MÓDULO II: INVERSIONES, TASAS Y ARBITRAJE (EXPANDIDO)
   // ===========================================================================
+  {
+    id: 'perfil-inversor',
+    category: 'inversiones',
+    title: 'Test del Inversor',
+    desc: 'Descubrí tu perfil de riesgo y cómo debería conformarse tu cartera ideal.',
+    path: '/test-inversor', // Ruta especial fuera de /calculadoras
+    icon: BrainCircuit,
+    color: 'indigo',
+    featured: true,
+    badge: 'Empezar acá'
+  },
+  {
+    id: 'monitor-mercado',
+    category: 'inversiones',
+    title: 'Monitor de Mercado',
+    desc: 'Tablero en tiempo real: Acciones, CEDEARs y Bonos (Panel de Cotizaciones).',
+    path: '/calculadoras/inversiones/monitor',
+    icon: Activity,
+    color: 'violet',
+    featured: true
+  },
+  {
+    id: 'inflacion-usd',
+    category: 'inversiones',
+    title: 'Dólar Colchón vs. SPY',
+    desc: 'Visualizá la erosión del poder de compra del dólar billete vs. inflación USA.',
+    path: '/calculadoras/inversiones/inflacion-usd',
+    icon: TrendingDown,
+    color: 'rose',
+    featured: false
+  },
+  {
+    id: 'calculadora-retiro',
+    category: 'inversiones',
+    title: 'Simulador de Jubilación',
+    desc: 'El poder del interés compuesto: Proyectá tu libertad financiera a largo plazo.',
+    path: '/calculadoras/inversiones/retiro',
+    icon: Landmark,
+    color: 'emerald',
+    featured: true
+  },
+  {
+    id: 'bandas-cambiarias',
+    category: 'inversiones',
+    title: 'Bandas del Dólar',
+    desc: 'Zonas de equilibrio teórico (Caro/Barato) del tipo de cambio según inflación.',
+    path: '/calculadoras/inversiones/bandas',
+    icon: BarChart4,
+    color: 'cyan',
+    featured: false,
+    badge: 'Advanced'
+  },
+  {
+    id: 'scanner-bonos',
+    category: 'inversiones',
+    title: 'Buscador de Bonos y ONs',
+    desc: 'Filtrá por TIR, Paridad y Ley. Encontrá la mejor opción de renta fija.',
+    path: '/calculadoras/inversiones/scanner-bonos',
+    icon: ListFilter,
+    color: 'slate',
+    featured: false
+  },
+  {
+    id: 'flujo-bonos',
+    category: 'inversiones',
+    title: 'Calendario de Bonos',
+    desc: 'Cronograma mensual de cobro de cupones y amortizaciones de tu cartera.',
+    path: '/calculadoras/inversiones/flujo-bonos',
+    icon: CalendarCheck,
+    color: 'blue',
+    featured: false
+  },
+  {
+    id: 'dividendos-cedears',
+    category: 'inversiones',
+    title: 'Calendario Dividendos',
+    desc: 'Fechas de corte (Ex-Date), pago y Yield estimado de empresas (CEDEARs).',
+    path: '/calculadoras/inversiones/dividendos',
+    icon: Calendar,
+    color: 'sky',
+    featured: false
+  },
+  // --- Herramientas Anteriores del Módulo II ---
   {
     id: 'radar-liquidez',
     category: 'inversiones',
@@ -126,8 +215,7 @@ export const toolsRegistry = [
     path: '/calculadoras/inversiones/liquidez',
     icon: ArrowRightLeft,
     color: 'violet',
-    featured: true,
-    badge: 'Nuevo'
+    featured: false
   },
   {
     id: 'plazo-fijo-uva',
@@ -145,7 +233,7 @@ export const toolsRegistry = [
     title: 'Monitor de Carry Trade',
     desc: 'La "Bicicleta Financiera". Calcula el retorno en USD de inversiones en pesos.',
     path: '/calculadoras/inversiones/carry-trade',
-    icon: Recycle, // O RefreshCw
+    icon: Recycle,
     color: 'emerald',
     featured: false,
     badge: 'Riesgo'
@@ -153,13 +241,12 @@ export const toolsRegistry = [
   {
     id: 'calculadora-bonos',
     category: 'inversiones',
-    title: 'Calculadora de Bonos',
-    desc: 'TIR (YTM), Paridad y Cashflow de bonos soberanos argentinos.',
+    title: 'Calculadora de Bonos (Individual)',
+    desc: 'TIR (YTM), Paridad y Cashflow de un bono específico.',
     path: '/calculadoras/inversiones/bonos',
     icon: ScrollText,
     color: 'slate',
-    featured: false,
-    badge: 'Pro'
+    featured: false
   },
   {
     id: 'arbitraje-cedears',
@@ -188,7 +275,7 @@ export const toolsRegistry = [
   {
     id: 'simulador-cuotas',
     category: 'credito',
-    title: 'Cuota Simple vs Contado',
+    title: 'Infleta: Cuotas vs Contado', // Actualizado título para reflejar "Infleta"
     desc: 'Calculadora de Costo Financiero Total. ¿Conviene cuotas con interés o cash?',
     path: '/calculadoras/credito/cuota-simple',
     icon: PieChart,
@@ -389,42 +476,42 @@ export const toolsRegistry = [
   // MÓDULO VI: ECONOMÍA DOMÉSTICA Y ESTILO DE VIDA
   // ===========================================================================
   {
+    id: 'dolar-tarjeta',
+    category: 'vida',
+    title: 'Dólar Tarjeta & Qatar',
+    desc: 'Detecta si te pasas del cupo de 300 USD y calcula impuestos PAIS/Ganancias.',
+    path: '/calculadoras/vida/dolar-tarjeta',
+    icon: CreditCard,
+    color: 'cyan',
+    featured: true,
+    badge: 'Nuevo'
+  },
+  {
     id: 'planificador-viajes',
     category: 'vida',
-    title: 'Dólar Viajero',
-    desc: '¿Tarjeta, MEP o Efectivo? Optimiza tus gastos en el exterior.',
+    title: 'Presupuesto de Viaje',
+    desc: 'Calculadora de vacaciones: Vuelos + Hotel + Comida a pesos hoy.',
     path: '/calculadoras/vida/viajes',
     icon: Plane,
     color: 'sky',
-    featured: true,
-    badge: 'Verano'
+    featured: false
   },
   {
     id: 'suscripciones',
     category: 'vida',
     title: 'Suscripciones Digitales',
-    desc: 'Calcula el precio final en pesos de Netflix, Spotify, Steam (con impuestos).',
+    desc: 'Calcula el precio final con 59% de impuestos (Netflix, Spotify, Steam).',
     path: '/calculadoras/vida/suscripciones',
     icon: Gamepad2,
     color: 'violet',
     featured: false
   },
   {
-    id: 'costo-automotor',
-    category: 'vida',
-    title: 'Mantenimiento Automotor',
-    desc: 'Costo real por kilómetro (Combustible + Seguro + Patente + Service).',
-    path: '/calculadoras/vida/automotor',
-    icon: CarFront,
-    color: 'slate',
-    featured: false
-  },
-  {
-    id: 'optimizador-super',
+    id: 'optimizador-ofertas',
     category: 'vida',
     title: 'Optimizador de Ofertas',
-    desc: 'Convierte promociones (3x2, 2da al 70%) a descuento real porcentual.',
-    path: '/calculadoras/vida/supermercado',
+    desc: 'Comparador real: ¿Conviene 3x2, 2x1 o 80% en la 2da unidad?',
+    path: '/calculadoras/vida/ofertas',
     icon: ShoppingBag,
     color: 'pink',
     featured: false

@@ -1,14 +1,16 @@
-import { useMemo } from 'react';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { AreaChart, Area } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, Minus, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 /**
- * COMPONENTE: StatCard v9.1 (Title Enhanced)
- * * Objetivo: Mejorar la distinción del título sin tocar el resto del diseño.
- * * Cambios:
- * - Título: font-black (más grueso) + color base más oscuro.
- * - Interacción: El título cambia de color (Verde/Rojo) al hacer hover (group-hover).
+ * COMPONENTE: StatCard v9.6 (Lint Free & UX Enhanced)
+ * ---------------------------------------------------
+ * Architect Notes:
+ * 1. Fix Linter: La prop 'Icono' ahora se renderiza dinámicamente tanto en el header 
+ * como en el estado vacío del gráfico.
+ * 2. Performance: Mantiene el motor ResizeObserver para gráficos fluidos.
+ * 3. Theme: Mantiene la lógica de colores semánticos (Bullish/Bearish).
  */
 export function StatCard({ 
   id, 
@@ -16,61 +18,92 @@ export function StatCard({
   valor, 
   variacion, 
   historial, 
-  esInverso = false, 
-  Icono = Activity, 
+  esInverso = false,
+  Icono = Activity, // eslint-disable-line no-unused-vars
   subtexto,
   datoAnterior,
   cambioAbsoluto
 }) {
 
+  // --- 1. LÓGICA DE ICONOS DE TENDENCIA ---
+  // Determinamos qué flecha mostrar según si sube o baja
   let FlechaTendencia = Minus;
   if (variacion > 0) FlechaTendencia = ArrowUpRight;
   if (variacion < 0) FlechaTendencia = ArrowDownRight;
 
+  // --- 2. MOTOR DE TEMAS (Semántica Financiera) ---
   const theme = useMemo(() => {
+    // Matemática financiera: En indicadores "inversos" (ej: Dólar, Riesgo),
+    // una baja (variacion < 0) es algo BUENO (verde).
     const esNegativoMatematicamente = variacion < 0;
     const esNeutro = variacion === 0;
     const esBuenaNoticia = esInverso ? esNegativoMatematicamente : !esNegativoMatematicamente;
 
+    // Caso: Sin variación (Neutro)
     if (esNeutro) return {
       color: "text-slate-500",
       bgBody: "bg-white dark:bg-slate-900", 
       bgBadge: "bg-slate-200 dark:bg-slate-800",
-      stroke: "#94a3b8",
+      stroke: "#94a3b8", // Slate-400
       fill: "url(#grad-neutral)",
       hoverBorder: "hover:border-slate-500",
-      // Título al hacer hover: Se pone negro oscuro (porque es neutro)
       titleHover: "group-hover:text-slate-800 dark:group-hover:text-slate-200" 
     };
 
+    // Caso: Tendencia Positiva/Negativa
     return esBuenaNoticia ? {
       color: "text-emerald-600 dark:text-emerald-400",
       bgBody: "bg-gradient-to-b from-emerald-50/80 to-white dark:bg-none dark:bg-slate-900",
       bgBadge: "bg-emerald-100 dark:bg-emerald-500/10",
-      stroke: "#10b981", 
+      stroke: "#10b981", // Emerald-500
       fill: "url(#grad-up)",
       hoverBorder: "hover:border-emerald-500/50",
-      // Título al hacer hover: Se pone VERDE
       titleHover: "group-hover:text-emerald-700 dark:group-hover:text-emerald-400"
     } : {
       color: "text-rose-600 dark:text-rose-400",
       bgBody: "bg-gradient-to-b from-rose-50/80 to-white dark:bg-none dark:bg-slate-900",
       bgBadge: "bg-rose-100 dark:bg-rose-500/10",
-      stroke: "#f43f5e", 
+      stroke: "#f43f5e", // Rose-500
       fill: "url(#grad-down)",
       hoverBorder: "hover:border-rose-500/50",
-      // Título al hacer hover: Se pone ROJO
       titleHover: "group-hover:text-rose-700 dark:group-hover:text-rose-400"
     };
   }, [variacion, esInverso]);
 
-  const formatoDinero = new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
+  // --- 3. DIMENSION ENGINE (Direct Dimension Injection) ---
+  // Soluciona el error de width: -1 en Recharts usando un observador real del DOM.
+  const chartContainerRef = useRef(null);
+  const [chartDims, setChartDims] = useState({ width: 0, height: 0 });
 
+  useEffect(() => {
+    // Si no hay historial o referencia, no observamos nada.
+    if (!historial || historial.length === 0 || !chartContainerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const { width, height } = entry.contentRect;
+        // Solo actualizamos si hay dimensiones válidas
+        if (width > 0 && height > 0) {
+            // requestAnimationFrame evita errores de "ResizeObserver loop limit exceeded"
+            requestAnimationFrame(() => {
+                setChartDims({ 
+                    width: Math.floor(width), 
+                    height: Math.floor(height) 
+                });
+            });
+        }
+      }
+    });
+
+    resizeObserver.observe(chartContainerRef.current);
+    return () => resizeObserver.disconnect(); // Cleanup al desmontar
+  }, [historial]);
+
+  // --- 4. FORMATO DE MONEDA ---
+  const formatoDinero = new Intl.NumberFormat('es-AR', {
+    style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0
+  });
+  // Si el valor ya viene formateado (string), lo usamos tal cual; si es número, lo formateamos.
   const valorMostrado = typeof valor === 'number' ? formatoDinero.format(valor) : valor;
 
   return (
@@ -83,29 +116,23 @@ export function StatCard({
         transition-all duration-300
       `}>
         
-        {/* --- HEADER & BODY --- */}
         <div className="p-4 sm:p-5 flex-1">
             
-            {/* Título e Icono (MEJORADO) */}
+            {/* --- HEADER --- */}
             <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    {/* Icono: Un poco más grande el contenedor para dar aire */}
+                    {/* Badge del Icono */}
                     <div className={`
                       p-1.5 rounded-lg shadow-sm backdrop-blur-sm transition-colors duration-300
                       bg-white/80 dark:bg-slate-800 
                       text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200
-                      /* Al hacer hover en la card, el icono también toma un tinte sutil del borde */
                       group-hover:ring-1 group-hover:ring-slate-200 dark:group-hover:ring-slate-700
                     `}>
+                        {/* ✅ FIX LINTER: Usamos la prop Icono dinámica */}
                         <Icono size={18} strokeWidth={2} />
                     </div>
                     
                     <div>
-                        {/* AQUÍ ESTÁ EL CAMBIO CLAVE:
-                           1. font-black (Más grueso)
-                           2. text-slate-600 (Más oscuro base)
-                           3. theme.titleHover (Cambia de color con la interacción)
-                        */}
                         <h3 className={`
                           text-xs font-black uppercase tracking-wider
                           text-slate-600 dark:text-slate-300
@@ -114,14 +141,14 @@ export function StatCard({
                         `}>
                             {titulo}
                         </h3>
-                        {/* Subtexto un poco más visible */}
                         {subtexto && <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{subtexto}</p>}
                     </div>
                 </div>
             </div>
 
-            {/* Valor y Gráfico (INTACTO) */}
+            {/* --- BODY & CHART --- */}
             <div className="flex items-center justify-between gap-4">
+                {/* Valor Principal */}
                 <div>
                     <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter tabular-nums">
                         {valorMostrado}
@@ -137,10 +164,14 @@ export function StatCard({
                     </div>
                 </div>
 
-                <div className="w-24 h-12 sm:w-28 sm:h-14 opacity-60 group-hover:opacity-100 transition-opacity mix-blend-multiply dark:mix-blend-normal">
+                {/* Contenedor del Gráfico */}
+                <div 
+                    ref={chartContainerRef}
+                    className="w-24 h-12 sm:w-28 sm:h-14 opacity-60 group-hover:opacity-100 transition-opacity mix-blend-multiply dark:mix-blend-normal relative"
+                >
                     {historial && historial.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={historial}>
+                        chartDims.width > 0 && chartDims.height > 0 && (
+                            <AreaChart width={chartDims.width} height={chartDims.height} data={historial}>
                                 <defs>
                                     <linearGradient id="grad-up" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
@@ -164,17 +195,19 @@ export function StatCard({
                                     isAnimationActive={false} 
                                 />
                             </AreaChart>
-                        </ResponsiveContainer>
+                        )
                     ) : (
+                        // Estado Vacío (Sin historial)
                         <div className="w-full h-full flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700 rounded">
-                            <Activity size={16} className="text-slate-300" />
+                            {/* ✅ FIX LINTER: Usamos el Icono dinámico en lugar de Activity hardcodeado */}
+                            <Icono size={16} className="text-slate-300 dark:text-slate-600" />
                         </div>
                     )}
                 </div>
             </div>
         </div>
 
-        {/* --- FOOTER DE DATOS (INTACTO) --- */}
+        {/* --- FOOTER --- */}
         {(datoAnterior || cambioAbsoluto) && (
             <div className="px-4 py-3 bg-slate-100 dark:bg-slate-800/60 border-t border-slate-300 dark:border-slate-700/80 flex justify-between items-center text-xs">
                 <div className="flex flex-col">

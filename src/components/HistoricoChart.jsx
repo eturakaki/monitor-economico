@@ -1,27 +1,11 @@
-import { useLayoutEffect } from 'react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-
-/**
- * HOOK: useSuppressRechartsWarnings
- * Rationale: Recharts tiene un bug conocido con ResizeObserver en React 18 strict mode.
- * Mantenemos este hook porque es vital para evitar ruido en la consola en desarrollo.
- */
-const useSuppressRechartsWarnings = () => {
-  useLayoutEffect(() => {
-    const originalError = console.error;
-    console.error = (...args) => {
-      if (/defaultProps/.test(args[0]) || /ResizeObserver/.test(args[0])) return;
-      originalError.call(console, ...args);
-    };
-    return () => {
-      console.error = originalError;
-    };
-  }, []);
-};
+import { useState, useEffect, useRef } from 'react';
+// 1. RECHARTS: Eliminamos ResponsiveContainer. Importamos lo necesario.
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 /**
  * COMPONENTE: CustomTooltip
  * Rationale: Diseño "Bloomberg". Mantenemos la estética Glassmorphism y tabular-nums.
+ * (Sin cambios visuales, solo validaciones de seguridad).
  */
 const CustomTooltip = ({ active, payload, label, esPorcentaje }) => {
   if (!active || !payload || !payload.length) return null;
@@ -54,18 +38,49 @@ const CustomTooltip = ({ active, payload, label, esPorcentaje }) => {
   );
 };
 
+/**
+ * COMPONENTE: HistoricoChart v10.0 (Titanium Fix)
+ * * ARCHITECT NOTE:
+ * Se reemplazó el uso de ResponsiveContainer por el patrón "Direct Dimension Injection"
+ * usando ResizeObserver. Esto elimina los errores de consola "width(-1)" durante
+ * las transiciones de página y garantiza un renderizado estable.
+ */
 export function HistoricoChart({ datos, color = "#10b981", esPorcentaje = false }) {
-  // 1. Aplicamos el silenciador de logs
-  useSuppressRechartsWarnings();
+  
+  // 🛡️ DIMENSION ENGINE
+  const chartRef = useRef(null);
+  const [chartDims, setChartDims] = useState({ width: 0, height: 0 });
 
-  // ELIMINADO: const [mounted, setMounted]...
-  // Rationale: En Vite (CSR), el componente se monta directamente en el cliente.
-  // No hay riesgo de "Hydration Mismatch" severo como en Next.js.
-  // Esto elimina el "Cascading Render" y satisface al linter.
+  useEffect(() => {
+    // Si no hay referencia, abortamos.
+    if (!chartRef.current) return;
 
+    // Instanciamos el Observador de Geometría
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const { width, height } = entry.contentRect;
+        // Solo renderizamos si el contenedor tiene existencia física (>0)
+        if (width > 0 && height > 0) {
+          requestAnimationFrame(() => {
+            setChartDims({ 
+              width: Math.floor(width), 
+              height: Math.floor(height) 
+            });
+          });
+        }
+      }
+    });
+
+    // Empezamos a vigilar
+    resizeObserver.observe(chartRef.current);
+
+    // Limpieza al desmontar
+    return () => resizeObserver.disconnect();
+  }, []); // Array vacío: Solo se monta el observer una vez
+
+  // --- Renderizado de Estado Vacío ---
   if (!datos || datos.length === 0) {
     return (
-      // Usamos h-full o una altura fija consistente para evitar saltos de layout
       <div className="h-[350px] flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-slate-400">
         <span className="text-3xl mb-2">📉</span>
         <p className="font-medium text-sm">Sin datos históricos</p>
@@ -74,9 +89,23 @@ export function HistoricoChart({ datos, color = "#10b981", esPorcentaje = false 
   }
 
   return (
-    <div className="w-full h-[350px] select-none transition-all duration-300">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={datos} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+    // Asignamos la ref al contenedor padre
+    // Importante: 'relative' crea el contexto para posicionamiento si fuera necesario.
+    <div 
+      ref={chartRef} 
+      className="w-full h-[350px] select-none transition-all duration-300 relative"
+    >
+      {/* Zero Trust Rendering:
+        El AreaChart solo nace cuando chartDims tiene valores válidos.
+        Esto evita que Recharts intente dibujar en el vacío (width 0/-1).
+      */}
+      {chartDims.width > 0 && chartDims.height > 0 && (
+        <AreaChart 
+          width={chartDims.width} 
+          height={chartDims.height} 
+          data={datos} 
+          margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+        >
           
           <defs>
             <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
@@ -126,7 +155,12 @@ export function HistoricoChart({ datos, color = "#10b981", esPorcentaje = false 
             isAnimationActive={true}
           />
         </AreaChart>
-      </ResponsiveContainer>
+      )}
+      
+      {/* Loader Opcional: Podrías poner un spinner aquí si quisieras 
+         mientras (chartDims.width === 0), pero es tan rápido (<16ms) 
+         que suele ser imperceptible.
+      */}
     </div>
   );
 }

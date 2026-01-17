@@ -51,6 +51,16 @@ import { CapacidadEndeudamiento } from './pages/herramientas/credito(mod3)/Capac
 import { ConsolidadorDeudas } from './pages/herramientas/credito(mod3)/ConsolidadorDeudas';
 import { SimuladorPrendario } from './pages/herramientas/credito(mod3)/SimuladorPrendario';
 import { CuotaSimple } from './pages/herramientas/credito(mod3)/CuotaSimple';
+import { InflacionUsdSpy } from './pages/herramientas/inversiones (mod 2)/InflacionUsdSpy';
+import { CalculadoraRetiro } from './pages/herramientas/inversiones (mod 2)/CalculadoraRetiro';
+import { BandasCambiarias } from './pages/herramientas/inversiones (mod 2)/BandasCambiarias';
+import { MonitorMercado } from './pages/herramientas/inversiones (mod 2)/MonitorMercado';
+import { ScannerBonos } from './pages/herramientas/inversiones (mod 2)/ScannerBonos';
+import { FlujoFondosBonos } from './pages/herramientas/inversiones (mod 2)/FlujoFondosBonos';
+import { CalendarioDividendos } from './pages/herramientas/inversiones (mod 2)/CalendarioDividendos';
+
+// --- FEATURE ESPECIAL: TEST INVERSOR (Requiere carpeta nueva en /pages/features/test-inversor) ---
+import { InvestorTestPage } from './pages/features/test-inversor/InvestorTestPage';
 
 // --- MÓDULO IV: INMOBILIARIO ---
 import { ComprarAlquilar } from './pages/herramientas/inmobiliario(mod4)/ComprarAlquilar';
@@ -71,14 +81,14 @@ import { ExportacionServicios } from './pages/herramientas/fiscal(mod5)/Exportac
 
 
 // --- MÓDULO VI: ESTILO DE VIDA ---
-// Carpeta: "estilo-vida(mod6)"
-// import { PlanificadorViajes } from './pages/herramientas/estilo-vida(mod6)/PlanificadorViajes';
-// ... resto del módulo 6
+import { CalculadoraDolarTarjeta } from './pages/herramientas/estilo-vida(mod6)/CalculadoraDolarTarjeta';
+import { PresupuestoViaje } from './pages/herramientas/estilo-vida(mod6)/PresupuestoViaje';
+import { GestorSuscripciones } from './pages/herramientas/estilo-vida(mod6)/GestorSuscripciones';
+import { OptimizadorOfertas } from './pages/herramientas/estilo-vida(mod6)/OptimizadorOfertas';
 
 // --- MÓDULO VII: CORPORATIVO ---
-// Carpeta: "corporativo(mod7)"
-// import { DescuentoCheques } from './pages/herramientas/corporativo(mod7)/DescuentoCheques';
-
+import { DescuentoCheques } from './pages/herramientas/corporativo(mod7)/DescuentoCheques';
+import { SimuladorMontecarlo } from './pages/herramientas/corporativo(mod7)/SimuladorMontecarlo';
 
 // --- PÁGINAS NUEVAS (Feature: Intelligence) ---
 import AnalyticsPage from './pages/Analytics';
@@ -164,7 +174,14 @@ function App() {
             <Route path="/calculadoras/inversiones/plazo-fijo-uva" element={<PlazoFijoUVA />} />
             <Route path="/calculadoras/inversiones/carry-trade" element={<CarryTrade />} />
             <Route path="/calculadoras/inversiones/dolarizacion" element={<RutasDolar />} />
-                        
+            <Route path="/calculadoras/inversiones/inflacion-usd" element={<InflacionUsdSpy />} />
+            <Route path="/calculadoras/inversiones/retiro" element={<CalculadoraRetiro />} />
+            <Route path="/calculadoras/inversiones/bandas" element={<BandasCambiarias />} />
+            <Route path="/calculadoras/inversiones/monitor" element={<MonitorMercado />} />
+            <Route path="/calculadoras/inversiones/scanner-bonos" element={<ScannerBonos />} />
+            <Route path="/calculadoras/inversiones/flujo-bonos" element={<FlujoFondosBonos />} />
+            <Route path="/calculadoras/inversiones/dividendos" element={<CalendarioDividendos />} />
+
             {/* Módulo III: Crédito */}
             <Route path="/calculadoras/credito/cft" element={<DecodificadorCFT />} />
             <Route path="/calculadoras/credito/bola-nieve" element={<BolaNieve />} />
@@ -190,10 +207,20 @@ function App() {
             <Route path="/calculadoras/fiscal/monotributo" element={<CategorizadorMonotributo />} />
             <Route path="/calculadoras/fiscal/exportacion" element={<ExportacionServicios />} />
 
+            // Rutas Módulo VI
+            <Route path="/calculadoras/vida/dolar-tarjeta" element={<CalculadoraDolarTarjeta />} />
+            <Route path="/calculadoras/vida/viajes" element={<PresupuestoViaje />} />
+            <Route path="/calculadoras/vida/suscripciones" element={<GestorSuscripciones />} />
+            <Route path="/calculadoras/vida/ofertas" element={<OptimizadorOfertas />} />
+
+              {/* MÓDULO VII: CORPORATIVO */}
+              <Route path="/calculadoras/corporativo/cheques" element={<DescuentoCheques />} />
+              <Route path="/calculadoras/corporativo/montecarlo" element={<SimuladorMontecarlo />} />
 
             {/* Rutas Dinámicas y 404 */}
             <Route path="/categoria/:id" element={<Categorias />} />
             <Route path="/indicador/:id" element={<DetalleIndicador />} />
+            <Route path="/test-inversor" element={<InvestorTestPage />} />
             <Route path="*" element={<NotFound />} />
             
           </Route> 
