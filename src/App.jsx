@@ -45,19 +45,30 @@ import { ArbitrajeCedears } from './pages/herramientas/inversiones (mod 2)/Arbit
 
 
 // --- MÓDULO III: CRÉDITO ---
-// Carpeta: "credito(mod3)"
-// import { CuotaSimple } from './pages/herramientas/credito(mod3)/CuotaSimple';
-// ... resto del módulo 3
+import { DecodificadorCFT } from './pages/herramientas/credito(mod3)/DecodificadorCFT';
+import { BolaNieve } from './pages/herramientas/credito(mod3)/BolaNieve';
+import { CapacidadEndeudamiento } from './pages/herramientas/credito(mod3)/CapacidadEndeudamiento';
+import { ConsolidadorDeudas } from './pages/herramientas/credito(mod3)/ConsolidadorDeudas';
+import { SimuladorPrendario } from './pages/herramientas/credito(mod3)/SimuladorPrendario';
+import { CuotaSimple } from './pages/herramientas/credito(mod3)/CuotaSimple';
 
 // --- MÓDULO IV: INMOBILIARIO ---
-// Carpeta: "inmobiliario(mod4)"
-// import { HipotecarioUVA } from './pages/herramientas/inmobiliario(mod4)/HipotecarioUVA';
-// ... resto del módulo 4
+import { ComprarAlquilar } from './pages/herramientas/inmobiliario(mod4)/ComprarAlquilar';
+import { HipotecarioUVA } from './pages/herramientas/inmobiliario(mod4)/HipotecarioUVA';
+import { ActualizadorAlquiler } from './pages/herramientas/inmobiliario(mod4)/ActualizadorAlquiler';
+import { CostosIngreso } from './pages/herramientas/inmobiliario(mod4)/CostosIngreso';
+import { RentabilidadInmueble } from './pages/herramientas/inmobiliario(mod4)/RentabilidadInmueble';
+import { CostoConstruccion } from './pages/herramientas/inmobiliario(mod4)/CostoConstruccion';
+import { GastosEscritura } from './pages/herramientas/inmobiliario(mod4)/GastosEscritura';
 
 // --- MÓDULO V: FISCAL ---
-// Carpeta: "fiscal(mod5)"
-// import { Monotributo } from './pages/herramientas/fiscal(mod5)/Monotributo';
-// ... resto del módulo 5
+import { CalculadoraCourier } from './pages/herramientas/fiscal(mod5)/CalculadoraCourier';
+import { GrossingUp } from './pages/herramientas/fiscal(mod5)/GrossingUp';
+import { RetencionesSircreb } from './pages/herramientas/fiscal(mod5)/RetencionesSircreb';
+import { CalculadoraGanancias } from './pages/herramientas/fiscal(mod5)/CalculadoraGanancias';
+import { CategorizadorMonotributo } from './pages/herramientas/fiscal(mod5)/CategorizadorMonotributo';
+import { ExportacionServicios } from './pages/herramientas/fiscal(mod5)/ExportacionServicios';
+
 
 // --- MÓDULO VI: ESTILO DE VIDA ---
 // Carpeta: "estilo-vida(mod6)"
@@ -155,15 +166,36 @@ function App() {
             <Route path="/calculadoras/inversiones/dolarizacion" element={<RutasDolar />} />
                         
             {/* Módulo III: Crédito */}
-            {/* <Route path="/calculadoras/credito/cuota-simple" element={<CuotaSimple />} /> */}
+            <Route path="/calculadoras/credito/cft" element={<DecodificadorCFT />} />
+            <Route path="/calculadoras/credito/bola-nieve" element={<BolaNieve />} />
+            <Route path="/calculadoras/credito/capacidad" element={<CapacidadEndeudamiento />} />
+            <Route path="/calculadoras/credito/consolidacion" element={<ConsolidadorDeudas />} />
+            <Route path="/calculadoras/credito/prendarios" element={<SimuladorPrendario />} />
+            <Route path="/calculadoras/credito/cuota-simple" element={<CuotaSimple />} />
             
-            {/* ... Agrega aquí el resto de rutas a medida que crees los archivos ... */}
+            // Routes Módulo IV
+            <Route path="/calculadoras/inmobiliario/comprar-alquilar" element={<ComprarAlquilar />} />
+            <Route path="/calculadoras/inmobiliario/hipotecario-uva" element={<HipotecarioUVA />} />
+            <Route path="/calculadoras/inmobiliario/alquiler" element={<ActualizadorAlquiler />} />
+            <Route path="/calculadoras/inmobiliario/inicio-alquiler" element={<CostosIngreso />} />
+            <Route path="/calculadoras/inmobiliario/rentabilidad" element={<RentabilidadInmueble />} />
+            <Route path="/calculadoras/inmobiliario/construccion" element={<CostoConstruccion />} />
+            <Route path="/calculadoras/inmobiliario/escrituracion" element={<GastosEscritura />} />
+                        
+            // Routes Módulo V
+            <Route path="/calculadoras/fiscal/importaciones" element={<CalculadoraCourier />} />
+            <Route path="/calculadoras/fiscal/grossing-up" element={<GrossingUp />} />
+            <Route path="/calculadoras/fiscal/sircreb" element={<RetencionesSircreb />} />
+            <Route path="/calculadoras/fiscal/ganancias" element={<CalculadoraGanancias />} />
+            <Route path="/calculadoras/fiscal/monotributo" element={<CategorizadorMonotributo />} />
+            <Route path="/calculadoras/fiscal/exportacion" element={<ExportacionServicios />} />
+
 
             {/* Rutas Dinámicas y 404 */}
             <Route path="/categoria/:id" element={<Categorias />} />
             <Route path="/indicador/:id" element={<DetalleIndicador />} />
             <Route path="*" element={<NotFound />} />
-
+            
           </Route> 
         </Routes>
       </BrowserRouter>
