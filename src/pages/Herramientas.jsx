@@ -187,10 +187,10 @@ const CategoryChip = ({ label, isActive, onClick }) => (
     onClick={onClick}
     className={`
       whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
-      border
+      border-2
       ${isActive 
         ? 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-500/20' 
-        : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:border-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-400'
+        : 'bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:border-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-400'
       }
     `}
   >
@@ -205,9 +205,12 @@ const ToolCard = ({ tool }) => (
       group relative flex flex-col justify-between
       bg-white dark:bg-slate-900 
       rounded-2xl p-6 
-      border border-gray-200 dark:border-slate-800 
-      shadow-sm hover:shadow-xl dark:hover:shadow-emerald-900/10
-      transition-all duration-300 ease-out hover:scale-[1.02] hover:border-${tool.color}-500/30
+      /* Bordes más definidos para mayor contraste */
+      border-2 border-gray-300 dark:border-slate-700 
+      shadow-sm hover:shadow-xl dark:hover:shadow-emerald-900/20
+      /* Cambio de color de borde en hover */
+      transition-all duration-300 ease-out hover:scale-[1.02] 
+      hover:border-emerald-500/50 dark:hover:border-emerald-400/50
     `}
   >
     {/* Hover Glow Effect */}
@@ -219,11 +222,13 @@ const ToolCard = ({ tool }) => (
           p-3 rounded-xl 
           bg-${tool.color}-100 dark:bg-${tool.color}-900/30 
           text-${tool.color}-600 dark:text-${tool.color}-400
+          /* Borde interno para el icono para resaltarlo */
+          border border-${tool.color}-200 dark:border-${tool.color}-500/30
         `}>
           <tool.icon size={24} strokeWidth={2} />
         </div>
         {tool.badge && (
-          <span className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-gray-500 bg-gray-100 dark:bg-slate-800 dark:text-gray-400 rounded-md border border-gray-200 dark:border-slate-700">
+          <span className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-gray-500 bg-gray-100 dark:bg-slate-800 dark:text-gray-300 rounded-md border-2 border-gray-200 dark:border-slate-600">
             {tool.badge}
           </span>
         )}
@@ -232,7 +237,7 @@ const ToolCard = ({ tool }) => (
       <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 relative z-10 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
         {tool.title}
       </h3>
-      <p className="text-gray-500 dark:text-slate-400 text-sm leading-relaxed relative z-10">
+      <p className="text-gray-600 dark:text-slate-300 text-sm leading-relaxed relative z-10">
         {tool.desc}
       </p>
     </div>

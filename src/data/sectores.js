@@ -59,10 +59,10 @@ export const sectores = [
     color: "emerald"
   },
   {
-    id: "laboral",
-    titulo: "Mercado Laboral",
-    subtitulo: "Empleo y Salarios",
-    descripcion: "Tasa de desempleo, empleo registrado, RIPTE e índice de salarios.",
+    id: "Calculos",
+    titulo: "Indicadores Calculados",
+    subtitulo: "Calculos propios",
+    descripcion: "Indicadores elaborados por el equipo de Monitor Económico.",
     Icono: Users,
     color: "emerald"
   },

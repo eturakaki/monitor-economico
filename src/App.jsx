@@ -21,6 +21,9 @@ import { Contacto } from './pages/Contacto';
 // --- HUB DE HERRAMIENTAS ---
 import { Calculadoras } from './pages/Herramientas';
 
+// --- HUB DE Mercados ---
+import { Mercados } from './pages/Mercados';
+
 // =====================================================================
 // 🛠️ SECCIÓN DE HERRAMIENTAS (CALCULADORAS)
 // IMPORTANTE: Rutas adaptadas a tus carpetas actuales con paréntesis
@@ -219,6 +222,7 @@ function App() {
 
             {/* Rutas Dinámicas y 404 */}
             <Route path="/categoria/:id" element={<Categorias />} />
+            <Route path="/mercados" element={<Mercados />} />
             <Route path="/indicador/:id" element={<DetalleIndicador />} />
             <Route path="/test-inversor" element={<InvestorTestPage />} />
             <Route path="*" element={<NotFound />} />

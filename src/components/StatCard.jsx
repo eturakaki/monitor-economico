@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useLayoutEffect, useId } from 'react'; // Agregamos useId
+import { useMemo, useRef, useState, useLayoutEffect, useId } from 'react';
 import { AreaChart, Area, YAxis } from 'recharts';
 import { 
   ArrowUpRight, 
@@ -12,11 +12,11 @@ import {
 import { Link } from 'react-router-dom';
 
 /**
- * COMPONENTE: StatCard v12.6 (Stable & Lint-Free)
+ * COMPONENTE: StatCard v12.9 (Stable)
  * ---------------------------------------------------
  * Fixes:
- * 1. PUREZA: Reemplazo de Math.random() por hook useId().
- * 2. LINTER: Verificación de uso de prop 'Icono'.
+ * 1. LINTER DIRECTIVE: Se aplica supresión explícita para la prop 'Icono'.
+ * Motivo: El entorno de ESLint no detecta uso de variables en JSX.
  */
 export function StatCard({ 
   id, 
@@ -25,7 +25,9 @@ export function StatCard({
   variacion, 
   historial, 
   esInverso = false,
-  Icono = Activity, // Prop destructurada aquí
+  // ⚠️ DIRECTIVA DE SEGURIDAD: Silenciamos el falso positivo aquí mismo.
+  // eslint-disable-next-line no-unused-vars
+  Icono = Activity, 
   subtexto,      
   descripcion,
   insight,
@@ -34,15 +36,13 @@ export function StatCard({
   tipo 
 }) {
 
-  // 1. GENERACIÓN DE ID ESTABLE (React 18+) 🛡️
+  // 1. GENERACIÓN DE ID ESTABLE
   const internalId = useId();
-  // Usamos el ID prop si existe, sino el generado por React.
-  // Esto asegura que el gradiente del gráfico siempre tenga una referencia única y estable.
   const cardId = id || internalId;
 
   const infoTexto = subtexto || descripcion || "";
 
-  // 2. MOTOR DE TEMA (Sentiment Analysis)
+  // 2. MOTOR DE TEMA
   const { theme, FlechaTendencia, variacionNum } = useMemo(() => {
     const varNum = typeof variacion === 'number' ? variacion : parseFloat(variacion) || 0;
     const esNegativo = varNum < 0;
@@ -84,7 +84,7 @@ export function StatCard({
     ? { text: "CALCULADO", style: "bg-indigo-500/10 text-indigo-300 border-indigo-500/20" }
     : { text: "OFICIAL", style: "bg-slate-800 text-slate-400 border-slate-700" };
 
-  // 4. FORMATTERS (MEMOIZED)
+  // 4. FORMATTERS
   const formatoDinero = useMemo(() => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0
@@ -100,7 +100,7 @@ export function StatCard({
       return cambioAbsoluto;
   }, [cambioAbsoluto, formatoDinero]);
 
-  // 5. CHART RESIZER (Titanium Protocol)
+  // 5. CHART RESIZER
   const chartContainerRef = useRef(null);
   const [dims, setDims] = useState({ width: 0, height: 0 });
 
@@ -142,9 +142,6 @@ export function StatCard({
             {showChart && (
                 <AreaChart width={dims.width} height={dims.height} data={safeHistorial} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                     <defs>
-                        {/* Uso de cardId estable gracias a useId(). 
-                            Evita parpadeos en el gradiente.
-                        */}
                         <linearGradient id={`grad-${cardId}`} x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor={theme.stroke} stopOpacity={0.5}/>
                             <stop offset="100%" stopColor={theme.stroke} stopOpacity={0}/>
@@ -173,7 +170,7 @@ export function StatCard({
                     bg-slate-800/60 border border-slate-700/50 text-slate-400
                     group-hover:bg-slate-700 group-hover:text-slate-200 group-hover:border-slate-600
                 `}>
-                    {/* ✅ SOLUCIÓN LINTER: Aquí usamos la prop 'Icono' */}
+                    {/* Renderizado Estándar */}
                     <Icono size={20} strokeWidth={1.5} />
                 </div>
 
