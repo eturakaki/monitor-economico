@@ -3,10 +3,10 @@ import { useAuth } from '../../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 /**
- * 🛡️ ProtectedRoute V2 (Role Based)
- * @param {Array} allowedPlans - (Opcional) Lista de planes permitidos ej: ['premium', 'plus']
+ * 🛡️ ProtectedRoute V2.1 (Hybrid: Wrapper + Layout)
+ * Soporta tanto envolver componentes individuales como grupos de rutas.
  */
-const ProtectedRoute = ({ allowedPlans }) => {
+const ProtectedRoute = ({ allowedPlans, children }) => { // <--- AGREGAMOS 'children' AQUÍ
   const { user, loading } = useAuth(); 
   const location = useLocation();
 
@@ -21,20 +21,20 @@ const ProtectedRoute = ({ allowedPlans }) => {
     );
   }
 
-  // 2. CHECK DE AUTENTICACIÓN (¿Existe el usuario?)
+  // 2. CHECK DE AUTENTICACIÓN
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 3. CHECK DE AUTORIZACIÓN (¿Tiene el plan correcto?)
-  // Si la ruta exige planes específicos Y el plan del usuario no está en la lista...
+  // 3. CHECK DE AUTORIZACIÓN (Planes)
   if (allowedPlans && !allowedPlans.includes(user.plan)) {
-    // 🚨 ALERTA DE UPSELL: Lo mandamos a ver los precios porque no le alcanza el nivel
     return <Navigate to="/planes" replace />;
   }
 
-  // 4. ACCESO CONCEDIDO
-  return <Outlet />;
+  // 4. ACCESO CONCEDIDO (Lógica Híbrida)
+  // Si se usó como wrapper (<ProtectedRoute><Dash/></ProtectedRoute>), renderiza 'children'.
+  // Si se usó como Layout (<Route element={<ProtectedRoute />}>...), renderiza 'Outlet'.
+  return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

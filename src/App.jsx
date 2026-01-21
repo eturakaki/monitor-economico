@@ -130,13 +130,12 @@ function App() {
             
             {/* 1. RUTAS PÚBLICAS (Accesibles para todos) */}
             <Route path="/" element={<Home />} />
-            
-            {/* Truco: Si el login busca /dashboard, lo mandamos al home por ahora */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            
+ 
             <Route path="/glosario" element={<Glosario />} />
             <Route path="/sobre-mi" element={<SobreMi />} />
             <Route path="/contacto" element={<Contacto />} />
+  
+
             <Route path="/planes" element={
               <div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300">
                 <Planes /> 
@@ -146,7 +145,9 @@ function App() {
             {/* 2. RUTAS PROTEGIDAS (Solo Usuarios Logueados) 🛡️ 
                 Aquí usamos el Gatekeeper para envolver las joyas de la corona. */}
             <Route element={<ProtectedRoute />}>
-                
+                {/* El Dashboard vive feliz aquí adentro junto a sus hermanos */}
+                <Route path="/dashboard" element={<Dashboard />} />
+
                 {/* Perfil de Usuario */}
                 <Route path="/perfil" element={<Perfil />} />
 
