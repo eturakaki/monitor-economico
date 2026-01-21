@@ -1,101 +1,173 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+// src/pages/Login.jsx
 import { useState } from 'react';
-import { ArrowLeft, LayoutDashboard } from 'lucide-react'; 
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // <--- Importamos el cerebro
+import { LineChart, Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
 
-export const Login = () => {
-  const [email, setEmail] = useState('');
-  const { login } = useAuth();
+export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // <--- Extraemos la función mágica
+  
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login({ name: 'Usuario Pro', email }); 
-    navigate('/');
+    setError('');
+    setLoading(true);
+
+    // SIMULACIÓN DE BACKEND (Esto se reemplazará por Firebase/Node luego)
+    try {
+      // Simulamos espera de red de 1.5 segundos
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      if (formData.email === 'error@monitoreco.com') {
+        throw new Error('Credenciales inválidas');
+      }
+
+      // 1. DEFINIMOS EL USUARIO SIMULADO
+      // Aquí decidimos qué rol darle según el email (truco para testear)
+      const mockUser = {
+        name: 'Iñaki Etura',
+        email: formData.email,
+        plan: formData.email.includes('pro') ? 'premium' : 'free', // Si el mail dice "pro", es premium
+        role: 'user',
+        avatar: null // El AuthContext generará uno automático
+      };
+
+      // 2. EJECUTAMOS EL LOGIN DEL CONTEXTO
+      login(mockUser);
+
+      // 3. REDIRIGIMOS AL DASHBOARD
+      navigate('/'); 
+      
+    } catch (err) {
+      // ✅ SOLUCIÓN: Usamos la variable para imprimir el error real en la consola
+      console.error('Error de inicio de sesión:', err); //Si no queremos ver esto. Lo borramos
+      
+      setError('Email o contraseña incorrectos. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0B1121] transition-colors duration-300 px-4">
-      
-      {/* BOTÓN "VOLVER" - Contraste mejorado */}
-      <div className="w-full max-w-md mb-6">
-        <Link 
-          to="/" 
-          className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors font-bold"
-        >
-          <ArrowLeft size={18} />
-          Volver al inicio
-        </Link>
-      </div>
-
-      {/* Card Principal - Siguiendo Protocolo V2.3 */}
-      <div className="w-full max-w-md px-8 py-10 bg-white dark:bg-slate-900 shadow-2xl rounded-2xl border-2 border-gray-300 dark:border-slate-700">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B1121] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+      <div className="max-w-md w-full space-y-8">
         
-        <div className="text-center mb-10">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 mb-4">
-            <LayoutDashboard className="text-emerald-600 dark:text-emerald-400" size={28} />
-          </div>
-          
-          <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">
-            Bienvenido a MonitorEco
+        {/* Header del Formulario */}
+        <div className="text-center">
+          <Link to="/" className="inline-flex items-center gap-2 mb-6 group">
+             <div className="bg-emerald-600 p-2 rounded-lg shadow-lg group-hover:scale-110 transition-transform">
+                <LineChart className="text-white" size={24} />
+             </div>
+          </Link>
+          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Bienvenido de nuevo
           </h2>
-          
-          <p className="mt-2 text-sm text-gray-600 dark:text-slate-300 tracking-wide font-medium">
-            Accedé a tu panel de control macroeconómico
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Ingresa a tu terminal de inteligencia financiera
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-slate-400 mb-2">
-              Correo Electrónico
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-            />
-          </div>
+        {/* Tarjeta del Formulario */}
+        <div className="bg-white dark:bg-slate-900 py-8 px-4 shadow-xl sm:rounded-xl sm:px-10 border border-slate-200 dark:border-slate-800">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            
+            {/* Input Email */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Email Profesional
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-slate-400" />
+                </div>
+                <input
+                  type="email"
+                  required
+                  className="block w-full pl-10 sm:text-sm border-slate-300 dark:border-slate-700 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-slate-800 dark:text-white h-10"
+                  placeholder="ejemplo@monitoreco.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+              </div>
+            </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-slate-400">
+            {/* Input Password */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Contraseña
               </label>
-              <a href="#" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-                ¿Olvidaste tu contraseña?
-              </a>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-slate-400" />
+                </div>
+                <input
+                  type="password"
+                  required
+                  className="block w-full pl-10 sm:text-sm border-slate-300 dark:border-slate-700 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-slate-800 dark:text-white h-10"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                />
+              </div>
             </div>
-            <input
-              id="password"
-              type="password"
-              required
-              placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-            />
+
+            {/* Mensaje de Error */}
+            {error && (
+              <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
+                <div className="flex">
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800 dark:text-red-400">{error}</h3>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Botón de Acción */}
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-md text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                    Validando credenciales...
+                  </>
+                ) : (
+                  <>
+                    Ingresar a MonitorEco
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Footer del Formulario */}
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-300 dark:border-slate-700" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white dark:bg-slate-900 text-slate-500">
+                  ¿No tienes cuenta?
+                </span>
+              </div>
+            </div>
+            <div className="mt-6 text-center">
+              <Link to="/register" className="font-medium text-emerald-600 hover:text-emerald-500">
+                Crear cuenta gratuita
+              </Link>
+            </div>
           </div>
-
-          <button
-            type="submit"
-            className="w-full flex justify-center py-4 px-4 rounded-xl shadow-lg text-sm font-black text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#0B1121] focus:ring-emerald-500 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            INICIAR SESIÓN
-          </button>
-        </form>
-
-        <div className="mt-8 pt-6 border-t-2 border-gray-100 dark:border-slate-800 text-center">
-          <p className="text-sm text-gray-600 dark:text-slate-400">
-            ¿No tenés una cuenta?{' '}
-            <Link to="/register" className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-              Registrate gratis
-            </Link>
-          </p>
         </div>
       </div>
     </div>
   );
-};
+}

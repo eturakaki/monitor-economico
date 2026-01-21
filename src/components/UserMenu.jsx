@@ -68,6 +68,10 @@ export const UserMenu = () => {
               <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{user.email}</p>
             </div>
             
+            <Link to="/perfil" className="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+              Mi Perfil
+            </Link>
+
             <Link to="/planes" className="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
               Mejorar Plan
             </Link>

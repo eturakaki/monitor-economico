@@ -1,8 +1,10 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // --- LÓGICA & UTILIDADES ---
 import { AuthProvider } from './context/AuthContext'; 
 import ScrollToTop from './components/ScrollToTop';   
+// 👇 IMPORTANTE: Aquí solucionamos el "ProtectedRoute is not defined"
+import ProtectedRoute from './components/auth/ProtectedRoute'; 
 
 // --- LAYOUTS ---
 import { Layout } from './components/Layout'; 
@@ -18,6 +20,12 @@ import { NotFound } from './pages/NotFound';
 import { SobreMi } from './pages/SobreMi';
 import { Contacto } from './pages/Contacto';
 
+import Dashboard from './pages/DashBoard';
+
+// 👇 NUEVOS COMPONENTES (Solución a "Perfil is not defined")
+import Perfil from './pages/Perfil'; 
+import ApiDashboard from './pages/ApiDashboard'; 
+
 // --- HUB DE HERRAMIENTAS ---
 import { Calculadoras } from './pages/Herramientas';
 
@@ -26,7 +34,6 @@ import { Mercados } from './pages/Mercados';
 
 // =====================================================================
 // 🛠️ SECCIÓN DE HERRAMIENTAS (CALCULADORAS)
-// IMPORTANTE: Rutas adaptadas a tus carpetas actuales con paréntesis
 // =====================================================================
 
 // --- MÓDULO I: INFLACIÓN ---
@@ -37,23 +44,12 @@ import { MiIPC } from './pages/herramientas/Inflacion (Mod1)/MiIPC';
 import { ProyectorTarifas } from './pages/herramientas/Inflacion (Mod1)/ProyectorTarifas';
 import { CanastaRegional } from './pages/herramientas/Inflacion (Mod1)/CanastaRegional';
 // --- MÓDULO II: INVERSIONES ---
-// Carpeta: "inversiones (mod 2)"
 import { RadarLiquidez } from './pages/herramientas/inversiones (mod 2)/RadarLiquidez';
 import { PlazoFijoUVA } from './pages/herramientas/inversiones (mod 2)/PlazoFijoUVA';
 import { CarryTrade } from './pages/herramientas/inversiones (mod 2)/CarryTrade';
 import { RutasDolar } from './pages/herramientas/inversiones (mod 2)/RutasDolar';
 import { CalculadoraBonos } from './pages/herramientas/inversiones (mod 2)/CalculadoraBonos';
 import { ArbitrajeCedears } from './pages/herramientas/inversiones (mod 2)/ArbitrajeCedears';
-
-
-
-// --- MÓDULO III: CRÉDITO ---
-import { DecodificadorCFT } from './pages/herramientas/credito(mod3)/DecodificadorCFT';
-import { BolaNieve } from './pages/herramientas/credito(mod3)/BolaNieve';
-import { CapacidadEndeudamiento } from './pages/herramientas/credito(mod3)/CapacidadEndeudamiento';
-import { ConsolidadorDeudas } from './pages/herramientas/credito(mod3)/ConsolidadorDeudas';
-import { SimuladorPrendario } from './pages/herramientas/credito(mod3)/SimuladorPrendario';
-import { CuotaSimple } from './pages/herramientas/credito(mod3)/CuotaSimple';
 import { InflacionUsdSpy } from './pages/herramientas/inversiones (mod 2)/InflacionUsdSpy';
 import { CalculadoraRetiro } from './pages/herramientas/inversiones (mod 2)/CalculadoraRetiro';
 import { BandasCambiarias } from './pages/herramientas/inversiones (mod 2)/BandasCambiarias';
@@ -62,7 +58,15 @@ import { ScannerBonos } from './pages/herramientas/inversiones (mod 2)/ScannerBo
 import { FlujoFondosBonos } from './pages/herramientas/inversiones (mod 2)/FlujoFondosBonos';
 import { CalendarioDividendos } from './pages/herramientas/inversiones (mod 2)/CalendarioDividendos';
 
-// --- FEATURE ESPECIAL: TEST INVERSOR (Requiere carpeta nueva en /pages/features/test-inversor) ---
+// --- MÓDULO III: CRÉDITO ---
+import { DecodificadorCFT } from './pages/herramientas/credito(mod3)/DecodificadorCFT';
+import { BolaNieve } from './pages/herramientas/credito(mod3)/BolaNieve';
+import { CapacidadEndeudamiento } from './pages/herramientas/credito(mod3)/CapacidadEndeudamiento';
+import { ConsolidadorDeudas } from './pages/herramientas/credito(mod3)/ConsolidadorDeudas';
+import { SimuladorPrendario } from './pages/herramientas/credito(mod3)/SimuladorPrendario';
+import { CuotaSimple } from './pages/herramientas/credito(mod3)/CuotaSimple';
+
+// --- FEATURE ESPECIAL: TEST INVERSOR ---
 import { InvestorTestPage } from './pages/features/test-inversor/InvestorTestPage';
 
 // --- MÓDULO IV: INMOBILIARIO ---
@@ -82,7 +86,6 @@ import { CalculadoraGanancias } from './pages/herramientas/fiscal(mod5)/Calculad
 import { CategorizadorMonotributo } from './pages/herramientas/fiscal(mod5)/CategorizadorMonotributo';
 import { ExportacionServicios } from './pages/herramientas/fiscal(mod5)/ExportacionServicios';
 
-
 // --- MÓDULO VI: ESTILO DE VIDA ---
 import { CalculadoraDolarTarjeta } from './pages/herramientas/estilo-vida(mod6)/CalculadoraDolarTarjeta';
 import { PresupuestoViaje } from './pages/herramientas/estilo-vida(mod6)/PresupuestoViaje';
@@ -101,7 +104,7 @@ import Terminos from './pages/Terminos';
 import ApiDocs from './pages/ApiDocs';   
 
 // --- PÁGINAS (AUTH) ---
-import { Login } from './pages/Login';       
+import  Login  from './pages/Login';
 import { Register } from './pages/Register'; 
 
 function App() {
@@ -112,52 +115,71 @@ function App() {
         
         <Routes>
           
-          {/* ZONA A: PÁGINAS "STANDALONE" */}
+          {/* ======================================================
+              ZONA A: PÁGINAS "STANDALONE" (Sin Navbar, Sin Footer)
+              ====================================================== */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/terminosdeuso" element={<Terminos />} />
           <Route path="/apidocs" element={<ApiDocs />} />
 
-          {/* ZONA B: APLICACIÓN PRINCIPAL */}
+          {/* ======================================================
+              ZONA B: APLICACIÓN PRINCIPAL (Con Layout)
+              ====================================================== */}
           <Route element={<Layout />}> 
             
+            {/* 1. RUTAS PÚBLICAS (Accesibles para todos) */}
             <Route path="/" element={<Home />} />
+            
+            {/* Truco: Si el login busca /dashboard, lo mandamos al home por ahora */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            
             <Route path="/glosario" element={<Glosario />} />
             <Route path="/sobre-mi" element={<SobreMi />} />
             <Route path="/contacto" element={<Contacto />} />
+            <Route path="/planes" element={
+              <div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300">
+                <Planes /> 
+              </div>
+            } />
 
-            {/* --- FEATURES --- */}
-            <Route 
-              path="/analytics" 
-              element={
-                <div className="bg-slate-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
-                  <AnalyticsPage />
-                </div>
-              } 
-            />
+            {/* 2. RUTAS PROTEGIDAS (Solo Usuarios Logueados) 🛡️ 
+                Aquí usamos el Gatekeeper para envolver las joyas de la corona. */}
+            <Route element={<ProtectedRoute />}>
+                
+                {/* Perfil de Usuario */}
+                <Route path="/perfil" element={<Perfil />} />
 
-            <Route 
-              path="/exportar" 
-              element={
-                <div className="bg-gray-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
-                  <DescargaPremium />
-                </div>
-              }
-            />
+                <Route 
+                  path="/analytics" 
+                  element={
+                    <div className="bg-slate-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
+                      <AnalyticsPage />
+                    </div>
+                  } 
+                />
 
-            <Route 
-              path="/planes" 
-              element={
-                <div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300">
-                  <Planes /> 
-                </div>
-              } 
-            />
+                {/* 🛡️ NIVEL 2: ZONA DE PAGO (Solo Premium y Plus) */}
+                <Route element={<ProtectedRoute allowedPlans={['premium', 'plus']} />}>
+                    <Route 
+                      path="/exportar" 
+                      element={
+                        <div className="bg-gray-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
+                          <DescargaPremium />
+                        </div>
+                      }
+                    />
+                </Route>
+
+                {/* 🛡️ NIVEL 3: SOLO PLUS */}
+                <Route element={<ProtectedRoute allowedPlans={['plus']} />}>
+                    <Route path="/api-keys" element={<ApiDashboard />} />
+                </Route>
+            
+            </Route>
 
             {/* =======================================================
-                ZONA DE HERRAMIENTAS (Rutas Públicas Limpias)
-                Aunque tus carpetas tengan nombres raros, la URL 
-                que ve el usuario debe ser limpia (/calculadoras/...)
+                ZONA DE HERRAMIENTAS (PÚBLICAS - FREEMIUM STRATEGY)
                 ======================================================= */}
             
             <Route path="/herramientas" element={<Calculadoras />} />
@@ -193,7 +215,7 @@ function App() {
             <Route path="/calculadoras/credito/prendarios" element={<SimuladorPrendario />} />
             <Route path="/calculadoras/credito/cuota-simple" element={<CuotaSimple />} />
             
-            // Routes Módulo IV
+            {/* Módulo IV: Inmobiliario */}
             <Route path="/calculadoras/inmobiliario/comprar-alquilar" element={<ComprarAlquilar />} />
             <Route path="/calculadoras/inmobiliario/hipotecario-uva" element={<HipotecarioUVA />} />
             <Route path="/calculadoras/inmobiliario/alquiler" element={<ActualizadorAlquiler />} />
@@ -202,7 +224,7 @@ function App() {
             <Route path="/calculadoras/inmobiliario/construccion" element={<CostoConstruccion />} />
             <Route path="/calculadoras/inmobiliario/escrituracion" element={<GastosEscritura />} />
                         
-            // Routes Módulo V
+            {/* Módulo V: Fiscal */}
             <Route path="/calculadoras/fiscal/importaciones" element={<CalculadoraCourier />} />
             <Route path="/calculadoras/fiscal/grossing-up" element={<GrossingUp />} />
             <Route path="/calculadoras/fiscal/sircreb" element={<RetencionesSircreb />} />
@@ -210,15 +232,15 @@ function App() {
             <Route path="/calculadoras/fiscal/monotributo" element={<CategorizadorMonotributo />} />
             <Route path="/calculadoras/fiscal/exportacion" element={<ExportacionServicios />} />
 
-            // Rutas Módulo VI
+            {/* Módulo VI: Vida */}
             <Route path="/calculadoras/vida/dolar-tarjeta" element={<CalculadoraDolarTarjeta />} />
             <Route path="/calculadoras/vida/viajes" element={<PresupuestoViaje />} />
             <Route path="/calculadoras/vida/suscripciones" element={<GestorSuscripciones />} />
             <Route path="/calculadoras/vida/ofertas" element={<OptimizadorOfertas />} />
 
-              {/* MÓDULO VII: CORPORATIVO */}
-              <Route path="/calculadoras/corporativo/cheques" element={<DescuentoCheques />} />
-              <Route path="/calculadoras/corporativo/montecarlo" element={<SimuladorMontecarlo />} />
+            {/* MÓDULO VII: CORPORATIVO */}
+            <Route path="/calculadoras/corporativo/cheques" element={<DescuentoCheques />} />
+            <Route path="/calculadoras/corporativo/montecarlo" element={<SimuladorMontecarlo />} />
 
             {/* Rutas Dinámicas y 404 */}
             <Route path="/categoria/:id" element={<Categorias />} />
@@ -235,3 +257,4 @@ function App() {
 }
 
 export default App;
+

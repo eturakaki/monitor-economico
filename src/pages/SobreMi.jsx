@@ -191,7 +191,7 @@ export function SobreMi() {
                 <Code size={20} className="text-emerald-500" /> Stack Técnico
               </h3>
               <div className="flex flex-wrap gap-2">
-                {['React.js', 'Tailwind CSS', 'Vite', 'Recharts', 'APIs REST', 'Git'].map((tag) => (
+                {['React.js', 'Tailwind CSS', 'Vite', 'Recharts', 'APIs REST', 'Git', 'R', 'RStudio'].map((tag) => (
                   <span key={tag} className="px-3 py-1.5 bg-gray-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-lg border border-gray-200 dark:border-slate-700 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition-colors">
                     {tag}
                   </span>

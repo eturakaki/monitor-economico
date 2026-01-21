@@ -1,3 +1,4 @@
+import { useAuth } from '../context/AuthContext';
 import React, { useMemo, useState } from 'react'; 
 import { Link } from 'react-router-dom';
 
@@ -105,7 +106,7 @@ const ActionCard = ({ icon: Icon, title, desc, to, accentColor = "blue" }) => {
 // VIEW PRINCIPAL: Home
 // ---------------------------------------------------------------------------
 export function Home() {
-  
+  const { user } = useAuth();
   const [activeSector, setActiveSector] = useState('cambiario');
 
   const destacadosFinancieros = useMemo(() => {
@@ -185,34 +186,38 @@ export function Home() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
-             {/* Botón Principal con sombra de color sutil */}
-             <button className="group flex items-center gap-2 px-8 py-4 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-sm shadow-xl hover:shadow-emerald-900/20 hover:-translate-y-0.5 transition-all duration-300">
-                <Terminal size={18} className="text-slate-400 dark:text-slate-500 group-hover:text-emerald-400 dark:group-hover:text-emerald-600 transition-colors" />
-                Iniciar Terminal
-             </button>
-             
-             {/* Botón Secundario limpio */}
-             <button className="flex items-center gap-2 px-8 py-4 rounded-lg 
-                bg-white dark:bg-transparent 
-                border-2 border-slate-300 dark:border-slate-700 
-                text-slate-700 dark:text-slate-300 font-bold text-sm 
-                shadow-sm backdrop-blur-sm
-                hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800
-                transition-all duration-200">
-              <Globe size={18} />
-              Ver Documentación
-            </button>
+                 
+                 {/* 👇 3. AQUÍ ESTÁ EL BOTÓN DINÁMICO CORREGIDO */}
+                 <Link to={user ? "/dashboard" : "/login"}>
+                    <button className="group flex items-center gap-2 px-8 py-4 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-sm shadow-xl hover:shadow-emerald-900/20 hover:-translate-y-0.5 transition-all duration-300">
+                        <Terminal size={18} className="text-slate-400 dark:text-slate-500 group-hover:text-emerald-400 dark:group-hover:text-emerald-600 transition-colors" />
+                        {/* Cambia el texto según si es usuario o visita */}
+                        {user ? 'Ir a mi Dashboard' : 'Iniciar Terminal'}
+                    </button>
+                 </Link>
+                 
+                 {/* Botón Secundario */}
+                 <button className="flex items-center gap-2 px-8 py-4 rounded-lg 
+                    bg-white dark:bg-transparent 
+                    border-2 border-slate-300 dark:border-slate-700 
+                    text-slate-700 dark:text-slate-300 font-bold text-sm 
+                    shadow-sm backdrop-blur-sm
+                    hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800
+                    transition-all duration-200">
+                  <Globe size={18} />
+                  Ver Documentación
+                </button>
+              </div>
           </div>
-      </div>
-    </div>
-</section>
+        </div>
+    </section>
 
       {/* === SECTION 2: PULSO DE MERCADO (Separación clara fondo gris vs card blanca) === */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
          <div className="flex justify-between items-end mb-6 px-1">
             <h2 className="text-sm font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <Activity size={16} className="text-emerald-700 dark:text-emerald-500" />
-                Resumen Ejecutivo
+                Indicadores Más buscados
             </h2>
             <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-slate-700 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 px-3 py-1.5 rounded-lg shadow-sm">
                <Clock size={12} />
@@ -225,7 +230,7 @@ export function Home() {
               /* CONTRASTE: border-slate-300 (Gris medio) en lugar de 200.
                  Esto dibuja una caja clara alrededor del dato.
               */
-              <div key={item.id} className="h-[190px] rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 shadow-sm overflow-hidden hover:shadow-lg transition-all">
+              <div key={item.id} className=" rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 shadow-sm overflow-hidden hover:shadow-lg transition-all">
                  <StatCard {...item} />
               </div>
             ))}
