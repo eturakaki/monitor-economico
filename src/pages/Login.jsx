@@ -1,12 +1,14 @@
 // src/pages/Login.jsx
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // <--- Importamos el cerebro
-import { LineChart, Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+// 👇 IMPORTANTE: Agregamos ArrowLeft
+import { LineChart, Lock, Mail, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth(); // <--- Extraemos la función mágica
+  const location = useLocation();
+  const { login } = useAuth();
   
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
@@ -17,35 +19,28 @@ export default function Login() {
     setError('');
     setLoading(true);
 
-    // SIMULACIÓN DE BACKEND (Esto se reemplazará por Firebase/Node luego)
     try {
-      // Simulamos espera de red de 1.5 segundos
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       if (formData.email === 'error@monitoreco.com') {
         throw new Error('Credenciales inválidas');
       }
 
-      // 1. DEFINIMOS EL USUARIO SIMULADO
-      // Aquí decidimos qué rol darle según el email (truco para testear)
       const mockUser = {
         name: 'Iñaki Etura',
         email: formData.email,
-        plan: formData.email.includes('pro') ? 'premium' : 'free', // Si el mail dice "pro", es premium
+        plan: formData.email.includes('pro') ? 'premium' : 'free',
         role: 'user',
-        avatar: null // El AuthContext generará uno automático
+        avatar: null 
       };
 
-      // 2. EJECUTAMOS EL LOGIN DEL CONTEXTO
       login(mockUser);
 
-      // 3. REDIRIGIMOS AL DASHBOARD
-      navigate('/'); 
+      const origin = location.state?.from?.pathname || '/dashboard';
+      navigate(origin, { replace: true }); 
       
     } catch (err) {
-      // ✅ SOLUCIÓN: Usamos la variable para imprimir el error real en la consola
-      console.error('Error de inicio de sesión:', err); //Si no queremos ver esto. Lo borramos
-      
+      console.error('Error de inicio de sesión:', err);
       setError('Email o contraseña incorrectos. Intenta de nuevo.');
     } finally {
       setLoading(false);
@@ -53,16 +48,35 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B1121] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
-      <div className="max-w-md w-full space-y-8">
+    // 👇 Agregamos 'relative' aquí por si acaso, aunque el absolute se posiciona respecto al viewport usualmente
+    <div className="relative min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B1121] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+      
+      {/* 🔙 BOTÓN VOLVER AL INICIO (NUEVO) */}
+      <div className="absolute top-6 left-6 sm:top-10 sm:left-10 z-10">
+        <Link 
+          to="/" 
+          className="
+            group flex items-center gap-2 px-4 py-2 rounded-full 
+            bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm
+            text-sm font-bold text-slate-600 dark:text-slate-400 
+            hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all
+          "
+        >
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+          <span className="hidden sm:inline">Volver al Inicio</span> {/* En móvil solo icono */}
+        </Link>
+      </div>
+
+      <div className="max-w-md w-full space-y-8 relative z-20"> {/* z-20 para que quede sobre el fondo */}
         
         {/* Header del Formulario */}
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center gap-2 mb-6 group">
-             <div className="bg-emerald-600 p-2 rounded-lg shadow-lg group-hover:scale-110 transition-transform">
+          {/* Quitamos el Link de aquí porque ya tenemos el botón de volver arriba, o lo dejamos como logo estático */}
+          <div className="inline-flex items-center gap-2 mb-6">
+             <div className="bg-emerald-600 p-2 rounded-lg shadow-lg">
                 <LineChart className="text-white" size={24} />
              </div>
-          </Link>
+          </div>
           <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Bienvenido de nuevo
           </h2>
