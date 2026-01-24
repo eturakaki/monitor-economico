@@ -1,33 +1,103 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+// 1. Agrega 'useRef' y 'useMemo' a la importación de React
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 
-// 1. CREAMOS EL CONTEXTO
+// 2. Importa el AuthContext
+import { useAuth } from './AuthContext';
+
+/**
+ * ------------------------------------------------------------------
+ * SHOP CONTEXT - GLOBAL STATE MANAGEMENT ARCHITECTURE
+ * ------------------------------------------------------------------
+ * Arquitectura: React Context API + LocalStorage Persistence Pattern
+ * Propósito: Centralizar la lógica de negocio (Business Logic) y el estado
+ * global para el Carrito de Compras y la Lista de Deseos (Wishlist).
+ */
+
+// 1. Context Initialization
 const ShopContext = createContext();
 
-// 2. EL PROVEEDOR (The Brain)
+// 2. Provider Component (The Brain)
 export const ShopProvider = ({ children }) => {
   
-  // --- ESTADOS CON PERSISTENCIA (LocalStorage) ---
+  // =================================================================
+  //  LAYER 1: PERSISTENCE & STATE HYDRATION
+  // =================================================================
   
-  // A. CARRITO
+  // --- INTEGRACIÓN DE SEGURIDAD ---
+  const { user, loading } = useAuth(); // Traemos al usuario del contexto de Auth
+  const prevUserRef = useRef(user);    // Creamos una "memoria" para comparar
+  
+  // A. STATE: CARRITO DE COMPRAS
   const [cart, setCart] = useState(() => {
-    // Verificamos si window existe (para evitar errores en algunos entornos de build)
     if (typeof window !== 'undefined') {
-        const savedCart = localStorage.getItem('monitor_cart');
-        return savedCart ? JSON.parse(savedCart) : [];
+        try {
+            const savedCart = localStorage.getItem('monitor_cart');
+            return savedCart ? JSON.parse(savedCart) : [];
+        } catch (error) {
+            console.error("Error crítico parseando el carrito:", error);
+            return []; // Fallback seguro ante datos corruptos
+        }
     }
     return [];
   });
 
-  // B. FAVORITOS (WISHLIST)
+  // B. STATE: FAVORITOS (WISHLIST)
   const [wishlist, setWishlist] = useState(() => {
     if (typeof window !== 'undefined') {
-        const savedWishlist = localStorage.getItem('monitor_wishlist');
-        return savedWishlist ? JSON.parse(savedWishlist) : [];
+        try {
+            const savedWishlist = localStorage.getItem('monitor_wishlist');
+            return savedWishlist ? JSON.parse(savedWishlist) : [];
+        } catch (error) {
+            console.error("Error crítico parseando wishlist:", error);
+            return [];
+        }
     }
     return [];
   });
 
-  // --- EFECTOS (Guardar cambios automáticamente) ---
+  // =================================================================
+  //  LAYER 1.5: SECURITY & SESSION CLEANUP
+  // =================================================================
+  
+  /**
+   * EFECTO: DETECCIÓN DE LOGOUT
+   * Propósito: Limpiar datos sensibles INMEDIATAMENTE al cerrar sesión.
+   */
+  useEffect(() => {
+    if (loading) return; // Si está cargando, esperamos
+
+    const prevUser = prevUserRef.current;
+    const currentUser = user;
+
+    // Si antes había usuario Y ahora no (Logout explícito)
+    if (prevUser && !currentUser) {
+        console.info("🔒 [ShopSystem] Logout detectado: Purgando datos locales.");
+        
+        // --- SENIOR NOTE ---
+        // Deshabilitamos la regla 'set-state-in-effect' aquí porque este re-render
+        // es INTENCIONAL y NECESARIO por seguridad (Session Cleanup).
+        
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCart([]);
+        
+        
+        setWishlist([]);
+        
+        // Limpiar LocalStorage
+        localStorage.removeItem('monitor_cart');
+        localStorage.removeItem('monitor_wishlist');
+    }
+
+    // Actualizamos la referencia
+    prevUserRef.current = currentUser;
+
+  }, [user, loading]);
+
+  // =================================================================
+  //  LAYER 2: SIDE EFFECTS (DATA SYNCHRONIZATION)
+  // =================================================================
+  
+  // Persistencia Automática: Suscripción a cambios de estado
   useEffect(() => {
     localStorage.setItem('monitor_cart', JSON.stringify(cart));
   }, [cart]);
@@ -36,67 +106,98 @@ export const ShopProvider = ({ children }) => {
     localStorage.setItem('monitor_wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  // --- LÓGICA DEL NEGOCIO (Actions) ---
+  // =================================================================
+  //  LAYER 3: BUSINESS LOGIC (ACTIONS)
+  // =================================================================
 
-  // 1. AGREGAR AL CARRITO
+  /**
+   * ACTION: Add Item to Cart
+   */
   const addToCart = (product) => {
     setCart((prevCart) => {
-      // ¿Ya existe el producto?
+      // Check for existence (Idempotency check)
       const existingItem = prevCart.find((item) => item.id === product.id);
 
       if (existingItem) {
-        // Si es curso, no sumamos cantidad (lógica de negocio)
+        // REGLA DE NEGOCIO: Los cursos no pueden tener cantidad > 1
         if (product.type === 'curso') return prevCart;
         
-        // Si es libro, sumamos +1
+        // REGLA DE NEGOCIO: Incremento de cantidad para items físicos
         return prevCart.map((item) =>
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       } else {
+        // Nuevo item: Inicializamos cantidad
         return [...prevCart, { ...product, quantity: 1 }];
       }
     });
-    // Aquí podrías poner un console.log o conectar una notificación real
-    console.log(`Producto agregado: ${product.title}`);
+    console.log(`[ShopSystem] Producto agregado: ${product.title}`);
   };
 
-  // 2. ELIMINAR DEL CARRITO
+  /**
+   * ACTION: Remove Item from Cart
+   */
   const removeFromCart = (productId) => {
     setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
   };
 
-  // 3. MANEJAR FAVORITOS (Toggle)
+  /**
+   * ACTION: Toggle Wishlist Status
+   */
   const toggleWishlist = (product) => {
     setWishlist((prevWish) => {
       const exists = prevWish.find((p) => p.id === product.id);
       if (exists) {
-        return prevWish.filter((p) => p.id !== product.id); // Quitar
+        return prevWish.filter((p) => p.id !== product.id); // Remove operation
       } else {
-        return [...prevWish, product]; // Agregar
+        return [...prevWish, product]; // Add operation
       }
     });
   };
 
-  // 4. VERIFICAR SI ESTÁ EN FAVORITOS
+  /**
+   * ACTION: Remove from Wishlist (Explicit)
+   */
+  const removeFromWishlist = (itemId) => {
+    setWishlist((prev) => prev.filter((item) => item.id !== itemId));
+  };
+
+  // HELPER: Check Wishlist Status (Boolean)
   const isInWishlist = (productId) => wishlist.some((p) => p.id === productId);
 
-  // 5. CALCULAR TOTALES
-  const cartTotal = cart.reduce((total, item) => {
-    const price = item.discountPrice ?? item.price;
-    return total + price * item.quantity;
-  }, 0);
+  // =================================================================
+  //  LAYER 4: COMPUTED VALUES (SELECTORS)
+  // =================================================================
+  
+  // Derivamos datos directamente del estado para asegurar "Single Source of Truth".
+  const cartTotal = useMemo(() => {
+    return cart.reduce((total, item) => {
+      const price = item.discountPrice ?? item.price; // Nullish coalescing para precio seguro
+      return total + price * item.quantity;
+    }, 0);
+  }, [cart]);
 
-  const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const cartCount = useMemo(() => {
+    return cart.reduce((acc, item) => acc + item.quantity, 0);
+  }, [cart]);
 
-  // --- EXPORTAR PODERES ---
+  // =================================================================
+  //  EXPOSE PUBLIC API
+  // =================================================================
   return (
     <ShopContext.Provider
       value={{
+        // State Snapshots
         cart,
         wishlist,
+        
+        // Actions (Mutators)
         addToCart,
         removeFromCart,
         toggleWishlist,
+        removeFromWishlist, 
+        
+        // Helpers & Computed
         isInWishlist,
         cartTotal,
         cartCount
@@ -107,10 +208,12 @@ export const ShopProvider = ({ children }) => {
   );
 };
 
-// 3. HOOK PERSONALIZADO
+// 3. Custom Hook (Consumer Abstraction)
 // eslint-disable-next-line react-refresh/only-export-components
 export const useShop = () => {
   const context = useContext(ShopContext);
-  if (!context) throw new Error('useShop debe usarse dentro de un ShopProvider');
+  if (!context) {
+    throw new Error('FATAL: useShop debe ser utilizado dentro de un <ShopProvider />');
+  }
   return context;
 };

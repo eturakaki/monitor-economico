@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, UserPlus } from 'lucide-react'; 
 
@@ -13,6 +13,7 @@ export const Register = () => {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation(); //
 
   const handleChange = (e) => {
     setFormData({
@@ -20,7 +21,7 @@ export const Register = () => {
       [e.target.id]: e.target.value
     });
   };
-
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
@@ -28,7 +29,11 @@ export const Register = () => {
       return;
     }
     login({ name: formData.name, email: formData.email, plan: 'Free' });
-    navigate('/'); 
+    navigate('/');
+    // ✅ 3. LA REDIRECCIÓN VA AQUÍ (Solo cuando hay éxito)
+    // Buscamos si había una página pendiente (ej: /checkout) o vamos al dashboard
+    const origin = location.state?.from?.pathname || '/dashboard';
+    navigate(origin, { replace: true });
   };
 
   return (

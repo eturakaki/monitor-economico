@@ -175,7 +175,12 @@ export default function Login() {
               </div>
             </div>
             <div className="mt-6 text-center">
-              <Link to="/register" className="font-medium text-emerald-600 hover:text-emerald-500">
+              {/* CORRECCIÓN CRÍTICA: Pasamos el 'state' al registro para no perder el checkout */}
+              <Link 
+                to="/register" 
+                state={location.state} // <--- ESTA ES LA CLAVE MÁGICA 🔑
+                className="font-medium text-emerald-600 hover:text-emerald-500"
+              >
                 Crear cuenta gratuita
               </Link>
             </div>

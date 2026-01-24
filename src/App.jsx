@@ -111,7 +111,10 @@ import { Register } from './pages/Register';
 import Academia from './pages/Academia';
 import Libreria from './pages/Libreria';
 
-import Checkout from './pages/Checkout';
+import { CartDrawer } from './components/shop/CartDrawer';
+import CartPage from './pages/CartPage';
+import WishlistPage from './pages/WishlistPage';
+import CheckoutPage from './pages/CheckoutPage'; // Importar la nueva página
 
 
 function App() {
@@ -120,7 +123,7 @@ function App() {
       <ShopProvider>
         <BrowserRouter>
           <ScrollToTop />
-          
+          <CartDrawer />
           <Routes>
             
             {/* ======================================================
@@ -167,6 +170,14 @@ function App() {
                       </div>
                     } 
                   />
+                  <Route 
+                      path="/checkout" 
+                      element={
+                        <ProtectedRoute>
+                          <CheckoutPage />
+                        </ProtectedRoute>
+                      } 
+                    />
 
                   {/* 🛡️ NIVEL 2: ZONA DE PAGO (Solo Premium y Plus) */}
                   <Route element={<ProtectedRoute allowedPlans={['premium', 'plus']} />}>
@@ -256,7 +267,8 @@ function App() {
               <Route path="/libreria" element={<Libreria />} />
 
                 {/* --- Carrito y checkout --- */}
-              <Route path="/checkout/:id" element={<Checkout />} />
+              <Route path="/carrito" element={<CartPage />} />
+              <Route path="/favoritos" element={<WishlistPage />} />
 
               {/* Rutas Dinámicas y 404 */}
               <Route path="/categoria/:id" element={<Categorias />} />
