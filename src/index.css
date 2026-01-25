@@ -10,7 +10,7 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* 👇 AQUÍ ESTÁ LA CLAVE: Pintamos el fondo raíz */
+    /* 👇 Pintamos el fondo raíz */
     @apply bg-slate-50 dark:bg-slate-950 transition-colors duration-300;
   }
 
@@ -19,8 +19,42 @@
     @apply font-black tracking-tight leading-tight text-slate-900 dark:text-white;
   }
   
-  /* Regla #3: El cuerpo hereda el texto, el fondo ya lo pone 'html' */
+  /* Regla #3: El cuerpo hereda el texto */
   body {
     @apply text-slate-600 dark:text-slate-300;
+  }
+}
+
+/* --- UTILIDADES PERSONALIZADAS (Scrollbar) --- */
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 6px; /* Altura horizontal fina */
+    width: 6px;  /* Ancho vertical fino */
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent; /* Fondo invisible */
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1; /* Gris suave (slate-300) */
+    border-radius: 20px;       /* Redondeado total */
+  }
+
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #334155; /* Gris oscuro (slate-700) */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8; /* Un poco más oscuro al pasar el mouse */
+  }
+  
+  /* Utilidad para ocultar scrollbar pero permitir scroll (para móviles si se necesita) */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

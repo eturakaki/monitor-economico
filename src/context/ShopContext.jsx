@@ -1,33 +1,23 @@
-// 1. Agrega 'useRef' y 'useMemo' a la importación de React
+// 1. Importaciones del núcleo de React
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
-
-// 2. Importa el AuthContext
+import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
 
 /**
  * ------------------------------------------------------------------
- * SHOP CONTEXT - GLOBAL STATE MANAGEMENT ARCHITECTURE
+ * SHOP CONTEXT - SSOT (Single Source of Truth - English Standard)
  * ------------------------------------------------------------------
- * Arquitectura: React Context API + LocalStorage Persistence Pattern
- * Propósito: Centralizar la lógica de negocio (Business Logic) y el estado
- * global para el Carrito de Compras y la Lista de Deseos (Wishlist).
  */
 
-// 1. Context Initialization
 const ShopContext = createContext();
 
-// 2. Provider Component (The Brain)
 export const ShopProvider = ({ children }) => {
   
-  // =================================================================
-  //  LAYER 1: PERSISTENCE & STATE HYDRATION
-  // =================================================================
-  
   // --- INTEGRACIÓN DE SEGURIDAD ---
-  const { user, loading } = useAuth(); // Traemos al usuario del contexto de Auth
-  const prevUserRef = useRef(user);    // Creamos una "memoria" para comparar
+  const { user, loading } = useAuth();
+  const prevUserRef = useRef(user);
   
-  // A. STATE: CARRITO DE COMPRAS
+  // A. STATE: CARRITO
   const [cart, setCart] = useState(() => {
     if (typeof window !== 'undefined') {
         try {
@@ -35,13 +25,13 @@ export const ShopProvider = ({ children }) => {
             return savedCart ? JSON.parse(savedCart) : [];
         } catch (error) {
             console.error("Error crítico parseando el carrito:", error);
-            return []; // Fallback seguro ante datos corruptos
+            return [];
         }
     }
     return [];
   });
 
-  // B. STATE: FAVORITOS (WISHLIST)
+  // B. STATE: FAVORITOS
   const [wishlist, setWishlist] = useState(() => {
     if (typeof window !== 'undefined') {
         try {
@@ -55,49 +45,39 @@ export const ShopProvider = ({ children }) => {
     return [];
   });
 
-  // =================================================================
-  //  LAYER 1.5: SECURITY & SESSION CLEANUP
-  // =================================================================
-  
-  /**
-   * EFECTO: DETECCIÓN DE LOGOUT
-   * Propósito: Limpiar datos sensibles INMEDIATAMENTE al cerrar sesión.
-   */
-  useEffect(() => {
-    if (loading) return; // Si está cargando, esperamos
+  // [NUEVO] C. STATE: HISTORIAL DE ÓRDENES (Las "Facturas")
+  const [orders, setOrders] = useState(() => {
+    if (typeof window !== 'undefined') {
+        try {
+            const savedOrders = localStorage.getItem('monitor_orders');
+            return savedOrders ? JSON.parse(savedOrders) : [];
+        } catch (error) {
+            console.error("Error cargando órdenes:", error);
+            return [];
+        }
+    }
+    return [];
+  });
 
+  // --- CLEANUP DE SEGURIDAD ---
+  useEffect(() => {
+    if (loading) return;
     const prevUser = prevUserRef.current;
     const currentUser = user;
 
-    // Si antes había usuario Y ahora no (Logout explícito)
     if (prevUser && !currentUser) {
         console.info("🔒 [ShopSystem] Logout detectado: Purgando datos locales.");
-        
-        // --- SENIOR NOTE ---
-        // Deshabilitamos la regla 'set-state-in-effect' aquí porque este re-render
-        // es INTENCIONAL y NECESARIO por seguridad (Session Cleanup).
-        
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCart([]);
-        
-        
         setWishlist([]);
-        
-        // Limpiar LocalStorage
+        setOrders([]); // [NUEVO] Limpiamos órdenes de la memoria
         localStorage.removeItem('monitor_cart');
         localStorage.removeItem('monitor_wishlist');
+        localStorage.removeItem('monitor_orders'); // [NUEVO] Limpiamos del storage
     }
-
-    // Actualizamos la referencia
     prevUserRef.current = currentUser;
-
   }, [user, loading]);
 
-  // =================================================================
-  //  LAYER 2: SIDE EFFECTS (DATA SYNCHRONIZATION)
-  // =================================================================
-  
-  // Persistencia Automática: Suscripción a cambios de estado
+  // --- PERSISTENCIA ---
   useEffect(() => {
     localStorage.setItem('monitor_cart', JSON.stringify(cart));
   }, [cart]);
@@ -106,73 +86,100 @@ export const ShopProvider = ({ children }) => {
     localStorage.setItem('monitor_wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
+  // [NUEVO] Persistencia de Órdenes
+  useEffect(() => {
+    localStorage.setItem('monitor_orders', JSON.stringify(orders));
+  }, [orders]);
+
   // =================================================================
-  //  LAYER 3: BUSINESS LOGIC (ACTIONS)
+  //  LAYER 3: BUSINESS LOGIC
   // =================================================================
 
-  /**
-   * ACTION: Add Item to Cart
-   */
   const addToCart = (product) => {
     setCart((prevCart) => {
-      // Check for existence (Idempotency check)
+      const isIncomingSubscription = product.type === 'subscription';
+      const hasExistingSubscription = prevCart.some(item => item.type === 'subscription');
+      
+      // [CLEAN CODE] Estandarización: Solo leemos 'title'.
+      const productName = product.title || 'Ítem';
+
+      // A: Suscripción (Prioridad)
+      if (isIncomingSubscription) {
+        if (prevCart.length > 0) {
+            toast.info('Carrito actualizado', {
+                description: 'Se vació el carrito para priorizar tu suscripción.'
+            });
+        }
+        return [{ ...product, quantity: 1 }];
+      }
+
+      // B: Conflicto
+      if (hasExistingSubscription) {
+         toast.warning('Suscripción eliminada', {
+            description: `Se eliminó el plan para poder agregar "${productName}".`,
+            duration: 4000,
+         });
+         return [{ ...product, quantity: 1 }];
+      }
+
+      // C: Normal
       const existingItem = prevCart.find((item) => item.id === product.id);
 
       if (existingItem) {
-        // REGLA DE NEGOCIO: Los cursos no pueden tener cantidad > 1
-        if (product.type === 'curso') return prevCart;
+        if (product.type === 'curso') {
+            toast.error('Ya tienes este curso', {
+                description: 'El acceso digital ya está en tu carrito.'
+            });
+            return prevCart;
+        }
         
-        // REGLA DE NEGOCIO: Incremento de cantidad para items físicos
+        toast.success('Cantidad actualizada', {
+             description: `${productName}: ${existingItem.quantity + 1} unidades.`
+        });
+
         return prevCart.map((item) =>
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       } else {
-        // Nuevo item: Inicializamos cantidad
+        toast.success('Agregado al carrito', {
+             description: `${productName} se agregó correctamente.`
+        });
         return [...prevCart, { ...product, quantity: 1 }];
       }
     });
-    console.log(`[ShopSystem] Producto agregado: ${product.title}`);
+    console.log(`[ShopSystem] Item procesado.`);
   };
 
-  /**
-   * ACTION: Remove Item from Cart
-   */
   const removeFromCart = (productId) => {
     setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
   };
 
-  /**
-   * ACTION: Toggle Wishlist Status
-   */
+  const clearCart = () => {
+    setCart([]); 
+    console.log("[ShopSystem] Carrito vaciado.");
+  };
+
   const toggleWishlist = (product) => {
     setWishlist((prevWish) => {
       const exists = prevWish.find((p) => p.id === product.id);
       if (exists) {
-        return prevWish.filter((p) => p.id !== product.id); // Remove operation
+        return prevWish.filter((p) => p.id !== product.id); 
       } else {
-        return [...prevWish, product]; // Add operation
+        return [...prevWish, product]; 
       }
     });
   };
 
-  /**
-   * ACTION: Remove from Wishlist (Explicit)
-   */
   const removeFromWishlist = (itemId) => {
     setWishlist((prev) => prev.filter((item) => item.id !== itemId));
   };
 
-  // HELPER: Check Wishlist Status (Boolean)
   const isInWishlist = (productId) => wishlist.some((p) => p.id === productId);
 
-  // =================================================================
-  //  LAYER 4: COMPUTED VALUES (SELECTORS)
-  // =================================================================
-  
-  // Derivamos datos directamente del estado para asegurar "Single Source of Truth".
+  // COMPUTED VALUES (Clean Code)
   const cartTotal = useMemo(() => {
     return cart.reduce((total, item) => {
-      const price = item.discountPrice ?? item.price; // Nullish coalescing para precio seguro
+      const price = Number(item.price) || 0;
       return total + price * item.quantity;
     }, 0);
   }, [cart]);
@@ -181,24 +188,54 @@ export const ShopProvider = ({ children }) => {
     return cart.reduce((acc, item) => acc + item.quantity, 0);
   }, [cart]);
 
-  // =================================================================
-  //  EXPOSE PUBLIC API
-  // =================================================================
+  // [NUEVO] ACCIÓN: Confirmar Compra (Persistencia)
+  const confirmPurchase = () => {
+    if (cart.length === 0) return;
+
+    const newOrder = {
+        id: `ORD-${Date.now().toString().slice(-6)}`,
+        date: new Date().toISOString(),
+        items: [...cart], // Snapshot inmutable
+        total: cartTotal,
+        status: 'approved',
+        paymentMethod: 'Credit Card (Simulación)'
+    };
+
+    setOrders((prev) => [newOrder, ...prev]);
+    clearCart();
+    
+    console.log("✅ [ShopSystem] Orden guardada:", newOrder);
+  };
+
+  // [NUEVO] SELECTOR: Mis Cursos (Biblioteca)
+  const myCourses = useMemo(() => {
+    const courses = [];
+    orders.forEach(order => {
+        order.items.forEach(item => {
+            if (item.type === 'curso') {
+                if (!courses.find(c => c.id === item.id)) {
+                    courses.push(item);
+                }
+            }
+        });
+    });
+    return courses;
+  }, [orders]);
+
   return (
     <ShopContext.Provider
       value={{
-        // State Snapshots
         cart,
         wishlist,
-        
-        // Actions (Mutators)
+        orders,      // [NUEVO] Exponemos el historial
+        myCourses,   // [NUEVO] Exponemos la biblioteca
         addToCart,
         removeFromCart,
+        clearCart,
         toggleWishlist,
         removeFromWishlist, 
-        
-        // Helpers & Computed
         isInWishlist,
+        confirmPurchase, // [NUEVO] Exponemos la acción de compra
         cartTotal,
         cartCount
       }}
@@ -208,8 +245,6 @@ export const ShopProvider = ({ children }) => {
   );
 };
 
-// 3. Custom Hook (Consumer Abstraction)
-// eslint-disable-next-line react-refresh/only-export-components
 export const useShop = () => {
   const context = useContext(ShopContext);
   if (!context) {

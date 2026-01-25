@@ -18,9 +18,9 @@ export default function CartPage() {
   const { cart = [], removeFromCart } = useShop(); 
 
   // CÁLCULO LOCAL (Seguridad): No dependemos de que el context lo traiga.
-  // Usamos useMemo para performance.
+  // [CHANGE] Estandarización: Solo calculamos usando 'price'.
   const total = useMemo(() => {
-    return cart.reduce((acc, item) => acc + (Number(item.precio) || 0), 0);
+    return cart.reduce((acc, item) => acc + (Number(item.price) || 0), 0);
   }, [cart]);
 
   // Scroll to top al entrar
@@ -93,9 +93,9 @@ export default function CartPage() {
                         <div className="flex gap-4 sm:gap-6">
                             {/* Imagen / Icono del Producto */}
                             <div className={`shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-${item.color || 'gray'}-100 dark:bg-${item.color || 'gray'}-900/20 flex items-center justify-center text-${item.color || 'gray'}-500 border border-slate-100 dark:border-slate-800`}>
-                                {/* Si tienes imagen úsala, sino icono genérico */}
-                                {item.imagen ? (
-                                    <img src={item.imagen} alt={item.titulo} className="w-full h-full object-cover rounded-xl" />
+                                {/* [CHANGE] Standard key 'image' */}
+                                {item.image ? (
+                                    <img src={item.image} alt={item.title} className="w-full h-full object-cover rounded-xl" />
                                 ) : (
                                     <CreditCard size={32} />
                                 )}
@@ -106,14 +106,17 @@ export default function CartPage() {
                                 <div>
                                     <div className="flex justify-between items-start">
                                         <h3 className="font-bold text-slate-900 dark:text-white text-base sm:text-lg leading-tight pr-8">
-                                            {item.titulo}
+                                            {/* [CHANGE] Standard key 'title' */}
+                                            {item.title} 
                                         </h3>
                                         <p className="font-mono font-bold text-lg text-slate-900 dark:text-white tabular-nums">
-                                            {formatPrice(item.precio)}
+                                            {/* [CHANGE] Standard key 'price' */}
+                                            {formatPrice(item.price)}
                                         </p>
                                     </div>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
-                                        {item.descripcion}
+                                        {/* [CHANGE] Standard key 'description' */}
+                                        {item.description}
                                     </p>
                                 </div>
                                 

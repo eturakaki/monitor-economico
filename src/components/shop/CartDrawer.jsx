@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ShoppingCart, Trash2, ArrowRight, CreditCard } from 'lucide-react';
-import { useShop } from '../../context/ShopContext'; // Ajusta la ruta si es necesario
+import { useShop } from '../../context/ShopContext'; 
 
-// Helper local (Mismo SSOT que en CartPage)
+// Helper local
 const formatPrice = (value) => {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -14,13 +14,9 @@ const formatPrice = (value) => {
 
 export function CartDrawer() {
   const navigate = useNavigate();
-  // Extraemos estados y funciones del Contexto Global
   const { isCartOpen, closeCart, cart, removeFromCart, cartTotal } = useShop();
-  
-  // Ref para detectar clics fuera del drawer (opcional, por seguridad UX)
   const drawerRef = useRef(null);
 
-  // Evitar scroll de fondo cuando el drawer está abierto
   useEffect(() => {
     if (isCartOpen) {
       document.body.style.overflow = 'hidden';
@@ -30,30 +26,26 @@ export function CartDrawer() {
     return () => { document.body.style.overflow = 'unset'; };
   }, [isCartOpen]);
 
-  // Si no está abierto, no renderizamos nada (Portal Pattern simplificado)
   if (!isCartOpen) return null;
 
   const handleGoToCart = () => {
-    closeCart(); // Cerramos el drawer primero
-    navigate('/carrito'); // Navegamos a la página completa
+    closeCart(); 
+    navigate('/carrito'); 
   };
 
   return (
     <div className="relative z-[100]">
-      
-      {/* 1. BACKDROP (Fondo Oscuro) */}
       <div 
         className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-300"
         onClick={closeCart}
       />
 
-      {/* 2. PANEL DESLIZANTE */}
       <div 
         ref={drawerRef}
         className="fixed inset-y-0 right-0 z-[101] w-full sm:w-[400px] bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col transform transition-transform animate-in slide-in-from-right duration-300"
       >
         
-        {/* A. HEADER */}
+        {/* HEADER */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md">
           <div className="flex items-center gap-2.5">
             <div className="relative">
@@ -72,7 +64,7 @@ export function CartDrawer() {
           </button>
         </div>
 
-        {/* B. LISTADO DE ÍTEMS (Scrollable) */}
+        {/* LISTADO */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
@@ -87,21 +79,29 @@ export function CartDrawer() {
               <div key={item.id} className="flex gap-3 group animate-in slide-in-from-bottom-2 duration-300">
                 {/* Imagen Mini */}
                 <div className={`w-16 h-16 rounded-lg bg-${item.color || 'gray'}-100 dark:bg-${item.color || 'gray'}-900/20 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-${item.color || 'gray'}-500 shrink-0`}>
-                   <CreditCard size={20} />
+                   {/* [CHANGE] Key: image */}
+                   {item.image ? (
+                        <img src={item.image} alt={item.title} className="w-full h-full object-cover rounded-lg"/>
+                   ) : (
+                        <CreditCard size={20} />
+                   )}
                 </div>
                 
                 {/* Datos */}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start">
                     <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate pr-2">
-                        {item.titulo}
+                        {/* [CHANGE] Key: title */}
+                        {item.title}
                     </h4>
                     <p className="font-mono text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums">
-                        {formatPrice(item.precio)}
+                        {/* [CHANGE] Key: price */}
+                        {formatPrice(item.price)}
                     </p>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                      {item.descripcion}
+                      {/* [CHANGE] Key: description */}
+                      {item.description}
                   </p>
                   <button 
                     onClick={() => removeFromCart(item.id)}
@@ -115,7 +115,7 @@ export function CartDrawer() {
           )}
         </div>
 
-        {/* C. FOOTER (Resumen y Acción) */}
+        {/* FOOTER */}
         {cart.length > 0 && (
           <div className="p-5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
             <div className="flex justify-between items-end mb-4">
