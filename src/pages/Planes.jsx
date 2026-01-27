@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, X, Info } from 'lucide-react'; // [ADD] Info icon para tooltip si fuera necesario
 import { planes } from '../data/planes';
 import { useShop } from '../context/ShopContext';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { toast } from 'sonner'; // [ADD] Feedback visual
 
 /**

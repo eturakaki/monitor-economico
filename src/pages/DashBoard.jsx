@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import { StatCard } from '../components/StatCard';
 import { misIndicadores } from '../data/monitores';

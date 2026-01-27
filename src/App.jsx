@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
 // --- LÓGICA & UTILIDADES ---
-import { useAuth } from './context/AuthContext'; 
+import { useAuth } from './hooks/useAuth';
 import ScrollToTop from './components/ScrollToTop';   
 import ProtectedRoute from './components/auth/ProtectedRoute'; 
 

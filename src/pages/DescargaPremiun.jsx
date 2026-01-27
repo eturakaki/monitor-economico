@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { toast } from 'sonner'; 
 import { 
   Download, FileSpreadsheet, FileJson, Crown, Check, Shield, Unlock,

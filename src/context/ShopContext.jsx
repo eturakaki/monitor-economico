@@ -1,7 +1,7 @@
 // 1. Importaciones del núcleo de React
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from 'sonner';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 /**
  * ------------------------------------------------------------------
@@ -45,7 +45,7 @@ export const ShopProvider = ({ children }) => {
     return [];
   });
 
-  // [NUEVO] C. STATE: HISTORIAL DE ÓRDENES (Las "Facturas")
+  // C. STATE: HISTORIAL DE ÓRDENES
   const [orders, setOrders] = useState(() => {
     if (typeof window !== 'undefined') {
         try {
@@ -60,20 +60,37 @@ export const ShopProvider = ({ children }) => {
   });
 
   // --- CLEANUP DE SEGURIDAD ---
+  
+  const clearShopState = () => {
+    console.info("🔒 [ShopSystem] Logout detectado: Purgando datos locales.");
+    
+    // 1. Storage
+    localStorage.removeItem('monitor_cart');
+    localStorage.removeItem('monitor_wishlist');
+    localStorage.removeItem('monitor_orders');
+
+    // 2. State
+    setCart([]);
+    setWishlist([]);
+    setOrders([]); 
+  };
+
   useEffect(() => {
     if (loading) return;
+    
     const prevUser = prevUserRef.current;
     const currentUser = user;
+    const isLoggingOut = prevUser && !currentUser;
 
-    if (prevUser && !currentUser) {
-        console.info("🔒 [ShopSystem] Logout detectado: Purgando datos locales.");
-        setCart([]);
-        setWishlist([]);
-        setOrders([]); // [NUEVO] Limpiamos órdenes de la memoria
-        localStorage.removeItem('monitor_cart');
-        localStorage.removeItem('monitor_wishlist');
-        localStorage.removeItem('monitor_orders'); // [NUEVO] Limpiamos del storage
+    if (isLoggingOut) {
+        // [SENIOR FIX] Desacopla la actualización del ciclo de render actual.
+        // Esto silencia el error "Calling setState synchronously" moviendo
+        // la limpieza al final del Event Loop.
+        setTimeout(() => {
+            clearShopState();
+        }, 0);
     }
+    
     prevUserRef.current = currentUser;
   }, [user, loading]);
 
@@ -86,7 +103,6 @@ export const ShopProvider = ({ children }) => {
     localStorage.setItem('monitor_wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  // [NUEVO] Persistencia de Órdenes
   useEffect(() => {
     localStorage.setItem('monitor_orders', JSON.stringify(orders));
   }, [orders]);
@@ -100,7 +116,6 @@ export const ShopProvider = ({ children }) => {
       const isIncomingSubscription = product.type === 'subscription';
       const hasExistingSubscription = prevCart.some(item => item.type === 'subscription');
       
-      // [CLEAN CODE] Estandarización: Solo leemos 'title'.
       const productName = product.title || 'Ítem';
 
       // A: Suscripción (Prioridad)
@@ -176,7 +191,7 @@ export const ShopProvider = ({ children }) => {
 
   const isInWishlist = (productId) => wishlist.some((p) => p.id === productId);
 
-  // COMPUTED VALUES (Clean Code)
+  // COMPUTED VALUES
   const cartTotal = useMemo(() => {
     return cart.reduce((total, item) => {
       const price = Number(item.price) || 0;
@@ -188,14 +203,14 @@ export const ShopProvider = ({ children }) => {
     return cart.reduce((acc, item) => acc + item.quantity, 0);
   }, [cart]);
 
-  // [NUEVO] ACCIÓN: Confirmar Compra (Persistencia)
+  // ACCIÓN: Confirmar Compra
   const confirmPurchase = () => {
     if (cart.length === 0) return;
 
     const newOrder = {
         id: `ORD-${Date.now().toString().slice(-6)}`,
         date: new Date().toISOString(),
-        items: [...cart], // Snapshot inmutable
+        items: [...cart],
         total: cartTotal,
         status: 'approved',
         paymentMethod: 'Credit Card (Simulación)'
@@ -207,7 +222,7 @@ export const ShopProvider = ({ children }) => {
     console.log("✅ [ShopSystem] Orden guardada:", newOrder);
   };
 
-  // [NUEVO] SELECTOR: Mis Cursos (Biblioteca)
+  // SELECTOR: Mis Cursos
   const myCourses = useMemo(() => {
     const courses = [];
     orders.forEach(order => {
@@ -227,15 +242,15 @@ export const ShopProvider = ({ children }) => {
       value={{
         cart,
         wishlist,
-        orders,      // [NUEVO] Exponemos el historial
-        myCourses,   // [NUEVO] Exponemos la biblioteca
+        orders,
+        myCourses,
         addToCart,
         removeFromCart,
         clearCart,
         toggleWishlist,
         removeFromWishlist, 
         isInWishlist,
-        confirmPurchase, // [NUEVO] Exponemos la acción de compra
+        confirmPurchase,
         cartTotal,
         cartCount
       }}
@@ -245,6 +260,7 @@ export const ShopProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useShop = () => {
   const context = useContext(ShopContext);
   if (!context) {

@@ -1,77 +1,70 @@
-// src/pages/Login.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-// 👇 IMPORTANTE: Agregamos ArrowLeft
+import { useAuth } from '../hooks/useAuth'; // ✅ Importando desde el nuevo hook
 import { LineChart, Lock, Mail, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   
+  // 👇 ESTO ES LO QUE FALTABA (Tus estados locales)
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // 🔥 1. NAVIGATOR REACTIVO (Senior Pattern)
+  // Este efecto vigila si 'isAuthenticated' cambia a true.
+  // Si lo hace, te redirige automáticamente.
+  useEffect(() => {
+    if (isAuthenticated) {
+      const origin = location.state?.from?.pathname || '/dashboard';
+      navigate(origin, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
+
+  // 🔥 2. HANDLER LIMPIO
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      if (formData.email === 'error@monitoreco.com') {
-        throw new Error('Credenciales inválidas');
-      }
-
-      const mockUser = {
-        name: 'Iñaki Etura',
+      // Solo ejecutamos la acción de login.
+      // NO navegamos aquí. Dejamos que el useEffect de arriba haga su trabajo.
+      await login({ 
         email: formData.email,
-        plan: formData.email.includes('pro') ? 'premium' : 'free',
-        role: 'user',
-        avatar: null 
-      };
-
-      login(mockUser);
-
-      const origin = location.state?.from?.pathname || '/dashboard';
-      navigate(origin, { replace: true }); 
+        name: 'Iñaki Etura', // En un futuro esto vendría del backend real
+        plan: formData.email.includes('pro') ? 'pro' : 'starter'
+      });
+      
+      // Si el login es exitoso, no hacemos nada más.
+      // El estado 'loading' se queda en true visualmente mientras el useEffect redirige.
       
     } catch (err) {
-      console.error('Error de inicio de sesión:', err);
-      setError('Email o contraseña incorrectos. Intenta de nuevo.');
-    } finally {
-      setLoading(false);
+      console.error('Login error:', err);
+      // El toast ya lo mostró el Context, pero actualizamos el estado local para feedback extra si quieres
+      setError('No se pudo iniciar sesión. Verifique sus credenciales.');
+      setLoading(false); // Solo quitamos el spinner si falló
     }
   };
 
   return (
-    // 👇 Agregamos 'relative' aquí por si acaso, aunque el absolute se posiciona respecto al viewport usualmente
     <div className="relative min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B1121] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       
-      {/* 🔙 BOTÓN VOLVER AL INICIO (NUEVO) */}
+      {/* Botón Volver */}
       <div className="absolute top-6 left-6 sm:top-10 sm:left-10 z-10">
         <Link 
           to="/" 
-          className="
-            group flex items-center gap-2 px-4 py-2 rounded-full 
-            bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm
-            text-sm font-bold text-slate-600 dark:text-slate-400 
-            hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all
-          "
+          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-sm font-bold text-slate-600 dark:text-slate-400 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
         >
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="hidden sm:inline">Volver al Inicio</span> {/* En móvil solo icono */}
+          <span className="hidden sm:inline">Volver al Inicio</span>
         </Link>
       </div>
 
-      <div className="max-w-md w-full space-y-8 relative z-20"> {/* z-20 para que quede sobre el fondo */}
-        
-        {/* Header del Formulario */}
+      <div className="max-w-md w-full space-y-8 relative z-20">
         <div className="text-center">
-          {/* Quitamos el Link de aquí porque ya tenemos el botón de volver arriba, o lo dejamos como logo estático */}
           <div className="inline-flex items-center gap-2 mb-6">
              <div className="bg-emerald-600 p-2 rounded-lg shadow-lg">
                 <LineChart className="text-white" size={24} />
@@ -85,7 +78,6 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Tarjeta del Formulario */}
         <div className="bg-white dark:bg-slate-900 py-8 px-4 shadow-xl sm:rounded-xl sm:px-10 border border-slate-200 dark:border-slate-800">
           <form className="space-y-6" onSubmit={handleSubmit}>
             
@@ -129,7 +121,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Mensaje de Error */}
+            {/* Error Message */}
             {error && (
               <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
                 <div className="flex">
@@ -140,7 +132,7 @@ export default function Login() {
               </div>
             )}
 
-            {/* Botón de Acción */}
+            {/* Submit Button */}
             <div>
               <button
                 type="submit"
@@ -150,7 +142,7 @@ export default function Login() {
                 {loading ? (
                   <>
                     <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                    Validando credenciales...
+                    Validando...
                   </>
                 ) : (
                   <>
@@ -162,7 +154,6 @@ export default function Login() {
             </div>
           </form>
 
-          {/* Footer del Formulario */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -175,10 +166,9 @@ export default function Login() {
               </div>
             </div>
             <div className="mt-6 text-center">
-              {/* CORRECCIÓN CRÍTICA: Pasamos el 'state' al registro para no perder el checkout */}
               <Link 
                 to="/register" 
-                state={location.state} // <--- ESTA ES LA CLAVE MÁGICA 🔑
+                state={location.state}
                 className="font-medium text-emerald-600 hover:text-emerald-500"
               >
                 Crear cuenta gratuita

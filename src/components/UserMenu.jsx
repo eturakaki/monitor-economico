@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { LogOut, User, Sparkles, ChevronDown } from 'lucide-react'; // Agregué iconos para darle toque pro
 
 export const UserMenu = () => {

@@ -1,13 +1,15 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react'; 
-import { Link } from 'react-router-dom'; // Para el link al upgrade
+import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, AreaChart, Area, BarChart, Bar, Legend, ResponsiveContainer 
+  AreaChart, Area, BarChart, Bar, Legend, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip 
 } from 'recharts';
 import { 
-  BrainCircuit, TrendingUp, Activity, DollarSign, Scale, AlertTriangle, Lock, Download, Calendar
+  BrainCircuit, TrendingUp, Activity, DollarSign, Scale, AlertTriangle, Lock, Download 
 } from 'lucide-react';
-import { useAuth } from "../context/AuthContext";
 import { toast } from 'sonner';
+
+// [FIX] Importamos desde hooks
+import { useAuth } from '../hooks/useAuth'; 
 
 // --- CONFIGURACIÓN DE ESTILOS ---
 const CHART_COLORS = {
@@ -18,7 +20,7 @@ const CHART_COLORS = {
   tooltipBorder: '#1e293b'
 };
 
-// Generador de datos simulados (Extendido para simular histórico)
+// Generador de datos simulados
 const generateHistoricalData = (months = 24) => {
   return Array.from({ length: months }, (_, i) => ({
     name: `Mes ${i + 1}`,
@@ -29,31 +31,36 @@ const generateHistoricalData = (months = 24) => {
   }));
 };
 
-const MetricCard = ({ title, value, change, isPositive, icon: Icon, description }) => (
-  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
-    <div className="flex justify-between items-start mb-4">
-      <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-        <Icon size={20} strokeWidth={1.5} />
-      </div>
-      <span className={`text-xs font-bold px-2 py-1 rounded-full border tabular-nums ${
-        isPositive 
-          ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
-          : 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20'
-      }`}>
-        {change > 0 ? '+' : ''}{change}%
-      </span>
-    </div>
-    <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">{title}</h3>
-    <div className="text-2xl font-black text-slate-900 dark:text-white mb-2 font-mono tabular-nums">{value}</div>
-    <p className="text-xs text-slate-400 leading-relaxed">{description}</p>
-  </div>
-);
+// [FIX LINTER] "Body Assignment Pattern"
+// En lugar de renombrar en los argumentos ({ icon: Icon }), recibimos 'icon'
+// y lo asignamos dentro. Esto elimina el falso positivo de "defined but never used".
+const MetricCard = ({ title, value, change, isPositive, icon, description }) => {
+  const Icon = icon; // Asignación explícita para que React lo renderice como componente
 
-// --- COMPONENTE: AI INSIGHTS (BLINDADO) ---
+  return (
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
+      <div className="flex justify-between items-start mb-4">
+        <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+          <Icon size={20} strokeWidth={1.5} />
+        </div>
+        <span className={`text-xs font-bold px-2 py-1 rounded-full border tabular-nums ${
+          isPositive 
+            ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
+            : 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20'
+        }`}>
+          {change > 0 ? '+' : ''}{change}%
+        </span>
+      </div>
+      <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">{title}</h3>
+      <div className="text-2xl font-black text-slate-900 dark:text-white mb-2 font-mono tabular-nums">{value}</div>
+      <p className="text-xs text-slate-400 leading-relaxed">{description}</p>
+    </div>
+  );
+};
+
+// --- COMPONENTE: AI INSIGHTS ---
 const AiInsight = ({ isPremium }) => (
   <div className="relative overflow-hidden rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-slate-900 dark:to-[#0f1526] p-6 shadow-sm">
-    
-    {/* CONTENIDO REAL (Siempre renderizado por SEO/Layout, pero oculto visualmente si es Free) */}
     <div className={!isPremium ? 'blur-sm select-none opacity-50' : ''}>
         <div className="flex items-center gap-3 mb-4">
         <div className="bg-indigo-600 text-white p-2 rounded-lg shadow-lg shadow-indigo-500/20">
@@ -67,7 +74,6 @@ const AiInsight = ({ isPremium }) => (
         </div>
     </div>
 
-    {/* OVERLAY DE BLOQUEO (Solo Free) */}
     {!isPremium && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/30 dark:bg-slate-900/40 backdrop-blur-[2px]">
             <Lock className="w-8 h-8 text-slate-900 dark:text-white mb-2" />
@@ -82,14 +88,12 @@ const AiInsight = ({ isPremium }) => (
 
 // --- PÁGINA PRINCIPAL ---
 const AnalyticsPage = () => {
-  const { isPremium } = useAuth(); // LEEMOS EL PERMISO REAL
+  const { isPremium } = useAuth();
   
-  // Generamos datos full, pero filtraremos según el plan
   const fullData = useMemo(() => generateHistoricalData(24), []);
   
-  // LOGICA DE RECORTE DE DATOS
   const displayedData = useMemo(() => {
-    return isPremium ? fullData : fullData.slice(-6); // Free ve solo 6 meses, Pro ve 24
+    return isPremium ? fullData : fullData.slice(-6); 
   }, [isPremium, fullData]);
 
   const m2Stats = useMemo(() => {
@@ -116,7 +120,7 @@ const AnalyticsPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0B1121] p-4 lg:p-8 font-sans [--chart-text:#64748b] dark:[--chart-text:#94a3b8] [--chart-grid:#e2e8f0] dark:[--chart-grid:#334155]">
       
-      {/* HEADER CON ACCIONES */}
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
         <div>
             <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-1">
@@ -128,7 +132,6 @@ const AnalyticsPage = () => {
         </div>
 
         <div className="flex gap-2">
-            {/* SELECTOR DE RANGO (Solo visual en demo, pero con lógica de bloqueo) */}
             <div className="flex bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1">
                 {['6M', '1Y', 'YTD', 'ALL'].map((range) => (
                     <button 
@@ -209,7 +212,6 @@ const AnalyticsPage = () => {
 
         {/* SIDEBAR CON IA Y BAR CHART */}
         <div className="space-y-6 flex flex-col h-full">
-          {/* Componente IA Blindado */}
           <AiInsight isPremium={isPremium} />
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm flex flex-col flex-grow min-h-[250px]">
@@ -236,7 +238,6 @@ const AnalyticsPage = () => {
             <div className="flex-grow w-full min-h-0">
                <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={displayedData.slice(-6)}> 
-                  {/* Siempre mostramos pocas barras para que sea legible en sidebar */}
                   <Tooltip cursor={{fill: 'var(--chart-grid)', opacity: 0.3}} contentStyle={{ backgroundColor: CHART_COLORS.tooltipBg, borderRadius: '8px', fontSize: '12px', color: '#fff' }} />
                   <Bar dataKey="m2" name="M2" fill={CHART_COLORS.m2.fill} radius={[4, 4, 0, 0]} />
                 </BarChart>

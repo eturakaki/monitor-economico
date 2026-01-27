@@ -30,8 +30,8 @@ import {
 import { sectores } from '../../data/sectores';
 import { herramientas } from '../../data/herramientas';
 import { ThemeToggle } from '../ThemeToggle'; 
-import { UserMenu } from '../UserMenu';       
-import { useAuth } from '../../context/AuthContext';
+import { UserMenu } from '../UserMenu';
+import { useAuth } from '../../hooks/useAuth';
 import { useShop } from '../../context/ShopContext';
 
 export function Navbar() {
