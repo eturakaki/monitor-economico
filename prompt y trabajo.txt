@@ -1,63 +1,8 @@
 RESPETA EL CODIGO PREEXISTENTE, NO CAMBIES ESTRUCTURA A MENOS QUE SEA MUY NECESSARIO Y ME PREGUNTAS PRIMERO.  COMENTA SIEMPRE EL CODIGO Y ACTUA COMO UN SENIOR SUPER PROFESIONAL ACTUAL DEL 2026
 
 
-
-
-
-
-
-
-
-
-
-
-🗺️ EL PLAN MAESTRO: De la "Compra" a la "Propiedad"
-No toques una tecla hasta que visualices estos 4 pasos. Esta es la secuencia lógica para que no queden cabos sueltos:
-
-1. 🔌 El "Handshake" (Conexión Checkout -> Contexto)
-Situación actual: Tu CheckoutPage es "tonta". Simula una espera y luego borra el carrito (clearCart). No guarda nada.
-
-La Estrategia: Debemos conectar el Checkout con la nueva función confirmPurchase que creamos en el Contexto.
-
-El Objetivo: Que al salir del Checkout, la data no se pierda en el éter, sino que se escriba en el "Libro Contable" (orders) del Contexto.
-
-2. 🛣️ La Infraestructura (Routing)
-Situación actual: Tienes botones en el Sidebar ("Mis Compras", "Mis Cursos"), pero si les haces clic, probablemente den error o no hagan nada.
-
-La Estrategia: Necesitamos crear los componentes de página (pages/Purchases.jsx y pages/MyCourses.jsx) y definirlos en tus rutas (App.jsx).
-
-El Objetivo: Que existan destinos físicos a donde navegar.
-
-3. 🧾 La Vista "Mis Compras" (Historial Financiero)
-Concepto: Esta pantalla debe inspirar confianza y orden. Piensa en el historial de Amazon o MercadoLibre.
-
-Requerimientos de Diseño:
-
-No queremos "tarjetas bonitas" aquí. Queremos DATOS.
-
-Tabla o Lista: Fecha, ID de Orden (ORD-XXXX), Total pagado, Estado ("Aprobado").
-
-Senior Touch: Un botón o link para "Ver detalle" (aunque por ahora sea visual) da mucha profesionalidad.
-
-4. 🎓 La Vista "Mis Cursos" (Biblioteca de Contenido)
-Concepto: Esta es la pantalla de consumo. Aquí el usuario viene a aprender, no a ver facturas.
-
-Lógica Inteligente: Aquí usaremos la variable myCourses que calculamos en el Contexto.
-
-Requerimientos de Diseño:
-
-Reutilizaremos la ProductCard pero... ¡Ojo! No puede tener botón de "Comprar".
-
-Senior Touch: Debemos adaptar la tarjeta o crear una variante (CourseCard) que en lugar de precio muestre una barra de progreso (simulada) o un botón "Ir al Aula".
-
-💡 MI RECOMENDACIÓN PROFESIONAL
-Para mantener la calidad "Senior", te recomiendo proceder en este orden estricto:
-
-Modificar CheckoutPage.jsx primero. (Aseguramos que la data se guarde).
-
-Crear la página Purchases.jsx (Mis Compras). (Verificamos que la data guardada se visualice correctamente como lista).
-
-Crear la página MyCourses.jsx (Mis Cursos). (Filtramos esa data para mostrar solo lo "consumible").
+A SOLUCIOMAR:
+AGREGAR MI PERFIL EN MENU HAMBURGUESA
 
 
 
@@ -74,21 +19,5 @@ Crear la página MyCourses.jsx (Mis Cursos). (Filtramos esa data para mostrar so
 
 
 
-🚀 SIGUIENTE PASO: Simulación de Pago (The "Magic" Button)
-Ahora vamos a hacer que ese botón verde de "Pagar con Tarjeta (Simulación)" haga algo real:
 
-Feedback Visual: Que se ponga en estado Loading (girando) para que el usuario sepa que está "procesando".
 
-Simulación de Red: Un retraso artificial de 2-3 segundos (para imitar a MercadoPago/Stripe).
-
-Resolución:
-
-Si es éxito: Limpiar carrito, mostrar Toast Verde y redirigir a una "Thank You Page" o Dashboard.
-
-Si es error: Mostrar Toast Rojo.
-
-Para hacerlo con la misma calidad quirúrgica que venimos manejando, necesito ver el código actual de:
-
-📂 src/pages/CheckoutPage.jsx
-
-Pégalo aquí y le inyectaré la lógica de procesamiento sin tocar tu diseño.

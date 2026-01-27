@@ -8,14 +8,17 @@ import {
   Activity, 
   Clock, 
   Calculator,    
-  BrainCircuit,  
-  FileText,      
+  BrainCircuit,      
   Download,       
   LayoutGrid,     
   ChevronRight,
   Terminal, 
   Globe,
-  Layers 
+  CheckCircle2,
+  Sparkles,
+  Layers,
+  CreditCard,
+  FileText
 } from 'lucide-react'; 
 
 // 2. COMPONENTES DEL SISTEMA
@@ -27,6 +30,7 @@ import { ResumenIA } from '../components/ResumenIA';
 import { misIndicadores } from '../data/monitores';
 import { toolsRegistry } from '../data/toolsRegistry';
 import { sectores } from '../data/sectores';
+import { planes } from '../data/planes';
 
 // ---------------------------------------------------------------------------
 // CONFIGURACIÓN ESTÁTICA
@@ -136,24 +140,18 @@ export function Home() {
        Esto asegura que cualquier elemento blanco (bg-white) resalte inmediatamente. */
     <div className="min-h-screen bg-slate-100 dark:bg-[#0B1121] transition-colors duration-500 pb-24">
       
-     {/* === SECTION 1: HERO BANNER MEJORADO === */}
+     {/* === SECTION 1: HERO BANNER (REFACTORIZADO - SENIOR LEVEL) === */}
 <section className="relative w-full overflow-hidden bg-white dark:bg-[#050914] pt-24 pb-20 lg:pt-32 lg:pb-28 border-b border-slate-300 dark:border-slate-800">
     
-    {/* 1. BACKGROUND COMPLEX: Puntos + Viñeta + Luz Ambiental */}
+    {/* 1. BACKGROUND COMPLEX: (Mantenemos tu fondo, está excelente) */}
     <div className="absolute inset-0 pointer-events-none">
-        
-        {/* A. La Luz Ambiental (El "Glow" Esmeralda detrás del texto) */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-emerald-500/10 dark:bg-emerald-500/20 blur-[80px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
-
-        {/* B. Los Puntos (Más oscuros como pediste) */}
         <div className="absolute inset-0 opacity-50 dark:opacity-20"
              style={{
-                 backgroundImage: 'radial-gradient(#475569 1px, transparent 1px)', // Slate-600 para los puntos
+                 backgroundImage: 'radial-gradient(#475569 1px, transparent 1px)',
                  backgroundSize: '24px 24px'
              }}>
         </div>
-
-        {/* C. La Máscara (Vignette): Esto hace que los puntos se borren en los bordes */}
         <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-white/50 dark:from-[#050914] dark:via-transparent dark:to-[#050914]/80"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,white_100%)] dark:bg-[radial-gradient(circle_at_center,transparent_0%,#050914_100%)] opacity-80"></div>
     </div>
@@ -161,57 +159,84 @@ export function Home() {
     <div className="relative z-10 max-w-7xl mx-auto px-6">
       <div className="flex flex-col items-center text-center">
           
-          {/* 2. BADGE MEJORADO (Estilo Cristal/Glass) */}
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-emerald-200/50 dark:border-emerald-900/50 mb-8 shadow-sm ring-1 ring-emerald-100 dark:ring-emerald-900/30">
+          {/* 2. BADGE (Glassmorphism + Live Pulse) */}
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-emerald-200/50 dark:border-emerald-900/50 mb-8 shadow-sm ring-1 ring-emerald-100 dark:ring-emerald-900/30 animate-in fade-in slide-in-from-top-4 duration-700">
               <div className="flex items-center gap-2">
                   <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-600 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                   </span>
-                  <span className="text-[11px] font-black text-slate-800 dark:text-slate-300 uppercase tracking-wider">
-                      Mercado Abierto
+                  <span className="text-[11px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest font-mono">
+                      Mercado Operativo
                   </span>
               </div>
           </div>
 
-          {/* 3. TIPOGRAFÍA CON MÁS FUERZA */}
-          <h1 className="text-5xl sm:text-7xl font-black text-slate-900 dark:text-white tracking-tighter mb-6 drop-shadow-sm">
-              Monitor<span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300">Eco</span>
-              <span className="text-slate-300 dark:text-slate-600">.</span>
+          {/* 3. HEADLINE (Tight & Impactful) */}
+          <h1 className="text-5xl sm:text-7xl font-black text-slate-900 dark:text-white tracking-tighter mb-6 drop-shadow-sm animate-in fade-in zoom-in-95 duration-700 delay-100">
+              Monitor<span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-600 to-teal-400 dark:from-emerald-400 dark:to-teal-300">Eco</span>
+              <span className="text-slate-300 dark:text-slate-700">.</span>
           </h1>
           
-          <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-medium mb-10">
-              Plataforma de inteligencia financiera institucional. 
-              <strong className="block sm:inline text-slate-900 dark:text-slate-200 font-bold decoration-emerald-500/30 decoration-2 underline-offset-4 underline"> Cotizaciones en tiempo real y modelos predictivos.</strong>
+          <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-medium mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+              Inteligencia financiera para la toma de decisiones. 
+              <span className="block mt-2 text-slate-900 dark:text-slate-200 font-bold">
+                 Datos en tiempo real, sin ruido.
+              </span>
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4">
+          {/* 4. BUTTON GROUP (La Joya de la Corona) */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
                  
-                 {/* 👇 3. AQUÍ ESTÁ EL BOTÓN DINÁMICO CORREGIDO */}
-                 <Link to={user ? "/dashboard" : "/login"}>
-                    <button className="group flex items-center gap-2 px-8 py-4 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-sm shadow-xl hover:shadow-emerald-900/20 hover:-translate-y-0.5 transition-all duration-300">
-                        <Terminal size={18} className="text-slate-400 dark:text-slate-500 group-hover:text-emerald-400 dark:group-hover:text-emerald-600 transition-colors" />
-                        {/* Cambia el texto según si es usuario o visita */}
-                        {user ? 'Ir a mi Dashboard' : 'Iniciar Terminal'}
+                 {/* BOTÓN PRIMARIO: Acción Directa */}
+                 <Link to={user ? "/dashboard" : "/register"}>
+                    <button className="group relative flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-sm shadow-xl hover:shadow-2xl hover:shadow-emerald-900/20 hover:-translate-y-1 transition-all duration-300 overflow-hidden min-w-[200px]">
+                        
+                        {/* Efecto de brillo al hacer hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
+                        
+                        {user ? (
+                            <>
+                                <Terminal size={18} className="text-slate-400 dark:text-slate-400 group-hover:text-emerald-400 dark:group-hover:text-emerald-600 transition-colors" />
+                                <span>Abrir Terminal</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>Comenzar Gratis</span>
+                                <ArrowRight size={18} className="text-slate-400 dark:text-slate-400 group-hover:translate-x-1 group-hover:text-emerald-400 dark:group-hover:text-emerald-600 transition-all" />
+                            </>
+                        )}
                     </button>
                  </Link>
                  
-                 {/* Botón Secundario */}
-                 <button className="flex items-center gap-2 px-8 py-4 rounded-lg 
-                    bg-white dark:bg-transparent 
-                    border-2 border-slate-300 dark:border-slate-700 
-                    text-slate-700 dark:text-slate-300 font-bold text-sm 
-                    shadow-sm backdrop-blur-sm
-                    hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800
-                    transition-all duration-200">
-                  <Globe size={18} />
-                  Ver Documentación
-                </button>
-              </div>
+                 {/* BOTÓN SECUNDARIO: Siempre Explorar Mercados */}
+                 <Link to="/mercados"> 
+                    <button className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl 
+                        bg-white/50 dark:bg-slate-900/50 
+                        backdrop-blur-sm
+                        border-2 border-slate-200 dark:border-slate-800 
+                        text-slate-700 dark:text-slate-300 font-bold text-sm 
+                        hover:border-slate-400 dark:hover:border-slate-600 
+                        hover:bg-white dark:hover:bg-slate-800
+                        transition-all duration-200 min-w-[200px]">
+                      
+                      <Activity size={18} className="text-slate-400" />
+                      Explorar Mercados
+                      
+                    </button>
+                 </Link>
           </div>
-        </div>
-    </section>
+          
+          {/* Social Proof / Trust Badge (Opcional pero muy Pro) */}
+          {!user && (
+            <p className="mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-in fade-in delay-500">
+                Sin tarjeta de crédito requerida • Datos Oficiales
+            </p>
+          )}
 
+      </div>
+    </div>
+</section>
       {/* === SECTION 2: PULSO DE MERCADO (Separación clara fondo gris vs card blanca) === */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
          <div className="flex justify-between items-end mb-6 px-1">
@@ -392,7 +417,106 @@ export function Home() {
             </div>
         </Link>
       </div>
-
+    {/* === SECTION 7 [PRO]: PLANES DE COMPRA INTELIGENTES === */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
+             <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600">
+                        <CreditCard size={20} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">
+                            Tu Suscripción
+                        </h3>
+                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                            Gestiona tu nivel de acceso a datos.
+                        </p>
+                    </div>
+                </div>
+                {/* Enlace directo a la página de precios completa */}
+                <Link to="/planes" className="hidden sm:flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
+                    Ver comparativa completa <ArrowRight size={14} />
+                </Link>
+             </div>
+             
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {planes
+                    .slice(0, 3) 
+                    .map((plan) => {
+                    const isCurrentPlan = user?.plan === plan.id;
+                    // Detectamos si este plan es "mejor" que el actual (suponiendo que precio = nivel)
+                    // Nota: Esto es visual, la lógica real está en /planes
+                    const isUpgrade = !isCurrentPlan && plan.price > 0; 
+                    
+                    return (
+                        <div 
+                            key={plan.id} 
+                            className={`
+                                relative flex flex-col p-6 rounded-2xl border transition-all duration-300 group
+                                ${isCurrentPlan 
+                                    ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500/50 ring-1 ring-emerald-500/50' 
+                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xl hover:-translate-y-1'
+                                }
+                            `}
+                        >
+                            {/* Header del Card */}
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 className={`font-bold text-lg ${isCurrentPlan ? 'text-emerald-800 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}`}>
+                                        {plan.name}
+                                    </h4>
+                                    {isCurrentPlan && (
+                                        <span className="inline-flex items-center gap-1 mt-1 text-[10px] uppercase tracking-wider font-black text-emerald-600 dark:text-emerald-400">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                            Activo Ahora
+                                        </span>
+                                    )}
+                                </div>
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold tabular-nums ${isCurrentPlan ? 'bg-white dark:bg-slate-900 text-emerald-600 shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+                                    {plan.price === 0 ? 'Free' : `${plan.currency}${plan.price.toLocaleString()}`}
+                                </span>
+                            </div>
+                            
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 flex-1 leading-relaxed">
+                                {plan.description}
+                            </p>
+                            
+                            {/* ÁREA DE ACCIÓN (BOTONES MEJORADOS) */}
+                            <div className="mt-auto">
+                                {isCurrentPlan ? (
+                                    // 1. ESTADO: PLAN ACTUAL (Validación positiva, no es clickeable)
+                                    <div className="w-full py-3 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center gap-2 cursor-default transition-colors">
+                                        <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400" />
+                                        <span className="text-sm font-bold text-emerald-800 dark:text-emerald-300">Plan Habilitado</span>
+                                    </div>
+                                ) : (
+                                    // 2. ESTADO: OTRO PLAN (Call to Action)
+                                    <Link 
+                                        to="/planes"
+                                        className={`
+                                            flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm transition-all duration-300
+                                            ${isUpgrade 
+                                                ? 'bg-slate-900 text-white hover:bg-emerald-600 shadow-lg hover:shadow-emerald-500/30 dark:bg-white dark:text-slate-900 dark:hover:bg-emerald-400' 
+                                                : 'border border-slate-300 dark:border-slate-700 text-slate-600 hover:border-slate-800 dark:hover:border-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                                            }
+                                        `}
+                                    >
+                                        {isUpgrade ? (
+                                            <>
+                                                <span>Subir de Nivel</span>
+                                                <Sparkles size={16} className={isUpgrade ? "text-yellow-300 dark:text-yellow-600" : ""} />
+                                            </>
+                                        ) : (
+                                            <span>Ver detalles</span>
+                                        )}
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+             </div>
+        </div>
       {/* === FOOTER NAV (MÁS CONTRASTE EN LIGHT MODE) === */}
       <div className="border-t border-slate-300 dark:border-slate-800 bg-white dark:bg-[#080C17] py-16">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

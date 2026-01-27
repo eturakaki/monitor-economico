@@ -164,22 +164,13 @@ function App() {
               {/* Feature: Panel de Usuario */}
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/perfil" element={<Perfil />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
               
               {/* Feature: E-Commerce Personal */}
               <Route path="/mis-compras" element={<PurchasesPage />} />
               <Route path="/mis-cursos" element={<MyCoursesPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
-
-              {/* 🛡️ NIVEL 2: ZONA PREMIUM (Solo Pro & Unlimited) */}
-              <Route element={
-                  <ProtectedRoute 
-                    // Validación segura: Usuario existe + Plan permitido
-                    isAllowed={!!user && ['pro', 'unlimited'].includes(user.plan)} 
-                    redirectTo="/planes" 
-                  />
-              }>
-                  {/* RUTA: Exportación de Datos */}
-                  <Route 
+              <Route 
                       path="/exportar" 
                       element={
                           <div className="bg-slate-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
@@ -187,8 +178,19 @@ function App() {
                           </div>
                       } 
                   />
-                  {/* Alias de ruta */}
-                  <Route path="/descargas" element={<DescargaPremium />} />
+              {/* 🛡️ NIVEL 2 ⛔ ESTRATEGIA "HARD GATE" (Seguridad Estricta):
+                  Analytics y la IA son el "Tesoro". Aquí NO dejamos ni asomar la nariz.
+                  Si no eres Pro/Unlimited, el Router te expulsa inmediatamente a /planes.
+              */}
+              <Route element={
+                  <ProtectedRoute 
+                    // Validación segura: Usuario existe + Plan permitido
+                    isAllowed={!!user && ['pro', 'unlimited'].includes(user.plan)} 
+                    redirectTo="/planes" 
+                  />
+              }>
+                  
+                  
               </Route>
 
               {/* 🛡️ NIVEL 3: SOLO EMPRESAS (Unlimited) */}

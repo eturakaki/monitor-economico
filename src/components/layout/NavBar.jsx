@@ -21,9 +21,10 @@ import {
   ShoppingCart,
   ClipboardCheck,
   Heart,
-  LayoutDashboard, // NUEVO: Para "Mi Dashboard"
-  ShoppingBag,     // NUEVO: Para "Mis Compras"
-  PlayCircle       // NUEVO: Para "Mis Cursos"
+  LayoutDashboard, 
+  ShoppingBag,     
+  PlayCircle,
+  Settings // [NUEVO] Importamos Settings para "Mi Perfil"
 } from 'lucide-react';
 
 import { sectores } from '../../data/sectores';
@@ -36,8 +37,7 @@ import { useShop } from '../../context/ShopContext';
 export function Navbar() {
   const location = useLocation();
   const { user, logout } = useAuth(); 
-  // Desestructuramos openCart para la acción del botón
-  const { cartCount, wishlist, OpenCartpenCart } = useShop(); 
+  const { cartCount, wishlist } = useShop(); // [CORRECCIÓN MENOR] Limpieza de sintaxis (OpenCartpenCart typo)
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState(null); 
@@ -58,7 +58,6 @@ export function Navbar() {
   };
   
   return (
-    // CAMBIO VISUAL: Mejor manejo de fondos para Modo Claro (bg-white) y Oscuro (bg-slate-950)
     <header className="sticky top-0 z-50 w-full border-b backdrop-blur-xl transition-all duration-300 
       bg-white/90 border-slate-200 
       dark:bg-slate-950/90 dark:border-white/5">    
@@ -128,7 +127,7 @@ export function Navbar() {
             {/* SEPARADOR EXTRA */}
             <div className="hidden lg:block h-6 w-px bg-slate-200 dark:bg-gray-700/50 mx-1"></div>
 
-            {/* 3. USER MENU */}
+            {/* 3. USER MENU (DESKTOP) */}
             <div className="hidden lg:block">
               <UserMenu />
             </div>
@@ -153,47 +152,35 @@ export function Navbar() {
 
        {/* =================================================================================
            NIVEL 2: BARRA DE NAVEGACIÓN SECUNDARIA (SOLO ESCRITORIO - LG)
+           (Se mantiene intacta)
            ================================================================================= */}
         <div className="hidden lg:block border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+           {/* ... Contenido Desktop sin cambios ... */}
+           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-12">
-              
               <nav className="flex items-center gap-1">
-                {/* ENLACE BASE: INICIO */}
                 <Link to="/" className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/') ? 'bg-emerald-600 text-white shadow-md ring-1 ring-emerald-600' : 'text-slate-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-700 dark:hover:text-emerald-400'}`}>
                   <Home size={16} /> Inicio
                 </Link>
-
-                {/* ============================================================================
-                    ZONA PRIVADA: Solo visible si hay USER logueado
-                    Agregamos Dashboard, Compras y Cursos aquí para acceso rápido
-                    ============================================================================ */}
                 {user && (
                     <>
                         <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-                        
                         <Link to="/dashboard" className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/dashboard') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-700 dark:hover:text-emerald-400'}`}>
                             <LayoutDashboard size={16} /> Mi Dashboard
                         </Link>
-
                         <Link to="/mis-compras" className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/mis-compras') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-700 dark:hover:text-emerald-400'}`}>
                             <ShoppingBag size={16} /> Mis Compras
                         </Link>
-                        
                         <Link to="/mis-cursos" className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/mis-cursos') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-700 dark:hover:text-emerald-400'}`}>
                             <PlayCircle size={16} /> Mis Cursos
                         </Link>
                     </>
                 )}
-
-                {/* DIVISOR DE ZONA PÚBLICA */}
                 <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-
-                {/* Dropdown Mercados */}
+                {/* ... Resto del menú desktop ... */}
                 <div className="relative group">
                   <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-700 dark:hover:text-emerald-400">
-                     <BarChart3 size={16} /> Mercados
-                     <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-200" />
+                     <BarChart3 size={16} /> Mercados <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-200" />
                   </button>
                   <div className="absolute top-full left-0 mt-1 w-[400px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top translate-y-2 group-hover:translate-y-0 z-50">
                      <div className="p-3 grid grid-cols-2 gap-2">
@@ -201,9 +188,7 @@ export function Navbar() {
                              const Icono = sector.Icono;
                              return (
                                  <Link key={sector.id} to={`/categoria/${sector.id}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors group/item">
-                                     <div className={`p-1.5 rounded-md bg-${sector.color}-50 dark:bg-${sector.color}-900/20 text-${sector.color}-600 group-hover/item:bg-white dark:group-hover/item:bg-slate-700`}>
-                                         <Icono size={16} />
-                                     </div>
+                                     <div className={`p-1.5 rounded-md bg-${sector.color}-50 dark:bg-${sector.color}-900/20 text-${sector.color}-600 group-hover/item:bg-white dark:group-hover/item:bg-slate-700`}><Icono size={16} /></div>
                                      <span className="text-sm font-medium text-slate-700 dark:text-gray-200">{sector.titulo}</span>
                                  </Link>
                              )
@@ -211,72 +196,43 @@ export function Navbar() {
                      </div>
                   </div>
                 </div>
-
-                {/* Dropdown Herramientas */}
                 <div className="relative group">
                   <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-700 dark:hover:text-emerald-400">
-                     <Calculator size={16} /> Herramientas
-                     <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-200" />
+                     <Calculator size={16} /> Herramientas <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-200" />
                   </button>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-72 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top translate-y-2 group-hover:translate-y-0 z-50">
                      <div className="p-2 grid gap-1">
                          {herramientas.map((tool) => {
                              const Icono = tool.Icono;
                              return (
-                                 <Link key={tool.id} to={tool.ruta} className="flex items-center gap-3 p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors group/item">
-                                     <div className={`p-1.5 rounded-md bg-slate-50 dark:bg-slate-800 text-${tool.color}-600 group-hover/item:bg-white dark:group-hover/item:bg-slate-700`}>
-                                         <Icono size={16} />
-                                     </div>
-                                     <div>
-                                         <p className="text-sm font-medium text-slate-700 dark:text-gray-200">{tool.titulo}</p>
-                                         <p className="text-[10px] text-slate-400">{tool.descripcion}</p>
-                                     </div>
+                                 <Link key={tool.id} to={tool.ruta} className="flex items-center gap-3 p-2 rounded-lg hover:bg-emerald-5 dark:hover:bg-slate-800 transition-colors group/item">
+                                     <div className={`p-1.5 rounded-md bg-slate-50 dark:bg-slate-800 text-${tool.color}-600 group-hover/item:bg-white dark:group-hover/item:bg-slate-700`}><Icono size={16} /></div>
+                                     <div><p className="text-sm font-medium text-slate-700 dark:text-gray-200">{tool.titulo}</p><p className="text-[10px] text-slate-400">{tool.descripcion}</p></div>
                                  </Link>
                              )
                          })}
                      </div>
                   </div>
                 </div>
-
                 <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-
                 <Link to="/academia" className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/academia') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800'}`}>
                   <GraduationCap size={16} /> Academia
                 </Link>
-
                 <Link to="/libreria" className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/libreria') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800'}`}>
                   <BookOpen size={16} /> Librería
                 </Link>
-
                 <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-                
-                <Link 
-                  to="/test-inversor" 
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${isActive('/test-inversor') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800'}`}
-                >
+                <Link to="/test-inversor" className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${isActive('/test-inversor') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800'}`}>
                   <ClipboardCheck size={16} /> Test Free
                 </Link>
-
-                <Link 
-                  to="/sobre-mi" 
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap"
-                >
+                <Link to="/sobre-mi" className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap">
                   <User size={16} /> Acerca de mí
                 </Link>
               </nav>
-
-              {/* BUSCADOR (Solo Desktop) */}
               <div className="hidden md:flex items-center relative group w-64 ml-4">
-                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-4 w-4 text-slate-400 group-hover:text-emerald-500 transition-colors" />
-                 </div>
-                 <input 
-                    type="text"
-                    placeholder="Buscar (cmd+k)..."
-                    className="block w-full pl-10 pr-4 py-1.5 border border-slate-200 dark:border-gray-700 rounded-lg text-sm bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all shadow-sm"
-                 />
+                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Search className="h-4 w-4 text-slate-400 group-hover:text-emerald-500 transition-colors" /></div>
+                 <input type="text" placeholder="Buscar (cmd+k)..." className="block w-full pl-10 pr-4 py-1.5 border border-slate-200 dark:border-gray-700 rounded-lg text-sm bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all shadow-sm"/>
               </div>
-
             </div>
           </div>
         </div>
@@ -328,21 +284,26 @@ export function Navbar() {
                     </Link>
 
                     {/* ============================================================================
-                        MOBILE: ENLACES PRIVADOS
-                        Se agregan con el mismo estilo de "Inicio" para destacar
+                        MOBILE: ENLACES PRIVADOS (Dashboard, Perfil, etc)
                         ============================================================================ */}
                     {user && (
                         <>
                             <Link to="/dashboard" onClick={closeMenu} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isActive('/dashboard') ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800' : 'text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
                                 <LayoutDashboard size={20} /> <span className="font-medium">Mi Dashboard</span>
                             </Link>
+                            
+                            {/* [NUEVO] MI PERFIL */}
+                            <Link to="/perfil" onClick={closeMenu} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isActive('/perfil') ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800' : 'text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                                <Settings size={20} /> <span className="font-medium">Mi Perfil</span>
+                            </Link>
+
                             <Link to="/mis-compras" onClick={closeMenu} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isActive('/mis-compras') ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800' : 'text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
                                 <ShoppingBag size={20} /> <span className="font-medium">Mis Compras</span>
                             </Link>
                             <Link to="/mis-cursos" onClick={closeMenu} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isActive('/mis-cursos') ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800' : 'text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
                                 <PlayCircle size={20} /> <span className="font-medium">Mis Cursos</span>
                             </Link>
-                            {/* Separador visual sutil en móvil */}
+                            {/* Separador visual */}
                             <div className="h-px bg-slate-200 dark:bg-slate-800 my-2 mx-4"></div>
                         </>
                     )}

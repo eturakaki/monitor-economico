@@ -1,28 +1,30 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, X } from 'lucide-react';
+import { Check, X, Info } from 'lucide-react'; // [ADD] Info icon para tooltip si fuera necesario
 import { planes } from '../data/planes';
 import { useShop } from '../context/ShopContext';
-import { useAuth } from '../context/AuthContext'; 
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'sonner'; // [ADD] Feedback visual
 
 /**
  * ------------------------------------------------------------------
  * COMPONENTE: PLANES (Pricing Page)
  * ------------------------------------------------------------------
- * Responsabilidad: Mostrar la oferta comercial y dirigir al usuario
- * al flujo correcto (Registro gratuito o Checkout de pago).
+ * Actualizado: Lógica de protección de re-compra.
  */
 
 const Planes = () => {
   const navigate = useNavigate();
-  const { addToCart } = useShop(); 
-  const { user } = useAuth(); 
+  const { addToCart } = useShop();
+  const { user } = useAuth();
 
-  /**
-   * MANEJADOR DE SUSCRIPCIÓN
-   */
   const handleSubscribe = (plan) => {
-    
+    // [LOGIC] Protección contra re-compra (Defensive Programming)
+    if (user?.plan === plan.id) {
+        toast.info("Ya tienes este plan activo.");
+        return;
+    }
+
     // 1. ESCENARIO PLAN GRATUITO
     if (plan.price === 0) {
       if (user) {
@@ -30,24 +32,23 @@ const Planes = () => {
       } else {
         navigate('/register');
       }
-      return; 
+      return;
     }
 
     // 2. ESCENARIO PLAN PAGO
-    // Adaptamos el Plan para que el Carrito lo entienda como un Producto
     const productToCart = {
-      id: plan.id,                     
-      title: plan.name || plan.title,  
-      description: plan.description,   // [MEJORA UX] Agregamos esto para verlo en el carrito
-      price: Number(plan.price),       
-      image: null,                     // Sin foto física
-      type: 'subscription',            // Flag para activar la lógica de reemplazo en el Contexto
-      period: plan.period,             
-      quantity: 1                      
+      id: plan.id,
+      title: plan.name || plan.title,
+      description: plan.description,
+      price: Number(plan.price),
+      image: null,
+      type: 'subscription',
+      period: plan.period,
+      quantity: 1
     };
 
-    addToCart(productToCart); 
-    navigate('/checkout'); 
+    addToCart(productToCart);
+    navigate('/checkout');
   };
 
   return (
@@ -70,6 +71,8 @@ const Planes = () => {
       <div className="max-w-7xl mx-auto grid gap-8 lg:grid-cols-3 items-start">
         {planes.map((plan) => {
           const Icon = plan.icon;
+          // [LOGIC] Determinamos si es el plan actual del usuario
+          const isCurrentPlan = user?.plan === plan.id;
 
           return (
             <div 
@@ -80,6 +83,7 @@ const Planes = () => {
                   ? 'bg-white dark:bg-slate-800 border-emerald-500 shadow-2xl scale-100 lg:scale-105 z-10' 
                   : 'bg-white dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700/50'
                 }
+                ${isCurrentPlan ? 'ring-2 ring-emerald-500/50 ring-offset-2 dark:ring-offset-slate-900' : ''}
               `}
             >
               {plan.badge && (
@@ -87,6 +91,15 @@ const Planes = () => {
                   <span className="bg-emerald-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
                      {plan.badge}
                   </span>
+                </div>
+              )}
+
+              {/* [UI] Etiqueta visual si es el plan actual */}
+              {isCurrentPlan && (
+                <div className="absolute top-4 right-4">
+                   <span className="flex items-center gap-1 text-[10px] uppercase font-black text-emerald-600 bg-emerald-100 px-2 py-1 rounded">
+                      Tu Plan
+                   </span>
                 </div>
               )}
 
@@ -137,17 +150,21 @@ const Planes = () => {
                 ))}
               </ul>
 
+              {/* [LOGIC & UI] Botón condicional según estado del plan */}
               <button
                 onClick={() => handleSubscribe(plan)}
+                disabled={isCurrentPlan} 
                 className={`
                   w-full py-3 px-4 rounded-lg text-sm font-bold transition-all duration-200
-                  ${plan.recommended
-                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-emerald-500/25'
-                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-900 dark:text-white border border-transparent hover:border-slate-300'
+                  ${isCurrentPlan 
+                    ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-transparent' 
+                    : plan.recommended
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-emerald-500/25'
+                        : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-900 dark:text-white border border-transparent hover:border-slate-300'
                   }
                 `}
               >
-                {plan.cta}
+                {isCurrentPlan ? 'Plan Actual' : plan.cta}
               </button>
             </div>
           );
