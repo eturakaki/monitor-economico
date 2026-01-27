@@ -1,13 +1,51 @@
-RESPETA EL CODIGO PREEXISTENTE, NO CAMBIES ESTRUCTURA A MENOS QUE SEA MUY NECESSARIO Y ME PREGUNTAS PRIMERO.  COMENTA SIEMPRE EL CODIGO Y ACTUA COMO UN SENIOR SUPER PROFESIONAL ACTUAL DEL 2026
+RESPETA EL CODIGO PREEXISTENTE, NO CAMBIES ESTRUCTURA A MENOS QUE SEA MUY NECESSARIO Y ME PREGUNTAS PRIMERO. SI tenes para mejorar el codigo y hacerlo mas profesional y AUMENTAR EL DISEÑO Y ESTRUCTURA, podes hacerlo. pero no borres la idea o estructura. COMENTA SIEMPRE EL CODIGO Y ACTUA COMO UN SENIOR SUPER PROFESIONAL ACTUAL DEL 2026
 
 EN BASE A TODO LO QUE VIMOS, HABLAMOS, DEBATIMOS, PLANEAMOS, entendiste y viste . DAME UN PROMPT SUPER COMPLETO PARA QUE HAGA UN NUEVO CHAT, CON TODA LA INFO NECESARIA Y CORRESPONDIENTE PARA QUE TENGA CONTEXTO. Y CON TODO LO NECESARIO PARA ESCRIBIR EL CODIGO DE MANERA SENIOR, PROFESIONAL CORRECTA.
 
 
 A SOLUCIONAR:
+CUANDO SALGO DE SESION, SE QUEDAN LOS FAVORITOS QUE ESTABAN.
+CUANDO HAGO UN DOWNGRADE A BASICO Y QUIERO VOLVER A COMPRAR  EL PROFESIONAL o EL UNLIMITED NO ME DEJA.
 
-CAMBIAR DE PLANES (DOWNGRADE) SIN NINGUN PROBLEMA
 
-
+/src
+  /assets
+  /components
+    /auth
+      - ProtectedRoute.jsx
+    /layout
+      - NavBar.jsx
+    /shop
+      - CartDrawer.jsx
+      - ProductCard.jsx
+      - ... (otros componentes UI)
+  /context
+    - AuthContext.jsx
+    - AuthProvider.jsx
+    - ShopContext.jsx  
+    - ThemeContext.jsx
+    - WishlistContext.jsx <
+  /data
+    - ... (mock data products)
+  /hooks
+    - useAuth.js
+  /pages
+    /herramientas
+      - ...
+    - CartPage.jsx
+    - CheckoutPage.jsx
+    - Dashboard.jsx
+    - Home.jsx
+    - Login.jsx
+    - Register.jsx
+    - WishListPage.jsx
+    - ...
+  /services
+    - userStatus.js
+    -wishlistService.js
+  /utils
+  - App.jsx
+  - main.jsx
 
 
 

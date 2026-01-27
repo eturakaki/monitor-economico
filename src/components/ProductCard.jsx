@@ -1,17 +1,27 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useShop } from '../context/ShopContext';
 import { 
   Star, Clock, BookOpen, Video, ShoppingCart, Heart, 
-  Truck, FileSpreadsheet, Check, X // <--- Importamos X para el estado de eliminar
+  Truck, FileSpreadsheet, Check, X,
+  PlayCircle 
 } from 'lucide-react';
-import { toast } from 'sonner'; // Opcional: Para notificar la eliminación si quieres
+import { toast } from 'sonner';
+
+// --- CORRECCIÓN DE RUTAS (FIX) ---
+// Usamos '../' porque 'components' y 'context' son hermanos dentro de 'src'
+import { useShop } from '../context/ShopContext';       
+import { useWishlist } from '../context/WishlistContext'; 
 
 export function ProductCard({ product }) {
   const navigate = useNavigate();
   
-  // 1. [CHANGE] Traemos removeFromCart
-  const { addToCart, removeFromCart, toggleWishlist, isInWishlist, cart } = useShop();
+  // --- 2. HOOKS DESACOPLADOS ---
+  // A. Lógica Transaccional (Carrito)
+  // [MODIFICADO] Agregamos 'hasPurchased' para verificar historial
+  const { addToCart, removeFromCart, cart, hasPurchased } = useShop();
+  
+  // B. Lógica de Engagement (Wishlist - NUEVO CEREBRO)
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const { 
     id, 
@@ -19,7 +29,7 @@ export function ProductCard({ product }) {
     title = 'Sin Título', 
     description,          
     price = 0,            
-    nivel, 
+    // nivel,  <-- ELIMINADO: No se usa en la UI actualmente, limpiamos el linter.
     duracion, 
     rating = 0, 
     estudiantes, 
@@ -29,10 +39,15 @@ export function ProductCard({ product }) {
     image                 
   } = product || {};
 
+  // --- 3. ESTADOS DERIVADOS ---
   const isLiked = isInWishlist(id);
   const isAdded = cart.some(item => item.id === id);
 
-  // Icono por defecto
+  // [NUEVO] Lógica de Propiedad: 
+  // Si ya lo compraste Y NO es un libro, lo marcamos como adquirido.
+  const isPurchased = hasPurchased(id) && type !== 'libro';
+
+  // Icono por defecto (Mantenemos tu lógica visual)
   let IconoPrincipal = IconoProp || Video;
   if (!IconoProp) {
       switch (type) {
@@ -46,17 +61,33 @@ export function ProductCard({ product }) {
     style: 'currency', currency: 'ARS', minimumFractionDigits: 0
   }).format(price);
 
-  // 2. [LOGIC] Manejador inteligente (Toggle)
+  // --- HANDLERS ---
+
+  // Handler para Carrito (Mantenemos tu lógica de Toggle + Protección)
   const handleCartAction = (e) => {
     e.stopPropagation();
-    
+
+    // [NUEVO] Si ya es tuyo, te llevo a verlo en lugar de comprarlo
+    if (isPurchased) {
+       navigate('/mis-cursos');
+       return;
+    }
+
     if (isAdded) {
-        // Si ya está, lo sacamos
         removeFromCart(id);
         toast.info("Eliminado del carrito", { duration: 2000 });
     } else {
-        // Si no está, lo agregamos
         addToCart(product);
+    }
+  };
+
+  // Handler para Wishlist (NUEVO)
+  const handleWishlistAction = (e) => {
+    e.stopPropagation(); // Evitamos navegar al detalle
+    if (isLiked) {
+        removeFromWishlist(id);
+    } else {
+        addToWishlist(product);
     }
   };
 
@@ -90,19 +121,16 @@ export function ProductCard({ product }) {
             </span>
         </div>
 
-        {/* Wishlist Toggle */}
+        {/* Wishlist Toggle CONECTADO */}
         <button 
-            onClick={(e) => {
-                e.stopPropagation();
-                toggleWishlist(product);
-            }}
-            className={`absolute top-3 right-3 z-20 p-2 rounded-full backdrop-blur-md shadow-sm border border-white/20 transition-all ${
+            onClick={handleWishlistAction}
+            className={`absolute top-3 right-3 z-20 p-2 rounded-full backdrop-blur-md shadow-sm border border-white/20 transition-all active:scale-90 ${
                 isLiked 
-                ? 'bg-rose-500 text-white' 
+                ? 'bg-rose-500 text-white shadow-rose-500/30' 
                 : 'bg-white/80 dark:bg-black/50 text-slate-600 dark:text-slate-300 hover:bg-rose-500 hover:text-white'
             }`}
         >
-            <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
+            <Heart size={18} fill={isLiked ? "currentColor" : "none"} strokeWidth={isLiked ? 0 : 2} />
         </button>
       </div>
 
@@ -140,27 +168,32 @@ export function ProductCard({ product }) {
             <div className="flex flex-col">
                 <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Precio</span>
                 <span className="text-xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
-                    {precioFinal}
+                    {/* [VISUAL] Si ya lo compraste, mostramos 'ADQUIRIDO' en lugar del precio */}
+                    {isPurchased ? 'ADQUIRIDO' : precioFinal}
                 </span>
             </div>
 
-            {/* 3. [CHANGE] Botón Interactivo Toggle */}
+            {/* Botón de Compra Inteligente */}
             <button 
               onClick={handleCartAction}
-              // Quitamos disabled={isAdded}
               className={`
                 group/btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all shadow-lg active:scale-95
-                ${isAdded 
-                    // ESTILO AGREGADO: 
-                    // Normal: Verde sutil. Hover: Rojo (para indicar eliminar)
-                    ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 dark:hover:border-rose-800' 
-                    // ESTILO NORMAL:
-                    : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-emerald-600 dark:hover:bg-emerald-400 hover:text-white dark:hover:text-slate-900 shadow-slate-900/20'
+                ${isPurchased 
+                    // ESTILO: YA COMPRADO (Azul)
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+                    : isAdded 
+                        // ESTILO: EN CARRITO (Verde)
+                        ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 dark:hover:border-rose-800' 
+                        // ESTILO: NORMAL (Negro/Blanco)
+                        : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-emerald-600 dark:hover:bg-emerald-400 hover:text-white dark:hover:text-slate-900 shadow-slate-900/20'
                 }
               `}
             >
-                {isAdded ? (
-                    // Lógica visual: Si haces hover sobre el botón "Agregado", cambia el texto a "Quitar"
+                {isPurchased ? (
+                    <>
+                        <PlayCircle size={16} /> Ver Curso
+                    </>
+                ) : isAdded ? (
                     <>
                         <span className="group-hover/btn:hidden flex items-center gap-2">
                             <Check size={16}/> Agregado

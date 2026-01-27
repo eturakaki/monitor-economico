@@ -24,7 +24,7 @@ import {
   LayoutDashboard, 
   ShoppingBag,     
   PlayCircle,
-  Settings // [NUEVO] Importamos Settings para "Mi Perfil"
+  Settings 
 } from 'lucide-react';
 
 import { sectores } from '../../data/sectores';
@@ -32,12 +32,18 @@ import { herramientas } from '../../data/herramientas';
 import { ThemeToggle } from '../ThemeToggle'; 
 import { UserMenu } from '../UserMenu';
 import { useAuth } from '../../hooks/useAuth';
-import { useShop } from '../../context/ShopContext';
+
+// --- 1. SEPARACIÓN DE PODERES (Arquitectura Limpia) ---
+import { useShop } from '../../context/ShopContext';         // Solo Carrito
+import { useWishlist } from '../../context/WishlistContext'; // Solo Favoritos
 
 export function Navbar() {
   const location = useLocation();
   const { user, logout } = useAuth(); 
-  const { cartCount, wishlist } = useShop(); // [CORRECCIÓN MENOR] Limpieza de sintaxis (OpenCartpenCart typo)
+  
+  // --- 2. CONSUMO DE CONTEXTOS INDEPENDIENTES ---
+  const { cartCount } = useShop(); // El ShopContext maneja el contador del carrito
+  const { wishlist } = useWishlist(); // El WishlistContext maneja el array de favoritos
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState(null); 
@@ -101,17 +107,17 @@ export function Navbar() {
                 </p>
             </div>
 
-            {/* 2. FAVORITOS */}
+            {/* 2. FAVORITOS (CONECTADO AL WISHLIST CONTEXT) */}
             <Link to="/favoritos" className="relative p-1.5 sm:p-2 text-slate-500 dark:text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors">
                 <Heart size={20} />
                 {wishlist.length > 0 && (
-                    <span className="absolute top-0.5 right-0.5 h-3.5 w-3.5 bg-rose-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center ring-2 ring-white dark:ring-slate-950">
+                    <span className="absolute top-0.5 right-0.5 h-3.5 w-3.5 bg-rose-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center ring-2 ring-white dark:ring-slate-950 animate-in zoom-in">
                         {wishlist.length}
                     </span>
                 )}
             </Link>
 
-           {/* CARRITO */}
+           {/* 3. CARRITO (CONECTADO AL SHOP CONTEXT) */}
             <Link 
             to="/carrito"
             className="relative p-1.5 sm:p-2 text-slate-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
@@ -127,17 +133,17 @@ export function Navbar() {
             {/* SEPARADOR EXTRA */}
             <div className="hidden lg:block h-6 w-px bg-slate-200 dark:bg-gray-700/50 mx-1"></div>
 
-            {/* 3. USER MENU (DESKTOP) */}
+            {/* 4. USER MENU (DESKTOP) */}
             <div className="hidden lg:block">
               <UserMenu />
             </div>
 
-            {/* 4. THEME TOGGLE */}
+            {/* 5. THEME TOGGLE */}
             <div className="flex items-center ml-0.5">
                <ThemeToggle />
             </div>
 
-            {/* 5. HAMBURGUESA (Móvil) */}
+            {/* 6. HAMBURGUESA (Móvil) */}
             <div className="lg:hidden ml-1">
                 <button 
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -152,10 +158,8 @@ export function Navbar() {
 
        {/* =================================================================================
            NIVEL 2: BARRA DE NAVEGACIÓN SECUNDARIA (SOLO ESCRITORIO - LG)
-           (Se mantiene intacta)
            ================================================================================= */}
         <div className="hidden lg:block border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-40">
-           {/* ... Contenido Desktop sin cambios ... */}
            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-12">
               <nav className="flex items-center gap-1">
@@ -177,7 +181,7 @@ export function Navbar() {
                     </>
                 )}
                 <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-                {/* ... Resto del menú desktop ... */}
+                
                 <div className="relative group">
                   <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-700 dark:hover:text-emerald-400">
                      <BarChart3 size={16} /> Mercados <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-200" />
@@ -283,16 +287,12 @@ export function Navbar() {
                         <Home size={20} /> <span className="font-medium">Inicio</span>
                     </Link>
 
-                    {/* ============================================================================
-                        MOBILE: ENLACES PRIVADOS (Dashboard, Perfil, etc)
-                        ============================================================================ */}
                     {user && (
                         <>
                             <Link to="/dashboard" onClick={closeMenu} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isActive('/dashboard') ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800' : 'text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
                                 <LayoutDashboard size={20} /> <span className="font-medium">Mi Dashboard</span>
                             </Link>
                             
-                            {/* [NUEVO] MI PERFIL */}
                             <Link to="/perfil" onClick={closeMenu} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isActive('/perfil') ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800' : 'text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
                                 <Settings size={20} /> <span className="font-medium">Mi Perfil</span>
                             </Link>
@@ -303,7 +303,6 @@ export function Navbar() {
                             <Link to="/mis-cursos" onClick={closeMenu} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isActive('/mis-cursos') ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800' : 'text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
                                 <PlayCircle size={20} /> <span className="font-medium">Mis Cursos</span>
                             </Link>
-                            {/* Separador visual */}
                             <div className="h-px bg-slate-200 dark:bg-slate-800 my-2 mx-4"></div>
                         </>
                     )}

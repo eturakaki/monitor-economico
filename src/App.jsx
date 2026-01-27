@@ -6,6 +6,11 @@ import { useAuth } from './hooks/useAuth';
 import ScrollToTop from './components/ScrollToTop';   
 import ProtectedRoute from './components/auth/ProtectedRoute'; 
 
+// --- CONTEXTOS (ECOSISTEMA DE DATOS) ---
+// Inyectamos los proveedores de estado global aquí
+import { ShopProvider } from './context/ShopContext';
+import { WishlistProvider } from './context/WishlistContext';
+
 // --- LAYOUTS ---
 import { Layout } from './components/Layout'; 
 
@@ -63,8 +68,6 @@ import { ConsolidadorDeudas } from './pages/herramientas/credito(mod3)/Consolida
 import { SimuladorPrendario } from './pages/herramientas/credito(mod3)/SimuladorPrendario';
 import { CuotaSimple } from './pages/herramientas/credito(mod3)/CuotaSimple';
 
-
-
 // --- MÓDULO IV: INMOBILIARIO ---
 import { ComprarAlquilar } from './pages/herramientas/inmobiliario(mod4)/ComprarAlquilar';
 import { HipotecarioUVA } from './pages/herramientas/inmobiliario(mod4)/HipotecarioUVA';
@@ -102,6 +105,7 @@ import ApiDocs from './pages/ApiDocs';
 // --- PÁGINAS (AUTH) ---
 import  Login  from './pages/Login';
 import { Register } from './pages/Register';
+import Recovery from './pages/Recovery';
 
 // --- TIENDAS & E-COMMERCE ---
 import Academia from './pages/Academia';
@@ -110,7 +114,7 @@ import Libreria from './pages/Libreria';
 // COMPONENTES DE SHOP
 import { CartDrawer } from './components/shop/CartDrawer'; 
 import CartPage from './pages/CartPage';
-import WishlistPage from './pages/WishlistPage';
+import WishlistPage from './pages/WishListPage'; // Corregido case sensitivity (WishListPage vs WishlistPage)
 import CheckoutPage from './pages/CheckoutPage'; 
 import PurchasesPage from './pages/PurchasesPage'; 
 import MyCoursesPage from './pages/MyCoursesPage';
@@ -121,169 +125,171 @@ function App() {
    * -----------------------------------------------------------------
    * HOOK DE AUTENTICACIÓN
    * -----------------------------------------------------------------
-   * Usamos 'useAuth' para obtener el usuario actual y proteger rutas.
+   * Usamos 'useAuth' aquí porque AuthProvider envuelve a <App> en main.jsx.
    */
   const { user } = useAuth(); 
 
   return (
-    <>
-      {/* COMPONENTES GLOBALES (Fuera del Router Switch) */}
-      <ScrollToTop />
-      <CartDrawer />
-
-      <Routes>
+    // 🏗️ ARQUITECTURA DE PROVEEDORES
+    // 1. ShopProvider: Maneja el carrito y lógica transaccional.
+    // 2. WishlistProvider: Maneja favoritos y sincronización DB (Depende de Auth).
+    <ShopProvider>
+      <WishlistProvider>
         
-        {/* ======================================================
-            ZONA A: PÁGINAS "STANDALONE" (Sin Navbar, Sin Footer)
-            ====================================================== */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/terminosdeuso" element={<Terminos />} />
-        <Route path="/apidocs" element={<ApiDocs />} />
+        {/* COMPONENTES GLOBALES */}
+        <ScrollToTop />
+        <CartDrawer /> {/* Ahora tiene acceso seguro al ShopContext */}
 
-        {/* ======================================================
-            ZONA B: APLICACIÓN PRINCIPAL (Con Layout)
-            ====================================================== */}
-        <Route element={<Layout />}> 
+        <Routes>
           
-          {/* 1. RUTAS PÚBLICAS */}
-          <Route path="/" element={<Home />} />
-          <Route path="/glosario" element={<Glosario />} />
-          <Route path="/sobre-mi" element={<SobreMi />} />
-          <Route path="/contacto" element={<Contacto />} />
-          
-          {/* Landing de Planes (Con fondo especial) */}
-          <Route path="/planes" element={
-            <div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300">
-              <Planes /> 
-            </div>
-          } />
+          {/* ======================================================
+              ZONA A: PÁGINAS "STANDALONE" (Sin Navbar, Sin Footer)
+              ====================================================== */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/terminosdeuso" element={<Terminos />} />
+          <Route path="/apidocs" element={<ApiDocs />} />
+          <Route path="/recovery" element={<Recovery />} />
 
-          {/* 2. RUTAS PROTEGIDAS (Requieren Login) 🛡️ */}
-          <Route element={<ProtectedRoute />}>
-              {/* Feature: Panel de Usuario */}
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/perfil" element={<Perfil />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-              
-              {/* Feature: E-Commerce Personal */}
-              <Route path="/mis-compras" element={<PurchasesPage />} />
-              <Route path="/mis-cursos" element={<MyCoursesPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route 
-                      path="/exportar" 
-                      element={
-                          <div className="bg-slate-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
-                              <DescargaPremium />
-                          </div>
-                      } 
-                  />
-              {/* 🛡️ NIVEL 2 ⛔ ESTRATEGIA "HARD GATE" (Seguridad Estricta):
-                  Analytics y la IA son el "Tesoro". Aquí NO dejamos ni asomar la nariz.
-                  Si no eres Pro/Unlimited, el Router te expulsa inmediatamente a /planes.
-              */}
-              <Route element={
-                  <ProtectedRoute 
-                    // Validación segura: Usuario existe + Plan permitido
-                    isAllowed={!!user && ['pro', 'unlimited'].includes(user.plan)} 
-                    redirectTo="/planes" 
-                  />
-              }>
-                  
-                  
-              </Route>
+          {/* ======================================================
+              ZONA B: APLICACIÓN PRINCIPAL (Con Layout)
+              ====================================================== */}
+          <Route element={<Layout />}> 
+            
+            {/* 1. RUTAS PÚBLICAS */}
+            <Route path="/" element={<Home />} />
+            <Route path="/glosario" element={<Glosario />} />
+            <Route path="/sobre-mi" element={<SobreMi />} />
+            <Route path="/contacto" element={<Contacto />} />
+            
+            {/* Landing de Planes (Con fondo especial) */}
+            <Route path="/planes" element={
+              <div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300">
+                <Planes /> 
+              </div>
+            } />
 
-              {/* 🛡️ NIVEL 3: SOLO EMPRESAS (Unlimited) */}
-              <Route element={
-                  <ProtectedRoute 
-                    isAllowed={!!user && user.plan === 'unlimited'}
-                    redirectTo="/planes"
-                  />
-              }>
-                  <Route path="/api-keys" element={<ApiDashboard />} />
-              </Route>
-          
-          </Route>
+            {/* 2. RUTAS PROTEGIDAS (Requieren Login) 🛡️ */}
+            <Route element={<ProtectedRoute />}>
+                {/* Feature: Panel de Usuario */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/perfil" element={<Perfil />} />
+                <Route path="/analytics" element={<AnalyticsPage />} />
+                
+                {/* Feature: E-Commerce Personal */}
+                <Route path="/mis-compras" element={<PurchasesPage />} />
+                <Route path="/mis-cursos" element={<MyCoursesPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route 
+                        path="/exportar" 
+                        element={
+                            <div className="bg-slate-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
+                                <DescargaPremium />
+                            </div>
+                        } 
+                    />
+                {/* 🛡️ NIVEL 2 ⛔ ESTRATEGIA "HARD GATE" */}
+                <Route element={
+                    <ProtectedRoute 
+                      isAllowed={!!user && ['pro', 'unlimited'].includes(user.plan)} 
+                      redirectTo="/planes" 
+                    />
+                }>
+                    {/* Rutas exclusivas Pro/Unlimited podrían ir aquí */}
+                </Route>
 
-          {/* =======================================================
-              ZONA DE HERRAMIENTAS (PÚBLICAS / FREEMIUM)
-              ======================================================= */}
-          
-          <Route path="/herramientas" element={<Calculadoras />} />
+                {/* 🛡️ NIVEL 3: SOLO EMPRESAS (Unlimited) */}
+                <Route element={
+                    <ProtectedRoute 
+                      isAllowed={!!user && user.plan === 'unlimited'}
+                      redirectTo="/planes"
+                    />
+                }>
+                    <Route path="/api-keys" element={<ApiDashboard />} />
+                </Route>
+            
+            </Route>
 
-          {/* Módulos de Herramientas (Rutas planas para SEO friendly) */}
-          <Route path="/calculadoras/inflacion/ajuste" element={<AjusteInflacion />} />
-          <Route path="/calculadoras/inflacion/salario-real" element={<SalarioReal />} />
-          <Route path="/calculadoras/inflacion/stockeo" element={<Stockeo />} />
-          <Route path="/calculadoras/inflacion/mi-ipc" element={<MiIPC />} />
-          <Route path="/calculadoras/inflacion/tarifas" element={<ProyectorTarifas />} />
-          <Route path="/calculadoras/inflacion/canasta-regional" element={<CanastaRegional />} />
-          
-          <Route path="/calculadoras/inversiones/liquidez" element={<RadarLiquidez />} />
-          <Route path="/calculadoras/inversiones/bonos" element={<CalculadoraBonos />} />
-          <Route path="/calculadoras/inversiones/cedears" element={<ArbitrajeCedears />} />
-          <Route path="/calculadoras/inversiones/plazo-fijo-uva" element={<PlazoFijoUVA />} />
-          <Route path="/calculadoras/inversiones/carry-trade" element={<CarryTrade />} />
-          <Route path="/calculadoras/inversiones/dolarizacion" element={<RutasDolar />} />
-          <Route path="/calculadoras/inversiones/inflacion-usd" element={<InflacionUsdSpy />} />
-          <Route path="/calculadoras/inversiones/retiro" element={<CalculadoraRetiro />} />
-          <Route path="/calculadoras/inversiones/bandas" element={<BandasCambiarias />} />
-          <Route path="/calculadoras/inversiones/monitor" element={<MonitorMercado />} />
-          <Route path="/calculadoras/inversiones/scanner-bonos" element={<ScannerBonos />} />
-          <Route path="/calculadoras/inversiones/flujo-bonos" element={<FlujoFondosBonos />} />
-          <Route path="/calculadoras/inversiones/dividendos" element={<CalendarioDividendos />} />
-          
-          <Route path="/calculadoras/credito/cft" element={<DecodificadorCFT />} />
-          <Route path="/calculadoras/credito/bola-nieve" element={<BolaNieve />} />
-          <Route path="/calculadoras/credito/capacidad" element={<CapacidadEndeudamiento />} />
-          <Route path="/calculadoras/credito/consolidacion" element={<ConsolidadorDeudas />} />
-          <Route path="/calculadoras/credito/prendarios" element={<SimuladorPrendario />} />
-          <Route path="/calculadoras/credito/cuota-simple" element={<CuotaSimple />} />
-          
-          <Route path="/calculadoras/inmobiliario/comprar-alquilar" element={<ComprarAlquilar />} />
-          <Route path="/calculadoras/inmobiliario/hipotecario-uva" element={<HipotecarioUVA />} />
-          <Route path="/calculadoras/inmobiliario/alquiler" element={<ActualizadorAlquiler />} />
-          <Route path="/calculadoras/inmobiliario/inicio-alquiler" element={<CostosIngreso />} />
-          <Route path="/calculadoras/inmobiliario/rentabilidad" element={<RentabilidadInmueble />} />
-          <Route path="/calculadoras/inmobiliario/construccion" element={<CostoConstruccion />} />
-          <Route path="/calculadoras/inmobiliario/escrituracion" element={<GastosEscritura />} />
-          
-          <Route path="/calculadoras/fiscal/importaciones" element={<CalculadoraCourier />} />
-          <Route path="/calculadoras/fiscal/grossing-up" element={<GrossingUp />} />
-          <Route path="/calculadoras/fiscal/sircreb" element={<RetencionesSircreb />} />
-          <Route path="/calculadoras/fiscal/ganancias" element={<CalculadoraGanancias />} />
-          <Route path="/calculadoras/fiscal/monotributo" element={<CategorizadorMonotributo />} />
-          <Route path="/calculadoras/fiscal/exportacion" element={<ExportacionServicios />} />
-          
-          <Route path="/calculadoras/vida/dolar-tarjeta" element={<CalculadoraDolarTarjeta />} />
-          <Route path="/calculadoras/vida/viajes" element={<PresupuestoViaje />} />
-          <Route path="/calculadoras/vida/suscripciones" element={<GestorSuscripciones />} />
-          <Route path="/calculadoras/vida/ofertas" element={<OptimizadorOfertas />} />
-          
-          <Route path="/calculadoras/corporativo/cheques" element={<DescuentoCheques />} />
-          <Route path="/calculadoras/corporativo/montecarlo" element={<SimuladorMontecarlo />} />
+            {/* =======================================================
+                ZONA DE HERRAMIENTAS (PÚBLICAS / FREEMIUM)
+                ======================================================= */}
+            
+            <Route path="/herramientas" element={<Calculadoras />} />
 
-              {/* --- SECCIÓN EDUCATIVA & STORE --- */}
-              <Route path="/academia" element={<Academia />} />
-              <Route path="/libreria" element={<Libreria />} />
+            {/* Módulos de Herramientas (Listado plano respetado) */}
+            <Route path="/calculadoras/inflacion/ajuste" element={<AjusteInflacion />} />
+            <Route path="/calculadoras/inflacion/salario-real" element={<SalarioReal />} />
+            <Route path="/calculadoras/inflacion/stockeo" element={<Stockeo />} />
+            <Route path="/calculadoras/inflacion/mi-ipc" element={<MiIPC />} />
+            <Route path="/calculadoras/inflacion/tarifas" element={<ProyectorTarifas />} />
+            <Route path="/calculadoras/inflacion/canasta-regional" element={<CanastaRegional />} />
+            
+            <Route path="/calculadoras/inversiones/liquidez" element={<RadarLiquidez />} />
+            <Route path="/calculadoras/inversiones/bonos" element={<CalculadoraBonos />} />
+            <Route path="/calculadoras/inversiones/cedears" element={<ArbitrajeCedears />} />
+            <Route path="/calculadoras/inversiones/plazo-fijo-uva" element={<PlazoFijoUVA />} />
+            <Route path="/calculadoras/inversiones/carry-trade" element={<CarryTrade />} />
+            <Route path="/calculadoras/inversiones/dolarizacion" element={<RutasDolar />} />
+            <Route path="/calculadoras/inversiones/inflacion-usd" element={<InflacionUsdSpy />} />
+            <Route path="/calculadoras/inversiones/retiro" element={<CalculadoraRetiro />} />
+            <Route path="/calculadoras/inversiones/bandas" element={<BandasCambiarias />} />
+            <Route path="/calculadoras/inversiones/monitor" element={<MonitorMercado />} />
+            <Route path="/calculadoras/inversiones/scanner-bonos" element={<ScannerBonos />} />
+            <Route path="/calculadoras/inversiones/flujo-bonos" element={<FlujoFondosBonos />} />
+            <Route path="/calculadoras/inversiones/dividendos" element={<CalendarioDividendos />} />
+            
+            <Route path="/calculadoras/credito/cft" element={<DecodificadorCFT />} />
+            <Route path="/calculadoras/credito/bola-nieve" element={<BolaNieve />} />
+            <Route path="/calculadoras/credito/capacidad" element={<CapacidadEndeudamiento />} />
+            <Route path="/calculadoras/credito/consolidacion" element={<ConsolidadorDeudas />} />
+            <Route path="/calculadoras/credito/prendarios" element={<SimuladorPrendario />} />
+            <Route path="/calculadoras/credito/cuota-simple" element={<CuotaSimple />} />
+            
+            <Route path="/calculadoras/inmobiliario/comprar-alquilar" element={<ComprarAlquilar />} />
+            <Route path="/calculadoras/inmobiliario/hipotecario-uva" element={<HipotecarioUVA />} />
+            <Route path="/calculadoras/inmobiliario/alquiler" element={<ActualizadorAlquiler />} />
+            <Route path="/calculadoras/inmobiliario/inicio-alquiler" element={<CostosIngreso />} />
+            <Route path="/calculadoras/inmobiliario/rentabilidad" element={<RentabilidadInmueble />} />
+            <Route path="/calculadoras/inmobiliario/construccion" element={<CostoConstruccion />} />
+            <Route path="/calculadoras/inmobiliario/escrituracion" element={<GastosEscritura />} />
+            
+            <Route path="/calculadoras/fiscal/importaciones" element={<CalculadoraCourier />} />
+            <Route path="/calculadoras/fiscal/grossing-up" element={<GrossingUp />} />
+            <Route path="/calculadoras/fiscal/sircreb" element={<RetencionesSircreb />} />
+            <Route path="/calculadoras/fiscal/ganancias" element={<CalculadoraGanancias />} />
+            <Route path="/calculadoras/fiscal/monotributo" element={<CategorizadorMonotributo />} />
+            <Route path="/calculadoras/fiscal/exportacion" element={<ExportacionServicios />} />
+            
+            <Route path="/calculadoras/vida/dolar-tarjeta" element={<CalculadoraDolarTarjeta />} />
+            <Route path="/calculadoras/vida/viajes" element={<PresupuestoViaje />} />
+            <Route path="/calculadoras/vida/suscripciones" element={<GestorSuscripciones />} />
+            <Route path="/calculadoras/vida/ofertas" element={<OptimizadorOfertas />} />
+            
+            <Route path="/calculadoras/corporativo/cheques" element={<DescuentoCheques />} />
+            <Route path="/calculadoras/corporativo/montecarlo" element={<SimuladorMontecarlo />} />
 
-              {/* --- Carrito y checkout (Accesos directos) --- */}
-              <Route path="/carrito" element={<CartPage />} />
-              <Route path="/favoritos" element={<WishlistPage />} />
+            {/* --- SECCIÓN EDUCATIVA & STORE --- */}
+            <Route path="/academia" element={<Academia />} />
+            <Route path="/libreria" element={<Libreria />} />
 
-              {/* Rutas Dinámicas y 404 */}
-              <Route path="/categoria/:id" element={<Categorias />} />
-              <Route path="/mercados" element={<Mercados />} />
-              <Route path="/indicador/:id" element={<DetalleIndicador />} />
-              
-              {/* TEST INVERSOR */}
-              <Route path="/test-inversor" element={<InvestorTestPage />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Route> 
-          </Routes>
-          <Toaster richColors position="bottom-right" duration={2000} />
-    </>
+            {/* --- Carrito y checkout (Accesos directos) --- */}
+            <Route path="/carrito" element={<CartPage />} />
+            <Route path="/favoritos" element={<WishlistPage />} />
+
+            {/* Rutas Dinámicas y 404 */}
+            <Route path="/categoria/:id" element={<Categorias />} />
+            <Route path="/mercados" element={<Mercados />} />
+            <Route path="/indicador/:id" element={<DetalleIndicador />} />
+            
+            {/* TEST INVERSOR */}
+            <Route path="/test-inversor" element={<InvestorTestPage />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Route> 
+        </Routes>
+        <Toaster richColors position="bottom-right" duration={2000} />
+      </WishlistProvider>
+    </ShopProvider>
   );
 }
 

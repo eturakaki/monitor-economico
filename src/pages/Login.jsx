@@ -100,13 +100,21 @@ export default function Login() {
                 />
               </div>
             </div>
-
-            {/* Input Password */}
+            
+            {/* Input Password CON LINK DE RECUPERACIÓN ✅ */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Contraseña
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Contraseña
+                </label>
+                <Link 
+                  to="/recovery" 
+                  className="text-xs font-bold text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+              <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-slate-400" />
                 </div>

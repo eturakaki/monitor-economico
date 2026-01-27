@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 
 /**
  * ------------------------------------------------------------------
- * SHOP CONTEXT - SSOT (Single Source of Truth - English Standard)
+ * SHOP CONTEXT - SSOT (Single Source of Truth)
  * ------------------------------------------------------------------
  */
 
@@ -60,16 +60,13 @@ export const ShopProvider = ({ children }) => {
   });
 
   // --- CLEANUP DE SEGURIDAD ---
-  
   const clearShopState = () => {
     console.info("🔒 [ShopSystem] Logout detectado: Purgando datos locales.");
     
-    // 1. Storage
     localStorage.removeItem('monitor_cart');
     localStorage.removeItem('monitor_wishlist');
     localStorage.removeItem('monitor_orders');
 
-    // 2. State
     setCart([]);
     setWishlist([]);
     setOrders([]); 
@@ -83,9 +80,6 @@ export const ShopProvider = ({ children }) => {
     const isLoggingOut = prevUser && !currentUser;
 
     if (isLoggingOut) {
-        // [SENIOR FIX] Desacopla la actualización del ciclo de render actual.
-        // Esto silencia el error "Calling setState synchronously" moviendo
-        // la limpieza al final del Event Loop.
         setTimeout(() => {
             clearShopState();
         }, 0);
@@ -111,11 +105,34 @@ export const ShopProvider = ({ children }) => {
   //  LAYER 3: BUSINESS LOGIC
   // =================================================================
 
+  // [NUEVO] VERIFICACIÓN DE PROPIEDAD DIGITAL
+  // Esta función es vital para evitar compras duplicadas.
+  const hasPurchased = (productId) => {
+    if (!orders || orders.length === 0) return false;
+
+    // Buscamos dentro de cada orden si existe el ítem
+    return orders.some(order => 
+        order.items && order.items.some(item => item.id === productId)
+    );
+  };
+
   const addToCart = (product) => {
+    // 1. Check de Propiedad Inteligente 🧠
+    // Definimos qué tipos de productos son de "compra única"
+    const isSinglePurchaseItem = ['curso', 'recurso', 'subscription'].includes(product.type);
+    
+    // Solo bloqueamos si es un ítem único Y ya lo tiene. 
+    // Si es 'libro', esta validación se salta y permite comprar más.
+    if (isSinglePurchaseItem && hasPurchased(product.id)) {
+        toast.info('Ya tienes acceso a este contenido', {
+            description: 'Lo encontrarás en tu biblioteca personal.'
+        });
+        return; 
+    }
+
     setCart((prevCart) => {
       const isIncomingSubscription = product.type === 'subscription';
       const hasExistingSubscription = prevCart.some(item => item.type === 'subscription');
-      
       const productName = product.title || 'Ítem';
 
       // A: Suscripción (Prioridad)
@@ -128,7 +145,7 @@ export const ShopProvider = ({ children }) => {
         return [{ ...product, quantity: 1 }];
       }
 
-      // B: Conflicto
+      // B: Conflicto Suscripción existente
       if (hasExistingSubscription) {
          toast.warning('Suscripción eliminada', {
             description: `Se eliminó el plan para poder agregar "${productName}".`,
@@ -137,17 +154,19 @@ export const ShopProvider = ({ children }) => {
          return [{ ...product, quantity: 1 }];
       }
 
-      // C: Normal
+      // C: Flujo Normal (Aquí entran los Libros también)
       const existingItem = prevCart.find((item) => item.id === product.id);
 
       if (existingItem) {
+        // Bloqueo extra solo para cursos en el carrito (por si acaso)
         if (product.type === 'curso') {
-            toast.error('Ya tienes este curso', {
-                description: 'El acceso digital ya está en tu carrito.'
+            toast.error('Ya está en el carrito', {
+                description: 'Acceso digital único.'
             });
             return prevCart;
         }
         
+        // Si es LIBRO, sumamos cantidad +1
         toast.success('Cantidad actualizada', {
              description: `${productName}: ${existingItem.quantity + 1} unidades.`
         });
@@ -251,6 +270,7 @@ export const ShopProvider = ({ children }) => {
         removeFromWishlist, 
         isInWishlist,
         confirmPurchase,
+        hasPurchased, // <--- EXPORTADO PÚBLICAMENTE
         cartTotal,
         cartCount
       }}
