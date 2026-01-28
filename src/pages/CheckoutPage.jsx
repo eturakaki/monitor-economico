@@ -63,7 +63,6 @@ export default function CheckoutPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validación de campos requeridos
     if (!formData.address || !formData.cardNumber) {
       toast.error('Por favor completa todos los campos de pago.');
       return;
@@ -71,28 +70,35 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
 
-    // Simulamos latencia de red (API de Pasarela de Pagos)
+    // Simulamos latencia de red
     setTimeout(() => {
-      // 1. Finalizar carga visual
+      // 1. [FIX LÓGICO] CAPTURA SEGURA DEL ESTADO
+      // Guardamos los items ANTES de que confirmPurchase vacíe el carrito.
+      // Esto elimina la dependencia de la "Race Condition".
+      const itemsPurchased = [...cart]; 
+      
+      // 2. Procesar pago y limpiar carrito
       setIsProcessing(false);
       setPaymentSuccess(true);
-      
-      // 2. [CRITICAL FIX] Confirmar la compra en el sistema
-      // Esto crea la orden, la guarda en 'orders' y LUEGO vacía el carrito.
-      // Así aseguramos que 'hasPurchased' encuentre el registro después.
       confirmPurchase(); 
-      const purchasedPlan = cart.find(item => item.title.includes('Plan') || item.price > 0);
+      
+      // 3. [FIX LÓGICO] ACTUALIZACIÓN DINÁMICA DE PLAN
+      // Buscamos el plan en la copia segura (itemsPurchased)
+      const purchasedPlan = itemsPurchased.find(item => 
+        item.type === 'subscription' || item.type === 'plan' || item.title.includes('Plan')
+      );
+
       if (purchasedPlan) {
-  // Llamamos a la función que ya creaste en AuthProvider. 
-  // Le pasamos 'pro' para que coincida con tu lógica de isPremium: ['pro', 'unlimited']
-  updateUserPlan('pro'); 
-}
-      // 3. Feedback al usuario
+        // ERROR ANTERIOR: updateUserPlan('pro');
+        // CORRECCIÓN: Usamos el ID real del producto (ej: 'unlimited', 'pro')
+        console.log("Actualizando usuario a plan:", purchasedPlan.id);
+        updateUserPlan(purchasedPlan.id); 
+      }
+
       toast.success('¡Pago procesado con éxito!', {
         description: 'Te enviamos el recibo a tu email y habilitamos tus cursos.'
       });
       
-      // 4. Redirección al Hub de Aprendizaje
       setTimeout(() => {
         navigate('/mis-compras'); 
       }, 3000);

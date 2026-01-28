@@ -1,20 +1,20 @@
-import { Routes, Route } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import { Routes, Route } from 'react-router-dom'; // CORRECCIÓN: Importación crítica faltante
+import { Toaster } from 'sonner'; // CORRECCIÓN: Necesario para el componente <Toaster /> usado al final
 
-// --- LÓGICA & UTILIDADES ---
+// --- UTILS & HOOKS ---
 import { useAuth } from './hooks/useAuth';
 import ScrollToTop from './components/ScrollToTop';   
 import ProtectedRoute from './components/auth/ProtectedRoute'; 
 
-// --- CONTEXTOS (ECOSISTEMA DE DATOS) ---
-// Inyectamos los proveedores de estado global aquí
+// --- CONTEXTS ---
 import { ShopProvider } from './context/ShopContext';
 import { WishlistProvider } from './context/WishlistContext';
 
 // --- LAYOUTS ---
-import { Layout } from './components/Layout'; 
+import { Layout } from './components/Layout'; // Layout Comercial (Navbar + Footer)
+import { LearningLayout } from './components/layout/LearningLayout'; // [NUEVO] Layout Inmersivo
 
-// --- PÁGINAS (APP PRINCIPAL) ---
+// --- PÁGINAS ---
 import { Home } from './pages/Home';
 import { DetalleIndicador } from './pages/DetalleIndicador';
 import { Categorias } from './pages/Categorias';
@@ -95,121 +95,78 @@ import { OptimizadorOfertas } from './pages/herramientas/estilo-vida(mod6)/Optim
 import { DescuentoCheques } from './pages/herramientas/corporativo(mod7)/DescuentoCheques';
 import { SimuladorMontecarlo } from './pages/herramientas/corporativo(mod7)/SimuladorMontecarlo';
 
-// --- PÁGINAS NUEVAS (Feature: Intelligence) ---
 import AnalyticsPage from './pages/Analytics';
-
-// --- PÁGINAS (INSTITUCIONALES / STANDALONE) ---
 import Terminos from './pages/Terminos'; 
 import ApiDocs from './pages/ApiDocs';   
-
-// --- PÁGINAS (AUTH) ---
-import  Login  from './pages/Login';
+import Login  from './pages/Login';
 import { Register } from './pages/Register';
 import Recovery from './pages/Recovery';
-
-// --- TIENDAS & E-COMMERCE ---
 import Academia from './pages/Academia';
 import Libreria from './pages/Libreria';
 
-// COMPONENTES DE SHOP
+// SHOP COMPONENTS
 import { CartDrawer } from './components/shop/CartDrawer'; 
 import CartPage from './pages/CartPage';
-import WishlistPage from './pages/WishListPage'; // Corregido case sensitivity (WishListPage vs WishlistPage)
+import WishlistPage from './pages/WishListPage'; 
 import CheckoutPage from './pages/CheckoutPage'; 
 import PurchasesPage from './pages/PurchasesPage'; 
 import MyCoursesPage from './pages/MyCoursesPage';
-
-
+import CoursePlayerPage from './pages/CoursePlayerPage';
 function App() {
-  /**
-   * -----------------------------------------------------------------
-   * HOOK DE AUTENTICACIÓN
-   * -----------------------------------------------------------------
-   * Usamos 'useAuth' aquí porque AuthProvider envuelve a <App> en main.jsx.
-   */
   const { user } = useAuth(); 
 
   return (
-    // 🏗️ ARQUITECTURA DE PROVEEDORES
-    // 1. ShopProvider: Maneja el carrito y lógica transaccional.
-    // 2. WishlistProvider: Maneja favoritos y sincronización DB (Depende de Auth).
     <ShopProvider>
       <WishlistProvider>
         
-        {/* COMPONENTES GLOBALES */}
         <ScrollToTop />
-        <CartDrawer /> {/* Ahora tiene acceso seguro al ShopContext */}
+        <CartDrawer />
 
         <Routes>
           
           {/* ======================================================
-              ZONA A: PÁGINAS "STANDALONE" (Sin Navbar, Sin Footer)
+              ZONA A: PÁGINAS STANDALONE (Auth, Legal, Landing)
               ====================================================== */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/terminosdeuso" element={<Terminos />} />
           <Route path="/apidocs" element={<ApiDocs />} />
           <Route path="/recovery" element={<Recovery />} />
+          
 
           {/* ======================================================
-              ZONA B: APLICACIÓN PRINCIPAL (Con Layout)
+              ZONA B: PLATAFORMA COMERCIAL (Con Navbar & Footer)
               ====================================================== */}
           <Route element={<Layout />}> 
             
-            {/* 1. RUTAS PÚBLICAS */}
+            {/* 1. PUBLIC ROUTES */}
             <Route path="/" element={<Home />} />
             <Route path="/glosario" element={<Glosario />} />
             <Route path="/sobre-mi" element={<SobreMi />} />
             <Route path="/contacto" element={<Contacto />} />
-            
-            {/* Landing de Planes (Con fondo especial) */}
-            <Route path="/planes" element={
-              <div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300">
-                <Planes /> 
-              </div>
-            } />
+            <Route path="/planes" element={<div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300"><Planes /></div>} />
 
-            {/* 2. RUTAS PROTEGIDAS (Requieren Login) 🛡️ */}
+            {/* 2. PROTECTED USER ROUTES (Dashboard, Shop, Profile) */}
             <Route element={<ProtectedRoute />}>
-                {/* Feature: Panel de Usuario */}
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/perfil" element={<Perfil />} />
                 <Route path="/analytics" element={<AnalyticsPage />} />
                 
-                {/* Feature: E-Commerce Personal */}
+                {/* E-Commerce Management */}
                 <Route path="/mis-compras" element={<PurchasesPage />} />
-                <Route path="/mis-cursos" element={<MyCoursesPage />} />
+                <Route path="/mis-cursos" element={<MyCoursesPage />} /> {/* Catálogo de mis cursos */}
                 <Route path="/checkout" element={<CheckoutPage />} />
-                <Route 
-                        path="/exportar" 
-                        element={
-                            <div className="bg-slate-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
-                                <DescargaPremium />
-                            </div>
-                        } 
-                    />
-                {/* 🛡️ NIVEL 2 ⛔ ESTRATEGIA "HARD GATE" */}
-                <Route element={
-                    <ProtectedRoute 
-                      isAllowed={!!user && ['pro', 'unlimited'].includes(user.plan)} 
-                      redirectTo="/planes" 
-                    />
-                }>
-                    {/* Rutas exclusivas Pro/Unlimited podrían ir aquí */}
+                <Route path="/exportar" element={<div className="bg-slate-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300"><DescargaPremium /></div>} />
+                
+                {/* Tiers Avanzados */}
+                <Route element={<ProtectedRoute isAllowed={!!user && ['pro', 'unlimited'].includes(user.plan)} redirectTo="/planes" />}>
+                   {/* Rutas Pro */}
                 </Route>
 
-                {/* 🛡️ NIVEL 3: SOLO EMPRESAS (Unlimited) */}
-                <Route element={
-                    <ProtectedRoute 
-                      isAllowed={!!user && user.plan === 'unlimited'}
-                      redirectTo="/planes"
-                    />
-                }>
+                <Route element={<ProtectedRoute isAllowed={!!user && user.plan === 'unlimited'} redirectTo="/planes" />}>
                     <Route path="/api-keys" element={<ApiDashboard />} />
                 </Route>
-            
             </Route>
-
             {/* =======================================================
                 ZONA DE HERRAMIENTAS (PÚBLICAS / FREEMIUM)
                 ======================================================= */}
@@ -268,24 +225,38 @@ function App() {
             <Route path="/calculadoras/corporativo/cheques" element={<DescuentoCheques />} />
             <Route path="/calculadoras/corporativo/montecarlo" element={<SimuladorMontecarlo />} />
 
-            {/* --- SECCIÓN EDUCATIVA & STORE --- */}
+  
             <Route path="/academia" element={<Academia />} />
             <Route path="/libreria" element={<Libreria />} />
-
-            {/* --- Carrito y checkout (Accesos directos) --- */}
             <Route path="/carrito" element={<CartPage />} />
             <Route path="/favoritos" element={<WishlistPage />} />
-
-            {/* Rutas Dinámicas y 404 */}
             <Route path="/categoria/:id" element={<Categorias />} />
             <Route path="/mercados" element={<Mercados />} />
             <Route path="/indicador/:id" element={<DetalleIndicador />} />
-            
-            {/* TEST INVERSOR */}
             <Route path="/test-inversor" element={<InvestorTestPage />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Route> 
+
+          </Route> {/* FIN ZONA B (Layout Comercial) */}
+
+
+          {/* ======================================================
+              ZONA C: ENTORNO DE APRENDIZAJE (Inmersivo)
+              ====================================================== 
+              Aquí es donde ocurre la magia. Sacamos estas rutas del Layout 
+              principal y las envolvemos en LearningLayout.
+          */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<LearningLayout />}>
+              {/* Simplificamos: Una sola ruta dinámica que carga el Player */}
+              <Route path="/curso/:id" element={<CoursePlayerPage />} />
+              {/* Opcional: Alias para SEO o bookmarking */}
+              <Route path="/curso/:id/learn" element={<CoursePlayerPage />} />
+            </Route>
+          </Route>
+
+
+          {/* 404 GLOBAL */}
+          <Route path="*" element={<NotFound />} />
+
         </Routes>
         <Toaster richColors position="bottom-right" duration={2000} />
       </WishlistProvider>

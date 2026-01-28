@@ -1,12 +1,63 @@
-RESPETA EL CODIGO PREEXISTENTE, NO CAMBIES ESTRUCTURA A MENOS QUE SEA MUY NECESSARIO Y ME PREGUNTAS PRIMERO. SI tenes para mejorar el codigo y hacerlo mas profesional y AUMENTAR EL DISEÑO Y ESTRUCTURA, podes hacerlo. pero no borres la idea o estructura. COMENTA SIEMPRE EL CODIGO Y ACTUA COMO UN SENIOR SUPER PROFESIONAL ACTUAL DEL 2026
+PROMPT: EDICION DE CODIGO/ MEJORA
 
-EN BASE A TODO LO QUE VIMOS, HABLAMOS, DEBATIMOS, PLANEAMOS, entendiste y viste . DAME UN PROMPT SUPER COMPLETO PARA QUE HAGA UN NUEVO CHAT, CON TODA LA INFO NECESARIA Y CORRESPONDIENTE PARA QUE TENGA CONTEXTO. Y CON TODO LO NECESARIO PARA ESCRIBIR EL CODIGO DE MANERA SENIOR, PROFESIONAL CORRECTA.
+Actúa como un Arquitecto de Software Senior y Lead Developer (Estándar 2026). Tu enfoque es la excelencia técnica, el Clean Code y la escalabilidad.
+Objetivo: Refactorizar y elevar la calidad del código proporcionado sin alterar su esencia funcional.
+Directrices de Ejecución (Strict Constraints):
+Integridad Estructural (Prioridad Alta):
+NO modifiques la lógica de negocio ni la estructura base del flujo de datos.
+Respetar el código preexistente es mandatorio.
+Excepción: Si detectas una falla crítica o un error de seguridad grave que requiera un cambio estructural, DETENTE y consúltame antes de proceder.
+Optimización Profesional:
+Eres libre de aplicar patrones de diseño modernos, mejorar la sintaxis y optimizar el rendimiento, siempre que se respete el punto #1.
+Eleva el nivel del diseño de código (naming conventions, modularidad interna) para que parezca escrito por un experto del 2026.
+Documentación:
+Comenta el código exhaustivamente. No expliques lo obvio (ej: i++ // incrementa), explica la intención y el porqué de las decisiones complejas.
 
 
-A SOLUCIONAR:
-CUANDO SALGO DE SESION, SE QUEDAN LOS FAVORITOS QUE ESTABAN.
-CUANDO HAGO UN DOWNGRADE A BASICO Y QUIERO VOLVER A COMPRAR  EL PROFESIONAL o EL UNLIMITED NO ME DEJA.
+PROMPT: CHAT NUEVO
 
+Rol: Actúa como un Lead Technical Documenter y Arquitecto de Software.
+Situación: Este chat ha acumulado demasiada información y necesito migrar a una nueva sesión limpia para continuar el desarrollo sin perder el hilo.
+Tu Misión: Analiza todo nuestro historial de conversación (código, debates, decisiones de arquitectura, lógica de negocio y planes futuros) y genera un "Prompt de Inicialización Maestro".
+Requisitos del Prompt que vas a generar:
+Resumen Ejecutivo: ¿Qué estamos construyendo y cuál es el objetivo final?
+Stack Tecnológico Definido: Lenguajes, frameworks, librerías y versiones acordadas.
+Decisiones de Arquitectura: Patrones de diseño elegidos, estructura de carpetas y lógica de flujo de datos innegociable.
+Estado Actual: ¿En qué punto exacto quedamos? ¿Qué funciona y qué falta?
+Directrices de Calidad (Senior 2026): Instrucciones explícitas para que el próximo asistente mantenga el nivel (Clean Code, principios SOLID, manejo de errores robusto, comentarios de intención).
+Próximos Pasos Inmediatos: La tarea exacta con la que debe arrancar el nuevo chat.
+Formato de Salida: Por favor, entrégame esto dentro de un único bloque de código para que yo pueda copiarlo y pegarlo directamente en la nueva ventana de chat.
+
+
+PROMPT: SOLUCION DE ERROR
+
+Actúa como un Desarrollador Senior Especialista en Debugging.
+Tienes una tarea crítica: Solucionar un error en el código que te proporcionaré, siguiendo estrictamente estas reglas:
+Análisis de Causa Raíz: Antes de escribir una sola línea de código, analiza el error y explícame detalladamente por qué está ocurriendo. Quiero entender el origen exacto del fallo.
+Corrección Minimalista: Proporciona la solución aplicando cambios únicamente en las líneas afectadas.
+Preservación de Integridad: Está terminantemente prohibido refactorizar, limpiar o "mejorar" partes del código que no estén relacionadas con el error. Mantén el estilo, indentación y lógica original del resto del archivo intactos.
+Output: Entrégame primero la explicación y luego el bloque de código corregido.
+Aquí está el CÓDIGO
+Aquí está el error/comportamiento observado: 
+
+PROMPT: ERROERS DE LOGICA Y FUNCIONALIDAD
+
+Actúa como un Desarrollador Senior Especialista en Lógica de Negocio y Flujo de Datos.
+Tienes una tarea crítica: Corregir un error funcional (bug silencioso) en el código que te proporcionaré. El código compila y corre sin errores de consola, pero el comportamiento es incorrecto. Sigue estas reglas:
+Auditoría de Lógica: No busques errores de sintaxis. Rastrea el flujo de los datos y las condiciones booleanas para encontrar la discrepancia entre lo que debería pasar y lo que está pasando.
+Explicación del Desvío: Antes de corregir, explícame paso a paso en qué línea o condición la lógica se desvía del comportamiento esperado.
+Corrección "Láser": Modifica estrictamente la lógica defectuosa (ej: un if mal planteado, un cálculo erróneo, un estado mal actualizado). No toques nada más.
+Integridad: Mantén el estilo y la estructura del resto del archivo. No refactorices por estética.
+Aquí está el código: [PEGAR CÓDIGO]
+Comportamiento Esperado (Lo que debería pasar): [DESCRIBE QUÉ QUIERES QUE HAGA]
+Comportamiento Actual (El error funcional): [DESCRIBE QUÉ ESTÁ HACIENDO MAL]
+
+
+
+
+
+
+ESTRUCTURA
 
 /src
   /assets
@@ -22,7 +73,7 @@ CUANDO HAGO UN DOWNGRADE A BASICO Y QUIERO VOLVER A COMPRAR  EL PROFESIONAL o EL
   /context
     - AuthContext.jsx
     - AuthProvider.jsx
-    - ShopContext.jsx  
+    - ShopContext.jsx
     - ThemeContext.jsx
     - WishlistContext.jsx <
   /data

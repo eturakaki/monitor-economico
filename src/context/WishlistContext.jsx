@@ -12,24 +12,29 @@ export const WishlistProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 1. Carga inicial
+  // EFECTO 1: LIMPIEZA INMEDIATA
+  // Separa la lógica de limpieza para que sea instantánea al logout
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+        setWishlist([]);
+    }
+  }, [isAuthenticated, user]);
+
+  // EFECTO 2: CARGA DE DATOS
   useEffect(() => {
     let isMounted = true;
 
     const fetchWishlist = async () => {
-      if (!isAuthenticated || !user?.email) {
-        setWishlist([]); 
-        return;
-      }
+      // Si no hay usuario, el Efecto 1 ya limpió. No hacemos nada.
+      if (!isAuthenticated || !user?.email) return;
 
       setLoading(true);
       try {
         const data = await wishlistService.getByUserId(user.email);
         if (isMounted) setWishlist(data);
       } catch (err) {
-        // FIX 1: Usamos 'err' para debug
         console.error("Error cargando favoritos:", err);
-        toast.error("No se pudieron cargar tus favoritos");
+        // Fallback silencioso para no molestar al usuario en cada carga
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -40,7 +45,8 @@ export const WishlistProvider = ({ children }) => {
     return () => { isMounted = false; };
   }, [isAuthenticated, user]);
 
-  // 2. Acción: Agregar
+  // ... (El resto de funciones addToWishlist, removeFromWishlist, isInWishlist se mantienen IGUAL)
+  
   const addToWishlist = useCallback(async (item) => {
     if (!isAuthenticated) {
       toast.warning('Debes iniciar sesión para guardar favoritos');
@@ -56,14 +62,12 @@ export const WishlistProvider = ({ children }) => {
     try {
       await wishlistService.addItem(user.email, item);
     } catch (err) {
-      // FIX 2: Usamos 'err'
       console.error("Rollback error:", err);
       setWishlist(prevWishlist);
-      toast.error('Error al guardar. Intenta nuevamente.');
+      toast.error('Error al guardar.');
     }
   }, [wishlist, isAuthenticated, user]);
 
-  // 3. Acción: Remover
   const removeFromWishlist = useCallback(async (itemId) => {
     if (!isAuthenticated) return;
 
@@ -74,7 +78,6 @@ export const WishlistProvider = ({ children }) => {
     try {
       await wishlistService.removeItem(user.email, itemId);
     } catch (err) {
-      // FIX 3: Usamos 'err'
       console.error("Remove error:", err);
       setWishlist(prevWishlist);
       toast.error('No se pudo eliminar el ítem.');
@@ -100,8 +103,6 @@ export const WishlistProvider = ({ children }) => {
   );
 };
 
-// FIX 4: Deshabilitamos la alerta de Fast Refresh para este export específico
-// Esto es estándar cuando se exporta el Hook y el Provider juntos.
 // eslint-disable-next-line react-refresh/only-export-components
 export const useWishlist = () => {
   const context = useContext(WishlistContext);
