@@ -1,28 +1,25 @@
 /**
  * @file userStatus.js
- * @description MOCK API & SECURITY LAYER V2 (The Fortress)
- * Simula un entorno de backend real con latencia variable (Jitter), 
- * fallos aleatorios (Chaos Monkey) y validación estricta de permisos.
- * * @version 2.1.0 - Strict Mode
+ * @description MOCK API & SECURITY LAYER V2.5 (Backend-Ready)
+ * Simula un entorno de backend robusto con gestión de ACLs (Access Control Lists),
+ * persistencia de progreso y transacciones atómicas simuladas.
+ * * @version 2.5.0 - Architecture Upgrade
  * @author Senior Architect (MonitorEco)
  */
 
-// --- ⚙️ CONFIGURACIÓN DEL ENTORNO SIMULADO ---
+// --- ⚙️ CONFIGURACIÓN DEL ENTORNO ---
 const ENV_CONFIG = {
-  // Latencia: Nunca es constante. Simulamos "Jitter" de red real.
-  LATENCY: { MIN: 400, MAX: 1500 }, 
-  
-  // Chaos Monkey: 5% de probabilidad de que el "servidor" explote (500 Error)
-  // Útil para verificar que tus Toasts de error funcionan.
-  FAILURE_RATE: 0.05, 
-  
-  // Clave de persistencia (como si fuera una Cookie de Sesión)
-  STORAGE_KEY: 'monitoreco_session_v2' 
+  // Latencia: Simulamos "Jitter" de red real para forzar Spinners en UI.
+  LATENCY: { MIN: 300, MAX: 1200 }, 
+  // Chaos Monkey: Probabilidad reducida para desarrollo, pero presente.
+  FAILURE_RATE: 0.02, 
+  STORAGE_KEY: 'monitoreco_session_v2',
+  DB_KEY: 'monitoreco_mock_db_v2'
 };
 
-// --- 🗄️ BASE DE DATOS MOCK (Source of Truth) ---
-// Estos usuarios existen "en el servidor". Si intentas loguear otro, se crea on-the-fly.
-const MOCK_DB = {
+// --- 🗄️ ESQUEMA DE DATOS (DATA CONTRACT) ---
+// Definimos la estructura canónica del usuario para garantizar consistencia.
+const INITIAL_DB = {
   users: [
     { 
       id: 'usr_admin_001', 
@@ -30,6 +27,10 @@ const MOCK_DB = {
       name: 'Admin User', 
       plan: 'unlimited', 
       role: 'admin', 
+      // [NUEVO] ACL: Listas de control de acceso y progreso
+      purchasedCourses: [], // Admin tiene bypass, pero mantenemos la estructura
+      completedLessons: [],
+      lastActivity: {}, // Mapa { courseId: lessonId }
       createdAt: '2025-01-01T00:00:00Z' 
     },
     { 
@@ -38,6 +39,9 @@ const MOCK_DB = {
       name: 'Trader Pro', 
       plan: 'pro', 
       role: 'user', 
+      purchasedCourses: ['course_1', 'course_2'], // Datos pre-cargados
+      completedLessons: ['l_101'],
+      lastActivity: { 'course_1': 'l_101' },
       createdAt: '2026-01-15T10:30:00Z' 
     },
     { 
@@ -46,105 +50,120 @@ const MOCK_DB = {
       name: 'Estudiante Free', 
       plan: 'starter', 
       role: 'user', 
+      purchasedCourses: [],
+      completedLessons: [],
+      lastActivity: {},
       createdAt: '2026-01-26T14:20:00Z' 
     }
   ]
 };
 
-// --- 🔧 MOTORES INTERNOS (PRIVATE HELPERS) ---
+// --- 🔧 PRIVATE HELPERS (CORE ENGINE) ---
 
-/**
- * Simula el tiempo de respuesta de red con variabilidad.
- * @returns {Promise<void>}
- */
-const simulateNetworkLatency = () => {
+const _simulateLatency = () => {
   const delay = Math.floor(
     Math.random() * (ENV_CONFIG.LATENCY.MAX - ENV_CONFIG.LATENCY.MIN + 1) + ENV_CONFIG.LATENCY.MIN
   );
   return new Promise(resolve => setTimeout(resolve, delay));
 };
 
-/**
- * Chaos Monkey: Introduce fallos aleatorios para probar robustez del frontend.
- * @throws {Error} 500 Internal Server Error
- */
-const triggerChaosMonkey = () => {
+const _triggerChaosMonkey = () => {
   if (Math.random() < ENV_CONFIG.FAILURE_RATE) {
-    console.error('[MockAPI] 🐒 Chaos Monkey atacó!');
+    console.warn('[MockAPI] 🐒 Chaos Monkey induced 500 Error');
     throw new Error('500: Error interno del servidor (Simulado)');
   }
 };
 
 /**
- * Lee la "Base de Datos" actual (simulada en localStorage para persistencia entre F5).
+ * Obtiene la DB asegurando migraciones de esquema en caliente.
+ * Si el usuario guardado no tiene los campos nuevos, los inyecta.
  */
-const getDatabase = () => {
-  const stored = localStorage.getItem('monitoreco_mock_db');
-  return stored ? JSON.parse(stored) : MOCK_DB;
+const _getDatabase = () => {
+  const stored = localStorage.getItem(ENV_CONFIG.DB_KEY);
+  const db = stored ? JSON.parse(stored) : INITIAL_DB;
+  
+  // Micro-migración: Asegurar que todos los usuarios tengan los arrays nuevos
+  // Esto previene crashes si la DB vieja sigue en localStorage.
+  db.users = db.users.map(u => ({
+    ...u,
+    purchasedCourses: u.purchasedCourses ?? [],
+    completedLessons: u.completedLessons ?? [],
+    lastActivity: u.lastActivity ?? {}
+  }));
+  
+  return db;
 };
 
 /**
- * Guarda el estado actual de la "Base de Datos".
+ * Transaction Commit: Guarda en DB y actualiza la sesión activa.
+ * Centraliza la lógica de escritura para evitar desincronización.
  */
-const saveDatabase = (db) => {
-  localStorage.setItem('monitoreco_mock_db', JSON.stringify(db));
+const _persistUserState = (db, updatedUser) => {
+  // 1. Guardar en "Disco" (DB Mock)
+  localStorage.setItem(ENV_CONFIG.DB_KEY, JSON.stringify(db));
+  
+  // 2. Actualizar "Cookie" (Sesión Local)
+  // Solo actualizamos la sesión si el usuario modificado es el actual.
+  const currentSession = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
+  if (currentSession) {
+    const sessionUser = JSON.parse(currentSession);
+    if (sessionUser.id === updatedUser.id) {
+      localStorage.setItem(ENV_CONFIG.STORAGE_KEY, JSON.stringify(updatedUser));
+    }
+  }
 };
 
-// --- 🚀 API PÚBLICA (SERVICE LAYER) ---
+// --- 🚀 SERVICE LAYER (PUBLIC API) ---
 
 export const UserStatusService = {
   
   /**
-   * POST /auth/login
-   * Autentica un usuario o lo registra si no existe (modo dev).
+   * Autenticación básica.
+   * Inicializa al usuario con el esquema completo si es nuevo.
    */
   async login({ email }) {
-    await simulateNetworkLatency();
-    triggerChaosMonkey();
+    await _simulateLatency();
+    _triggerChaosMonkey();
 
-    const db = getDatabase();
-    // Normalizamos email a minúsculas para búsqueda
+    const db = _getDatabase();
     let user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
     if (!user) {
-      // DEV MODE: Auto-registro si no existe
+      // Registro de usuario nuevo (Pattern: Default Props)
       user = {
         id: `usr_${crypto.randomUUID().split('-')[0]}`,
         email,
-        name: email.split('@')[0], // Fallback name
-        plan: 'starter', // Todo usuario nuevo nace Free
+        name: email.split('@')[0],
+        plan: 'starter',
         role: 'user',
+        purchasedCourses: [], // Init vacío
+        completedLessons: [], // Init vacío
+        lastActivity: {},
         createdAt: new Date().toISOString()
       };
       db.users.push(user);
-      saveDatabase(db);
+      // Nota: Guardamos toda la DB, no solo el usuario
+      localStorage.setItem(ENV_CONFIG.DB_KEY, JSON.stringify(db));
     }
 
-    // Persistimos la sesión (Cookie simulada)
     localStorage.setItem(ENV_CONFIG.STORAGE_KEY, JSON.stringify(user));
-    
     return user;
   },
 
-  /**
-   * GET /auth/me
-   * Valida si la sesión actual sigue siendo válida en el servidor.
-   */
   async fetchUser() {
-    await simulateNetworkLatency();
-    // Nota: No usamos Chaos Monkey aquí para evitar bloqueos infinitos al cargar la app.
-
+    await _simulateLatency();
+    // Bypass de Chaos Monkey para evitar bloqueos en carga inicial (Critical Path)
+    
     const sessionData = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
     if (!sessionData) return null;
 
     const sessionUser = JSON.parse(sessionData);
-    const db = getDatabase();
+    const db = _getDatabase();
     
-    // Verificación estricta: ¿El usuario sigue existiendo en DB?
+    // Re-hidratación: Buscamos la versión más fresca del usuario en la DB
     const freshUser = db.users.find(u => u.id === sessionUser.id);
     
     if (!freshUser) {
-      // Si el usuario fue borrado de la DB, invalidamos la sesión local
       localStorage.removeItem(ENV_CONFIG.STORAGE_KEY);
       return null;
     }
@@ -152,73 +171,105 @@ export const UserStatusService = {
     return freshUser;
   },
 
-  /**
-   * POST /auth/logout
-   */
   async logout() {
-    await simulateNetworkLatency();
+    await _simulateLatency();
     localStorage.removeItem(ENV_CONFIG.STORAGE_KEY);
     return true;
   },
 
   /**
-   * POST /billing/upgrade
-   * Simula una transacción financiera compleja.
+   * [CORE] Gestión de Compras y Packs.
+   * Recibe un array de IDs (productIds) para soportar carritos mixtos o packs.
+   * @param {string[]} productIds - Array de IDs de cursos a desbloquear.
+   */
+  async grantAccess(productIds) {
+    await _simulateLatency();
+    // Validamos sesión
+    const sessionData = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
+    if (!sessionData) throw new Error('401: Unauthorized');
+    
+    const currentUser = JSON.parse(sessionData);
+    const db = _getDatabase();
+    const userIndex = db.users.findIndex(u => u.id === currentUser.id);
+
+    if (userIndex === -1) throw new Error('404: User not found');
+
+    // Lógica de Unión de Sets (Idempotencia)
+    // Evita duplicados si compras un pack que incluye un curso que ya tenías.
+    const currentCourses = new Set(db.users[userIndex].purchasedCourses);
+    productIds.forEach(id => currentCourses.add(id));
+
+    // Commit
+    db.users[userIndex].purchasedCourses = Array.from(currentCourses);
+    _persistUserState(db, db.users[userIndex]);
+
+    return db.users[userIndex];
+  },
+
+  /**
+   * [CORE] Seguimiento de Progreso.
+   * Se llama cuando termina un video (onEnded).
+   * @param {string} courseId - Contexto del curso.
+   * @param {string} lessonId - ID único de la lección terminada.
+   */
+  async updateLessonProgress(courseId, lessonId) {
+    // Latencia mínima para feedback rápido en UI (Optimistic UI support)
+    await new Promise(r => setTimeout(r, 300)); 
+
+    const sessionData = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
+    if (!sessionData) return null; // Silent fail si no hay sesión
+
+    const currentUser = JSON.parse(sessionData);
+    const db = _getDatabase();
+    const userIndex = db.users.findIndex(u => u.id === currentUser.id);
+
+    if (userIndex === -1) return null;
+
+    const user = db.users[userIndex];
+
+    // 1. Marcar como completada (Set para evitar duplicados)
+    const completedSet = new Set(user.completedLessons);
+    completedSet.add(lessonId);
+    user.completedLessons = Array.from(completedSet);
+
+    // 2. Actualizar puntero de "Última actividad" para Resume
+    user.lastActivity = {
+        ...user.lastActivity,
+        [courseId]: lessonId
+    };
+
+    // Commit
+    db.users[userIndex] = user;
+    _persistUserState(db, user);
+
+    return user;
+  },
+
+  /**
+   * Upgrade de Plan (Suscripciones)
    */
   async updatePlan(newPlanId) {
-    await simulateNetworkLatency();
-    triggerChaosMonkey(); // Los pagos fallan a menudo en la vida real
+    await _simulateLatency();
+    _triggerChaosMonkey();
 
     const sessionData = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
     if (!sessionData) throw new Error('401: No autorizado');
 
     const currentUser = JSON.parse(sessionData);
     
-    // VALIDACIÓN DE NEGOCIO (Backend)
     if (currentUser.plan === newPlanId) {
       throw new Error(`400: Ya tienes activo el plan ${newPlanId.toUpperCase()}`);
     }
 
-    // SIMULACIÓN DE PAGOS
-    if (currentUser.email.includes('error')) {
-      throw new Error('402: Fondos insuficientes (Simulado)');
-    }
-
-    // Actualizar en DB
-    const db = getDatabase();
+    const db = _getDatabase();
     const userIndex = db.users.findIndex(u => u.id === currentUser.id);
     
-    if (userIndex === -1) throw new Error('404: Usuario no encontrado');
-
-    // Aplicar cambio
+    // Actualizar Plan
     db.users[userIndex].plan = newPlanId;
-    saveDatabase(db); // Guardar en "DB"
     
-    // Actualizar sesión local
-    const updatedUser = db.users[userIndex];
-    localStorage.setItem(ENV_CONFIG.STORAGE_KEY, JSON.stringify(updatedUser));
+    // Commit
+    _persistUserState(db, db.users[userIndex]);
 
-    return updatedUser;
-  },
-
-  /**
-   * GET /api/premium-data (STRESS TEST)
-   * Intenta acceder a un recurso protegido. Lanza 403 si el plan es insuficiente.
-   */
-  async checkPremiumAccess() {
-    await simulateNetworkLatency();
-    triggerChaosMonkey();
-
-    const sessionData = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
-    if (!sessionData) throw new Error('401: Debes iniciar sesión');
-
-    const user = JSON.parse(sessionData);
-    const ALLOWED_PLANS = ['pro', 'unlimited'];
-
-    if (!ALLOWED_PLANS.includes(user.plan)) {
-      throw new Error(`403: Acceso Denegado. El plan '${user.plan}' no tiene permisos.`);
-    }
-
-    return { access: true, timestamp: Date.now(), secret: 'DATA-ENCRYPTED-2026' };
+    return db.users[userIndex];
   }
 };

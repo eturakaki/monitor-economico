@@ -1,7 +1,7 @@
 PROMPT: EDICION DE CODIGO/ MEJORA
 
 Actúa como un Arquitecto de Software Senior y Lead Developer (Estándar 2026). Tu enfoque es la excelencia técnica, el Clean Code y la escalabilidad.
-Objetivo: Refactorizar y elevar la calidad del código proporcionado sin alterar su esencia funcional.
+Objetivo: Refactorizar y elevar la calidad del código proporcionado con lo que me querés hacer. sin alterar su esencia funcional.
 Directrices de Ejecución (Strict Constraints):
 Integridad Estructural (Prioridad Alta):
 NO modifiques la lógica de negocio ni la estructura base del flujo de datos.
@@ -12,7 +12,6 @@ Eres libre de aplicar patrones de diseño modernos, mejorar la sintaxis y optimi
 Eleva el nivel del diseño de código (naming conventions, modularidad interna) para que parezca escrito por un experto del 2026.
 Documentación:
 Comenta el código exhaustivamente. No expliques lo obvio (ej: i++ // incrementa), explica la intención y el porqué de las decisiones complejas.
-
 
 PROMPT: CHAT NUEVO
 
@@ -57,49 +56,95 @@ Comportamiento Actual (El error funcional): [DESCRIBE QUÉ ESTÁ HACIENDO MAL]
 
 
 
-ESTRUCTURA
-
-/src
-  /assets
-  /components
-    /auth
-      - ProtectedRoute.jsx
-    /layout
-      - NavBar.jsx
-    /shop
-      - CartDrawer.jsx
+//monitor-economico
+  /public
+  /src
+    /assets
+      - (logos, imágenes...)
+    /components
+      /auth
+        - ProtectedRoute.jsx
+      /layout
+        - LearningLayout.jsx
+        - NavBar.jsx
+      /player
+        - PlayerSideBar.jsx
+      /shop
+        - CartDrawer.jsx
+      - HistoricoChart.jsx
+      - Layout.jsx
+      - MonitorGrid.jsx
       - ProductCard.jsx
-      - ... (otros componentes UI)
-  /context
-    - AuthContext.jsx
-    - AuthProvider.jsx
-    - ShopContext.jsx
-    - ThemeContext.jsx
-    - WishlistContext.jsx <
-  /data
-    - ... (mock data products)
-  /hooks
-    - useAuth.js
-  /pages
-    /herramientas
-      - ...
-    - CartPage.jsx
-    - CheckoutPage.jsx
-    - Dashboard.jsx
-    - Home.jsx
-    - Login.jsx
-    - Register.jsx
-    - WishListPage.jsx
-    - ...
-  /services
-    - userStatus.js
-    -wishlistService.js
-  /utils
-  - App.jsx
-  - main.jsx
+      - ResumenIA.jsx
+      - ScrollToTop.jsx
+      - SortableWidget.jsx
+      - StatCard.jsx
+      - StressTestPanel.jsx
+      - ThemeToggle.jsx
+      - ToolLayout.jsx
+      - UserMenu.jsx
+      - Grid.jsx
 
+    /context
+      - AuthContext.jsx
+      - AuthProvider.jsx
+      - ShopContext.jsx
+      - ThemeContext.jsx
+      - WishlistContext.jsx
 
-
+    /data
+      - analisisIA.js
+      - courseContentMock.js
+      - cursos.js
+      - dataGlosario.js
+      - herramientas.js
+      - herramientasfin.js
+      - libros.js
+      - monitores.js
+      - planes.js
+      - sectores.js
+      - toolsRegistry.js
+    /hooks
+      - useAuth.js
+    /pages
+      /features
+      /herramientas
+      - Academia.jsx
+      - Analytics.jsx
+      - ApiDashboard.jsx
+      - ApiDocs.jsx
+      - CartPage.jsx
+      - Categorias.jsx
+      - CheckoutPage.jsx
+      - Contacto.jsx
+      - CoursePlayerPage.jsx
+      - DashBoard.jsx
+      - DescargaPremiun.jsx
+      - DetalleIndicador.jsx
+      - Herramientas.jsx
+      - Home.jsx
+      - Libreria.jsx
+      - Login.jsx
+      - Mercados.jsx
+      - Perfil.jsx
+      - Planes.jsx
+      - PurchasesPage.jsx
+      - Recovery.jsx
+      - Register.jsx
+      - SobreMi.jsx
+      - TEMP_Glosario.jsx
+      - Terminos.jsx
+      - WishListPage.jsx
+    /services
+      - userStatus.js
+      - wishlistService.js
+    /utils
+    - App.jsx
+    - index.css
+    - main.jsx
+    - .gitignore
+    - eslint.config.js
+    - package.json
 
 
 
