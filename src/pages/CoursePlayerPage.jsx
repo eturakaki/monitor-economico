@@ -1,42 +1,72 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import ReactPlayer from 'react-player'; // [CORE] Motor de video
+import ReactPlayer from 'react-player'; // [ARCH] Universal Player (Soporta .MOV y YouTube)
 import { toast } from 'sonner';
 import { 
-  Loader2, Play, Download, MessageCircle, Menu, 
-  ChevronRight, CheckCircle, FileText 
+  Loader2, Download, MessageCircle, Menu, 
+  ChevronRight, CheckCircle 
 } from 'lucide-react';
 
-// Contexts & Data
-import { useAuth } from '../hooks/useAuth'; // [CHANGE] Migramos de Shop a Auth para el progreso
+// --- CORE SERVICES & CONTEXTS ---
+import { useAuth } from '../hooks/useAuth'; 
 import { cursos } from '../data/cursos'; 
 import { courseContentMock } from '../data/courseContentMock'; 
 import { PlayerSidebar } from '../components/player/PlayerSidebar';
 
-// --- HELPER COMPONENT: RESOURCE PANEL ---
-// Mantenemos tu componente UI intacto para preservar la identidad visual.
+// --- CONFIGURACIÓN DE INGENIERÍA ---
+/**
+ * Constantes de configuración del reproductor.
+ * Se extraen para evitar la recreación de objetos en cada renderizado (Performance).
+ */
+const PLAYER_CONFIG = {
+  youtube: { 
+    playerVars: { showinfo: 1, modestbranding: 1, rel: 0, origin: window.location.origin } 
+  },
+  file: { 
+    attributes: { 
+      controlsList: 'nodownload', // Seguridad básica: dificulta la descarga directa
+      disablePictureInPicture: false
+    } 
+  }
+};
+
+// [TESTING] Archivo local para pruebas cuando falla el streaming o no hay URL
+// Vite sirve archivos de la carpeta 'public' directamente en la raíz '/'
+const LOCAL_TEST_VIDEO = "/IMG_6217.MOV";
+
+const TABS = { RESOURCES: 'resources', NOTES: 'notes' };
+
+// --- COMPONENTES VISUALES (UI) ---
+/**
+ * ResourcesPanel: Panel lateral desacoplado.
+ * Mantiene el principio de responsabilidad única (SRP) para la UI de recursos.
+ */
 const ResourcesPanel = ({ activeTab }) => (
   <div className="p-6">
-     {activeTab === 'resources' ? (
-          <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Descargas</h3>
-              <div className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-500 transition-colors cursor-pointer group bg-white dark:bg-gray-800/50">
+     {activeTab === TABS.RESOURCES ? (
+          <div className="space-y-4 animate-in fade-in duration-300">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Descargas Disponibles</h3>
+              <div className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-500 transition-colors cursor-pointer group bg-white dark:bg-gray-800/50 shadow-sm">
                   <div className="flex items-center gap-3">
                       <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/20 transition-colors">
                           <Download className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-emerald-500" />
                       </div>
                       <div>
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Diapositivas</p>
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Material Complementario</p>
                           <p className="text-[10px] text-gray-500">PDF - 2.4 MB</p>
                       </div>
                   </div>
               </div>
           </div>
       ) : (
-          <div className="text-center py-8">
-              <MessageCircle className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">Notas personales</p>
-              <button className="mt-2 text-xs text-emerald-500 font-medium">Crear nota</button>
+          <div className="text-center py-8 animate-in fade-in duration-300">
+              <div className="bg-gray-100 dark:bg-gray-800 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <MessageCircle className="w-6 h-6 text-gray-400" />
+              </div>
+              <p className="text-sm text-gray-500 mb-2">Tus notas son privadas</p>
+              <button className="text-xs font-semibold text-emerald-600 hover:text-emerald-500 transition-colors border border-emerald-200 px-4 py-2 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                  + Crear nueva nota
+              </button>
           </div>
       )}
   </div>
@@ -44,101 +74,111 @@ const ResourcesPanel = ({ activeTab }) => (
 
 /**
  * ------------------------------------------------------------------
- * PAGE: COURSE PLAYER (SMART COMPONENT)
+ * PAGE: COURSE PLAYER (SMART CONTROLLER)
  * ------------------------------------------------------------------
- * Orquestador principal de la experiencia de aprendizaje.
- * Responsabilidades:
- * 1. Gestión del Reproductor de Video (ReactPlayer).
- * 2. Sincronización de Progreso (Trigger onEnded).
- * 3. Gestión del Layout Adaptativo (Mobile/Desktop).
+ * Orquestador principal. Gestiona la lógica de reproducción híbrida (Local/Cloud).
  */
 const CoursePlayerPage = () => {
   const { id } = useParams();
   
-  // [ARCH] Inyectamos dependencias de Auth para escribir progreso
+  // [INJECTION] Dependencias del Sistema
   const { markLessonAsCompleted, isLessonCompleted } = useAuth(); 
 
-  // --- STATE ---
+  // [STATE] Flujo de Datos UI
   const [activeLesson, setActiveLesson] = useState(null);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('resources'); 
+  const [activeTab, setActiveTab] = useState(TABS.RESOURCES); 
   
-  // Estados del Player
+  // [STATE] Motor de Video
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef(null);
 
-  // --- DATA FETCHING (Memoized) ---
+  // [DATA] Selectores Memoizados (Optimización de Lectura)
   const courseMetadata = useMemo(() => cursos.find(c => c.id === id), [id]);
   const courseContent = useMemo(() => courseContentMock[id] || courseContentMock['default'], [id]);
 
-  // --- INITIALIZATION ---
+ // --- LÓGICA DE INICIALIZACIÓN ---
   useEffect(() => {
-    // [ARCH CHECK] Eliminada la validación de seguridad (verifyAccess).
-    // Ahora confiamos en el GuardedCourseRoute. Esto evita doble redirección y limpia el código.
-    
-    // Auto-select primera lección si no hay ninguna activa
-    if (!activeLesson && courseContent?.modules?.[0]?.lessons?.length > 0) {
-      // [FIX] Envolvemos en setTimeout para convertir la actualización en asíncrona (Macrotask).
-      // Esto evita el error "Synchronous setState" y permite que el componente termine de montarse primero.
-      const timer = setTimeout(() => {
-          setActiveLesson(courseContent.modules[0].lessons[0]);
-      }, 0);
-      
-      return () => clearTimeout(timer); // Limpieza preventiva
+    const hasContent = courseContent?.modules?.[0]?.lessons?.length > 0;
+
+    if (hasContent) {
+      // SOLUCIÓN: Usamos el patrón de actualización funcional.
+      // 'current' recibe el valor más fresco del estado sin añadir 'activeLesson' a las dependencias.
+      setActiveLesson(current => {
+        if (current) return current; // Si ya existe lección, no hacemos nada (evita re-render)
+
+        console.log("🚀 [Player] Inicializando curso:", courseMetadata?.title);
+        return courseContent.modules[0].lessons[0];
+      });
     }
-  }, [courseContent, activeLesson]);
+  }, [courseContent, courseMetadata]); // Ahora el array de dependencias es veraz y completo.
+  
+  // --- HANDLERS (CONTROLADORES DE EVENTOS) ---
 
-  // --- PLAYER LOGIC HANDLERS ---
-
-  const handleLessonChange = (lesson) => {
+  const handleLessonChange = useCallback((lesson) => {
     setActiveLesson(lesson);
-    setIsPlaying(true); // Autoplay UX al cambiar lección
+    setIsPlaying(true); // UX: Si el usuario cambia manualmente, asumimos que quiere ver el video ya.
     
-    // UX: Scroll reset para móviles
+    // Mobile UX: Scroll suave hacia arriba para ver el video
     if (window.innerWidth < 1024) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, []);
 
   /**
-   * [CORE LOGIC] Trigger de finalización.
-   * Se ejecuta cuando el video termina naturalmente.
+   * Gatillo de Progreso: Se dispara SOLAMENTE cuando el video termina.
+   * Conecta con el backend (simulado) para guardar el avance.
    */
-  const handleVideoEnded = () => {
+  const handleVideoEnded = useCallback(() => {
     if (!activeLesson) return;
 
-    // Solo disparamos la escritura si la lección NO estaba completada previamente.
-    // Esto ahorra llamadas innecesarias al "backend".
+    // Patrón Idempotente: Evita llamadas duplicadas si ya estaba marcado.
     if (!isLessonCompleted(activeLesson.id)) {
-        
-        // 1. Llamada al Servicio (vía Context)
         markLessonAsCompleted(id, activeLesson.id);
         
-        // 2. Feedback Visual Inmediato
         toast.success("¡Lección completada!", {
             description: `Has terminado "${activeLesson.title}"`,
             icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
-            duration: 3000,
+            duration: 4000,
         });
     }
-  };
+  }, [activeLesson, id, isLessonCompleted, markLessonAsCompleted]);
 
-  // Fail-safe visual si los datos no cargan (aunque ProtectedRoute debería prevenir esto)
+  /**
+   * [RESOLVER] Determina la fuente del video.
+   * Prioridad: 
+   * 1. URL específica de la lección (si existe).
+   * 2. Video Local de Prueba (Fallback para desarrollo/test).
+   */
+  const getVideoSource = () => {
+  if (!activeLesson) return null;
+  
+  // Lógica Senior: Confiamos en la data. 
+  // Si hay videoUrl, la usamos (sea de YouTube o local).
+  // Si no hay, podemos retornar null o una imagen de placeholder, 
+  // pero NO un video hardcodeado oculto en el código.
+  return activeLesson.videoUrl;
+};
+
+  // --- SAFEGUARDS (Pantallas de Carga/Error) ---
   if (!courseMetadata) {
     return (
-      <div className="flex-1 bg-[#0B1121] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+      <div className="flex-1 bg-[#0B1121] flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+          <p className="text-gray-400 text-sm animate-pulse">Cargando entorno de aprendizaje...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col flex-1 h-full overflow-hidden">
+    <div className="flex flex-col flex-1 h-full overflow-hidden bg-gray-50 dark:bg-black">
       
-      {/* 1. PLAYER HEADER */}
-      <div className="h-14 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0f1629] flex items-center justify-between px-4 shrink-0">
+      {/* 1. HEADER DE NAVEGACIÓN */}
+      <header className="h-14 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0f1629] flex items-center justify-between px-4 shrink-0 z-20 relative shadow-sm">
          <div className="flex items-center gap-3 overflow-hidden">
-            {/* Mobile Menu Trigger */}
+            {/* Trigger Menú Mobile */}
             <button 
                 onClick={() => setSidebarOpen(true)}
                 className="lg:hidden p-2 -ml-2 text-gray-500 hover:text-emerald-500 active:bg-gray-100 dark:active:bg-gray-800 rounded-md transition-colors"
@@ -146,34 +186,40 @@ const CoursePlayerPage = () => {
                 <Menu size={20} />
             </button>
             
+            {/* Info de Lección Actual */}
             <div className="flex flex-col">
                 <h1 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-md flex items-center gap-2">
-                    {activeLesson?.title || "Cargando..."}
-                    {/* Indicador visual en el header si ya está vista */}
+                    {activeLesson?.title || "Cargando lección..."}
                     {isLessonCompleted(activeLesson?.id) && (
-                        <CheckCircle size={14} className="text-emerald-500" />
+                        <span title="Completada">
+                          <CheckCircle size={14} className="text-emerald-500" />
+                        </span>
                     )}
                 </h1>
-                <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                    <span className="truncate max-w-[150px]">{courseMetadata?.title}</span>
+                <nav className="flex items-center gap-1 text-[10px] text-gray-500">
+                    <span className="truncate max-w-[150px] font-medium">{courseMetadata?.title}</span>
                     <ChevronRight size={10} />
-                    <span>Reproduciendo ahora</span>
-                </div>
+                    <span className="text-emerald-600 dark:text-emerald-400">Reproduciendo</span>
+                </nav>
             </div>
          </div>
 
-         {/* Desktop Controls */}
+         {/* Badge Desktop */}
          <div className="hidden sm:flex gap-2">
-             <span className="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20 font-medium">
+             <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/20 text-xs font-semibold">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
                 Modo Alumno
-             </span>
+             </div>
          </div>
-      </div>
+      </header>
 
-      {/* 2. MAIN WORKSPACE */}
+      {/* 2. ÁREA DE TRABAJO (GRID PRINCIPAL) */}
       <div className="flex flex-1 overflow-hidden relative">
         
-        {/* A. SIDEBAR / DRAWER */}
+        {/* COMPONENTE: SIDEBAR DE NAVEGACIÓN */}
         <PlayerSidebar 
             content={courseContent} 
             activeLessonId={activeLesson?.id}
@@ -182,72 +228,81 @@ const CoursePlayerPage = () => {
             onClose={() => setSidebarOpen(false)}
         />
 
-        {/* B. CENTER STAGE */}
-        <main className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-black overflow-y-auto">
+        {/* COMPONENTE: ESCENARIO PRINCIPAL */}
+        <main className="flex-1 flex flex-col min-w-0 overflow-y-auto custom-scrollbar bg-white dark:bg-[#0B1121]">
             
-            {/* VIDEO PLAYER CONTAINER */}
-            {/* Wrapper aspect-video para mantener 16:9 responsivo */}
-            <div className="w-full bg-black sticky top-0 z-10 shadow-lg aspect-video">
+            {/* --- REPRODUCTOR DE VIDEO (CORE) --- */}
+            {/* Aspect Ratio 16:9 forzado con aspect-video de Tailwind */}
+            <div className="w-full bg-black sticky top-0 z-10 shadow-2xl aspect-video group">
                 {activeLesson ? (
                     <ReactPlayer
+                        // [ARCH] Key es vital para forzar re-render completo al cambiar entre tipos de fuente (YouTube <-> Archivo Local)
+                        key={activeLesson.id} 
                         ref={playerRef}
-                        // [FALLBACK] URL de prueba profesional si el mock no tiene videoUrl
-                        url={activeLesson.videoUrl || "https://www.youtube.com/watch?v=lxS89zZ8JVE"} 
+                        // Usamos el resolver inteligente
+                        url={getVideoSource()} 
                         width="100%"
                         height="100%"
-                        playing={isPlaying}
+                        playing={isPlaying} 
                         controls={true}
-                        // [HOOK] El evento clave para tu lógica de progreso
-                        onEnded={handleVideoEnded} 
-                        // Configuración limpia para YouTube (sin sugerencias externas)
-                        config={{
-                            youtube: { playerVars: { showinfo: 1, modestbranding: 1, rel: 0 } }
-                        }}
+                        onEnded={handleVideoEnded}
+                        config={PLAYER_CONFIG}
+                        // Fallback de estilo
+                        style={{ backgroundColor: '#000' }} 
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-500">
-                        <Loader2 className="animate-spin mr-2" /> Cargando contenido...
+                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 bg-gray-900">
+                        <Loader2 className="animate-spin mb-3 text-emerald-500" size={32} /> 
+                        <span className="text-sm font-medium tracking-wide">Cargando contenido multimedia...</span>
                     </div>
                 )}
             </div>
 
-            {/* [MÓVIL] TABS */}
+            {/* --- TABS (SOLO MOBILE) --- */}
             <div className="block 2xl:hidden flex-1 bg-white dark:bg-[#0B1121]">
                 <div className="flex border-b border-gray-200 dark:border-gray-800">
-                    <button 
-                        onClick={() => setActiveTab('resources')}
-                        className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'resources' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500'}`}
-                    >
-                        Recursos
-                    </button>
-                    <button 
-                        onClick={() => setActiveTab('notes')}
-                        className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'notes' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500'}`}
-                    >
-                        Notas
-                    </button>
+                    {[
+                        { id: TABS.RESOURCES, label: 'Recursos' },
+                        { id: TABS.NOTES, label: 'Mis Notas' }
+                    ].map(tab => (
+                        <button 
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`flex-1 py-4 text-sm font-medium border-b-2 transition-all ${
+                                activeTab === tab.id 
+                                ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/10' 
+                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
                 <ResourcesPanel activeTab={activeTab} />
             </div>
         </main>
 
-        {/* C. RIGHT COLUMN (Desktop Resources) */}
-        <aside className="hidden 2xl:flex w-80 flex-col bg-white dark:bg-[#0f1629] border-l border-gray-200 dark:border-gray-800 shrink-0 z-10">
+        {/* --- PANEL DERECHO (DESKTOP) --- */}
+        <aside className="hidden 2xl:flex w-96 flex-col bg-white dark:bg-[#0f1629] border-l border-gray-200 dark:border-gray-800 shrink-0 z-10 shadow-xl shadow-gray-200/50 dark:shadow-none">
             <div className="flex border-b border-gray-200 dark:border-gray-800">
-                <button 
-                    onClick={() => setActiveTab('resources')}
-                    className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'resources' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-gray-500'}`}
-                >
-                    Recursos
-                </button>
-                <button 
-                    onClick={() => setActiveTab('notes')}
-                    className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'notes' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-gray-500'}`}
-                >
-                    Notas
-                </button>
+                 {[
+                    { id: TABS.RESOURCES, label: 'Recursos' },
+                    { id: TABS.NOTES, label: 'Mis Notas' }
+                ].map(tab => (
+                    <button 
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex-1 py-4 text-sm font-medium border-b-2 transition-all ${
+                            activeTab === tab.id 
+                            ? 'border-emerald-500 text-emerald-600 bg-emerald-50/30' 
+                            : 'border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50'
+                        }`}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
                 <ResourcesPanel activeTab={activeTab} />
             </div>
         </aside>
