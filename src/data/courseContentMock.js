@@ -19,7 +19,7 @@ export const courseContentMock = {
             type: 'video', 
             isFree: true,
             // 👇 EL VIDEO QUE PEDISTE (Test F1 2026)
-            videoUrl: '/IMG_6217.MOV'
+            videoUrl: '../public/IMG_6217.MOV'
           },
           { 
             id: 'l_102', 
