@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import ReactPlayer from 'react-player'; // [ARCH] Universal Player (Soporta .MOV y YouTube)
+import ReactPlayer from 'react-player'; // [ARCH] Soporte híbrido: Archivos nativos y Streaming (YouTube)
 import { toast } from 'sonner';
 import { 
   Loader2, Download, MessageCircle, Menu, 
@@ -13,33 +13,43 @@ import { cursos } from '../data/cursos';
 import { courseContentMock } from '../data/courseContentMock'; 
 import { PlayerSidebar } from '../components/player/PlayerSidebar';
 
-// --- CONFIGURACIÓN DE INGENIERÍA ---
+// --- INGENIERÍA DE CONFIGURACIÓN ---
+
 /**
- * Constantes de configuración del reproductor.
- * Se extraen para evitar la recreación de objetos en cada renderizado (Performance).
+ * Configuración estática del reproductor para evitar recreación de objetos en el Render Cycle.
+ * Define comportamientos de seguridad y UI para diferentes proveedores.
  */
 const PLAYER_CONFIG = {
   youtube: { 
-    playerVars: { showinfo: 1, modestbranding: 1, rel: 0, origin: window.location.origin } 
+    playerVars: { 
+      showinfo: 1, 
+      modestbranding: 1, 
+      rel: 0, 
+      origin: window.location.origin // Seguridad: Restricción de dominio
+    } 
   },
   file: { 
     attributes: { 
-      controlsList: 'nodownload', // Seguridad básica: dificulta la descarga directa
+      controlsList: 'nodownload', // UX/Seguridad: Desincentiva la descarga directa
       disablePictureInPicture: false
     } 
   }
 };
 
-// [TESTING] Archivo local para pruebas cuando falla el streaming o no hay URL
-// Vite sirve archivos de la carpeta 'public' directamente en la raíz '/'
-const LOCAL_TEST_VIDEO = "/IMG_6217.MOV";
+/**
+ * [FALLBACK ASSET]
+ * Video de seguridad garantizado. Se usa cuando la fuente principal falla o es inexistente.
+ * NOTA: Al estar en 'public', se sirve desde la raíz del servidor.
+ */
+const LOCAL_TEST_VIDEO = "/demo-video.mp4"; 
 
 const TABS = { RESOURCES: 'resources', NOTES: 'notes' };
 
-// --- COMPONENTES VISUALES (UI) ---
+// --- COMPONENTES DE UI (Presentational Components) ---
+
 /**
- * ResourcesPanel: Panel lateral desacoplado.
- * Mantiene el principio de responsabilidad única (SRP) para la UI de recursos.
+ * ResourcesPanel
+ * Componente puro desacoplado para manejar la visualización de recursos laterales.
  */
 const ResourcesPanel = ({ activeTab }) => (
   <div className="p-6">
@@ -76,63 +86,63 @@ const ResourcesPanel = ({ activeTab }) => (
  * ------------------------------------------------------------------
  * PAGE: COURSE PLAYER (SMART CONTROLLER)
  * ------------------------------------------------------------------
- * Orquestador principal. Gestiona la lógica de reproducción híbrida (Local/Cloud).
+ * Arquitectura: Smart Container.
+ * Responsabilidad: Orquestación de estado, resolución de rutas y lógica de progreso.
  */
 const CoursePlayerPage = () => {
   const { id } = useParams();
   
-  // [INJECTION] Dependencias del Sistema
+  // [DEPENDENCIES] Inyección de servicios
   const { markLessonAsCompleted, isLessonCompleted } = useAuth(); 
 
-  // [STATE] Flujo de Datos UI
+  // [UI STATE]
   const [activeLesson, setActiveLesson] = useState(null);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(TABS.RESOURCES); 
   
-  // [STATE] Motor de Video
+  // [PLAYER STATE]
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef(null);
 
-  // [DATA] Selectores Memoizados (Optimización de Lectura)
+  // [DATA LAYER] Memoización para evitar búsquedas costosas en cada render
   const courseMetadata = useMemo(() => cursos.find(c => c.id === id), [id]);
   const courseContent = useMemo(() => courseContentMock[id] || courseContentMock['default'], [id]);
 
- // --- LÓGICA DE INICIALIZACIÓN ---
+  // --- LIFECYCLE: INICIALIZACIÓN ---
   useEffect(() => {
     const hasContent = courseContent?.modules?.[0]?.lessons?.length > 0;
 
     if (hasContent) {
-      // SOLUCIÓN: Usamos el patrón de actualización funcional.
-      // 'current' recibe el valor más fresco del estado sin añadir 'activeLesson' a las dependencias.
+      // Patrón de actualización funcional para garantizar atomicidad
       setActiveLesson(current => {
-        if (current) return current; // Si ya existe lección, no hacemos nada (evita re-render)
+        if (current) return current; // Preservar estado si ya existe (evita rebotes)
 
-        console.log("🚀 [Player] Inicializando curso:", courseMetadata?.title);
+        console.log(`🚀 [Player System] Inicializando contexto: ${courseMetadata?.title}`);
         return courseContent.modules[0].lessons[0];
       });
     }
-  }, [courseContent, courseMetadata]); // Ahora el array de dependencias es veraz y completo.
+  }, [courseContent, courseMetadata]); 
   
-  // --- HANDLERS (CONTROLADORES DE EVENTOS) ---
+  // --- BUSINESS LOGIC: HANDLERS ---
 
   const handleLessonChange = useCallback((lesson) => {
     setActiveLesson(lesson);
-    setIsPlaying(true); // UX: Si el usuario cambia manualmente, asumimos que quiere ver el video ya.
+    setIsPlaying(true); // UX: Autoplay implícito al cambiar lección manualmente
     
-    // Mobile UX: Scroll suave hacia arriba para ver el video
+    // UX Mobile: Reset del viewport para priorizar el video
     if (window.innerWidth < 1024) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, []);
 
   /**
-   * Gatillo de Progreso: Se dispara SOLAMENTE cuando el video termina.
-   * Conecta con el backend (simulado) para guardar el avance.
+   * Manejador de Progreso:
+   * Solo dispara la llamada al backend (simulado) cuando el media se consume totalmente.
+   * Implementa verificación de idempotencia para evitar llamadas duplicadas a la API.
    */
   const handleVideoEnded = useCallback(() => {
     if (!activeLesson) return;
 
-    // Patrón Idempotente: Evita llamadas duplicadas si ya estaba marcado.
     if (!isLessonCompleted(activeLesson.id)) {
         markLessonAsCompleted(id, activeLesson.id);
         
@@ -145,22 +155,47 @@ const CoursePlayerPage = () => {
   }, [activeLesson, id, isLessonCompleted, markLessonAsCompleted]);
 
   /**
-   * [RESOLVER] Determina la fuente del video.
-   * Prioridad: 
-   * 1. URL específica de la lección (si existe).
-   * 2. Video Local de Prueba (Fallback para desarrollo/test).
+   * [CORE ARCHITECTURE] RESOLUTOR DE FUENTE DE VIDEO INTELIGENTE (ADAPTER PATTERN)
+   * * Problema: La data puede venir "sucia" (rutas relativas ../public) o vacía.
+   * Solución: Normalizar cualquier input a una URL válida para el navegador.
    */
-  const getVideoSource = () => {
-  if (!activeLesson) return null;
-  
-  // Lógica Senior: Confiamos en la data. 
-  // Si hay videoUrl, la usamos (sea de YouTube o local).
-  // Si no hay, podemos retornar null o una imagen de placeholder, 
-  // pero NO un video hardcodeado oculto en el código.
-  return activeLesson.videoUrl;
-};
+  const resolveVideoSource = useCallback(() => {
+    // 1. Guard Clause: Sin lección, no hay render.
+    if (!activeLesson) return null;
 
-  // --- SAFEGUARDS (Pantallas de Carga/Error) ---
+    let { videoUrl } = activeLesson;
+
+    // 2. Fallback Strategy (Defensive Programming):
+    // Si la URL es nula, indefinida o vacía, inyectamos el asset local de seguridad.
+    if (!videoUrl || videoUrl.trim() === '') {
+        console.warn(`[Player Warning] URL no provista para lección "${activeLesson.id}". Usando Fallback.`);
+        return LOCAL_TEST_VIDEO;
+    }
+
+    // 3. External Source Pass-through:
+    // Si es YouTube, Vimeo o CDN externo, permitimos el paso directo.
+    if (videoUrl.startsWith('http') || videoUrl.startsWith('www.') || videoUrl.includes('youtu')) {
+        return videoUrl;
+    }
+
+    // 4. Local Path Sanitization (La lógica crítica):
+    // El navegador no ve carpetas físicas como 'public' ni entiende '../'.
+    // Transformamos rutas relativas de sistema de archivos en Rutas Absolutas de Servidor Web.
+    
+    // Eliminamos referencias a carpetas padres (../../) y la mención explícita a 'public'
+    // Ejemplo entrada: "../../public/demo-video.mp4" -> Salida intermedia: "/demo-video.mp4"
+    videoUrl = videoUrl.replace(/(\.\.\/)+public\//g, '').replace('public/', '');
+    
+    // Aseguramos que sea una ruta absoluta (Root Relative)
+    if (!videoUrl.startsWith('/')) {
+        videoUrl = `/${videoUrl}`;
+    }
+
+    return videoUrl;
+
+  }, [activeLesson]);
+
+  // --- SAFEGUARDS (Loading UI) ---
   if (!courseMetadata) {
     return (
       <div className="flex-1 bg-[#0B1121] flex items-center justify-center h-screen">
@@ -182,6 +217,7 @@ const CoursePlayerPage = () => {
             <button 
                 onClick={() => setSidebarOpen(true)}
                 className="lg:hidden p-2 -ml-2 text-gray-500 hover:text-emerald-500 active:bg-gray-100 dark:active:bg-gray-800 rounded-md transition-colors"
+                aria-label="Abrir menú de lecciones"
             >
                 <Menu size={20} />
             </button>
@@ -191,7 +227,7 @@ const CoursePlayerPage = () => {
                 <h1 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-md flex items-center gap-2">
                     {activeLesson?.title || "Cargando lección..."}
                     {isLessonCompleted(activeLesson?.id) && (
-                        <span title="Completada">
+                        <span title="Lección completada">
                           <CheckCircle size={14} className="text-emerald-500" />
                         </span>
                     )}
@@ -232,23 +268,32 @@ const CoursePlayerPage = () => {
         <main className="flex-1 flex flex-col min-w-0 overflow-y-auto custom-scrollbar bg-white dark:bg-[#0B1121]">
             
             {/* --- REPRODUCTOR DE VIDEO (CORE) --- */}
-            {/* Aspect Ratio 16:9 forzado con aspect-video de Tailwind */}
             <div className="w-full bg-black sticky top-0 z-10 shadow-2xl aspect-video group">
                 {activeLesson ? (
                     <ReactPlayer
-                        // [ARCH] Key es vital para forzar re-render completo al cambiar entre tipos de fuente (YouTube <-> Archivo Local)
+                        // [CRITICAL] Key fuerza la recreación del componente si cambia el ID, 
+                        // necesario para limpiar buffers internos entre tipos de video (YouTube vs File).
                         key={activeLesson.id} 
                         ref={playerRef}
-                        // Usamos el resolver inteligente
-                        url={getVideoSource()} 
+                        
+                        // Inyección de URL sanitizada y resuelta
+                        url={resolveVideoSource()} 
+                        
                         width="100%"
                         height="100%"
                         playing={isPlaying} 
                         controls={true}
                         onEnded={handleVideoEnded}
                         config={PLAYER_CONFIG}
-                        // Fallback de estilo
                         style={{ backgroundColor: '#000' }} 
+                        
+                        // [ERROR HANDLING] Manejo robusto de fallos de red o decodificación
+                        onError={(e) => {
+                            console.error("Error reproduciendo video:", e);
+                            toast.error("Error al cargar el video", {
+                                description: "Verifica tu conexión o el formato del archivo.",
+                            });
+                        }} 
                     />
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 bg-gray-900">

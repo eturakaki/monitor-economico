@@ -6,7 +6,7 @@
 
 export const courseContentMock = {
   'course_1': { // Master en Análisis Técnico
-    introVideo: "https://www.youtube.com/watch?v=aqz-KE-bpKQ", // Video de F1 solicitado
+    introVideo: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', 
     modules: [
       {
         id: 'mod_1',
@@ -18,8 +18,9 @@ export const courseContentMock = {
             duration: '15:00', 
             type: 'video', 
             isFree: true,
-            // 👇 EL VIDEO QUE PEDISTE (Test F1 2026)
-            videoUrl: '../public/IMG_6217.MOV'
+          
+            // En courseContentMock.js
+            videoUrl: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
           },
           { 
             id: 'l_102', 
@@ -27,8 +28,9 @@ export const courseContentMock = {
             duration: '20:00', 
             type: 'video', 
             isFree: false,
-            // Video diferente para probar el cambio (Trading real)
-            videoUrl: '/IMG_6217.MOV'
+
+            // En la lección l_101
+            videoUrl: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
           },
           { 
             id: 'l_103', 
@@ -50,7 +52,7 @@ export const courseContentMock = {
             duration: '25:00', 
             type: 'video', 
             isFree: false, 
-            videoUrl: '/IMG_6217.MOV'
+            videoUrl: '/demo-video.mp4'
           },
           { 
             id: 'l_202', 
