@@ -102,21 +102,42 @@ export const AuthProvider = ({ children }) => {
 
   /**
    * [NUEVO] Lógica de Progreso de Aprendizaje.
-   * Conecta el Player con el UserStatusService.
+   /**
+   * [CORREGIDO] Lógica de Progreso de Aprendizaje.
+   * Implementa Optimistic UI (Zero-Lag) y actualización defensiva.
    */
   const markLessonAsCompleted = useCallback(async (courseId, lessonId) => {
     if (!user) return;
 
-    // Optimistic UI: Evita llamar al servicio si ya está completada
+    // 1. Check de duplicados: Si ya la tiene, abortamos para no ensuciar el estado.
     if (user.completedLessons?.includes(lessonId)) return;
 
+    // 2. OPTIMISTIC UPDATE: Actualizamos la memoria INMEDIATAMENTE.
+    // Usamos el patrón de "Functional State Update" para garantizar que no perdemos
+    // datos si el usuario hace click muy rápido (concurrencia de React).
+    setUser((prevUser) => {
+        // Protección extra por si el usuario se deslogueó en el interin
+        if (!prevUser) return null; 
+
+        return {
+            ...prevUser, // Mantenemos nombre, plan, email, etc. (Defensive Merge)
+            completedLessons: [...(prevUser.completedLessons || []), lessonId]
+        };
+    });
+
     try {
-      // Background Sync: No bloqueamos la UI con un loader, es transparente
-      const updatedUser = await UserStatusService.updateLessonProgress(courseId, lessonId);
-      if (updatedUser) setUser(updatedUser);
+      // 3. BACKGROUND SYNC: Persistencia asíncrona.
+      // Ya no bloqueamos la UI esperando esto. El usuario ya vio su check verde.
+      await UserStatusService.updateLessonProgress(courseId, lessonId);
+      
+      // Nota: No hacemos setUser(response) aquí para evitar sobrescribir
+      // la versión optimista con datos viejos o parciales del backend.
+      
     } catch (error) {
-      console.error('Error saving progress:', error);
-      toast.error('No se pudo guardar el progreso');
+      console.error('[Auth] Sync error:', error);
+      // UX Decision: No revertimos el estado (Rollback) para no frustrar al usuario.
+      // Le avisamos que hubo un problema de red, pero mantenemos su "visto" localmente.
+      toast.warning('Progreso guardado localmente (Sin conexión)');
     }
   }, [user]);
 

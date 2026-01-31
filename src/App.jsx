@@ -246,10 +246,22 @@ function App() {
           */}
           <Route element={<ProtectedRoute />}>
             <Route element={<LearningLayout />}>
-              {/* Simplificamos: Una sola ruta dinámica que carga el Player */}
+              
+              {/* 1. RUTA ESPECÍFICA (La nueva "Verdad"): 
+                  Permite navegar directamente a una lección (ej: F5, Links compartidos).
+                  El componente leerá ambos IDs: courseId y lessonId. 
+              */}
+              <Route path="/curso/:courseId/leccion/:lessonId" element={<CoursePlayerPage />} />
+
+              {/* 2. RUTA GENÉRICA (Legacy / Fallback): 
+                  Mantiene compatibilidad. Si entras aquí, el componente 
+                  cargará la lección 1 por defecto (como hace hoy).
+              */}
               <Route path="/curso/:id" element={<CoursePlayerPage />} />
-              {/* Opcional: Alias para SEO o bookmarking */}
+              
+              {/* Alias opcional (lo mantenemos por si lo usabas) */}
               <Route path="/curso/:id/learn" element={<CoursePlayerPage />} />
+              
             </Route>
           </Route>
 

@@ -1,12 +1,11 @@
 /**
- * MOCK DATA LAYER - CONTENT DELIVERY
- * Estructura jerárquica: Curso -> Módulos -> Lecciones
- * UPDATED: Videos reales de YouTube para probar ReactPlayer
+ * MOCK DATA LAYER - UPDATED (HTTPS SECURE)
  */
 
 export const courseContentMock = {
-  'course_1': { // Master en Análisis Técnico
-    introVideo: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', 
+  'course_1': { 
+    introVideo: 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', 
+    title: 'Master en Análisis Técnico',
     modules: [
       {
         id: 'mod_1',
@@ -15,30 +14,27 @@ export const courseContentMock = {
           { 
             id: 'l_101', 
             title: 'Teoría de Dow y Ciclos de Mercado', 
-            duration: '15:00', 
+            duration: '10:34', 
             type: 'video', 
             isFree: true,
-          
-            // En courseContentMock.js
-            videoUrl: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+            videoSrc: 'https://www.w3schools.com/html/mov_bbb.mp4'
           },
           { 
             id: 'l_102', 
             title: 'Velas Japonesas: Lectura Institucional', 
-            duration: '20:00', 
+            duration: '12:00', 
             type: 'video', 
             isFree: false,
-
-            // En la lección l_101
-            videoUrl: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+            videoSrc: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' 
           },
           { 
             id: 'l_103', 
             title: 'Soportes y Resistencias Dinámicos', 
-            duration: '10:00', 
+            duration: '08:45', 
             type: 'video', 
             isFree: false,
-            // Sin URL para probar el Fallback (debería cargar el video por defecto)
+            // CORRECCIÓN LÁSER: Unificación de propiedad 'videoUrl' -> 'videoSrc'
+            videoSrc: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
           }
         ]
       },
@@ -49,53 +45,20 @@ export const courseContentMock = {
           { 
             id: 'l_201', 
             title: 'RSI: Divergencias Ocultas', 
-            duration: '25:00', 
+            duration: '15:00', 
             type: 'video', 
             isFree: false, 
-            videoUrl: '/demo-video.mp4'
-          },
-          { 
-            id: 'l_202', 
-            title: 'MACD y Medias Móviles', 
-            duration: '30:00', 
-            type: 'video', 
-            isFree: false 
-          },
-          { 
-            id: 'l_203', 
-            title: 'Quiz: Patrones de Reversión', 
-            duration: '15:00', 
-            type: 'quiz', 
-            isFree: false 
+            // CORRECCIÓN LÁSER: Unificación de propiedad 'videoUrl' -> 'videoSrc'
+            videoSrc: 'https://www.w3schools.com/html/mov_bbb.mp4'
           }
         ]
       }
     ]
   },
   
-  // Fallback genérico para otros cursos sin contenido específico
   'default': {
     introVideo: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-    modules: [
-      {
-        id: 'mod_def_1',
-        title: 'Módulo Introductorio',
-        lessons: [
-          { 
-            id: 'l_def_1', 
-            title: 'Bienvenida al Curso', 
-            duration: '05:00', 
-            type: 'video', 
-            videoUrl: '/IMG_6217.MOV'
-          },
-          { 
-            id: 'l_def_2', 
-            title: 'Configuración del Entorno', 
-            duration: '10:00', 
-            type: 'video' 
-          }
-        ]
-      }
-    ]
+    title: "Curso Demo",
+    modules: []
   }
 };

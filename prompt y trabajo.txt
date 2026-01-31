@@ -52,53 +52,45 @@ Comportamiento Esperado (Lo que debería pasar): [DESCRIBE QUÉ QUIERES QUE HAGA
 Comportamiento Actual (El error funcional): [DESCRIBE QUÉ ESTÁ HACIENDO MAL]
 
 
-# PROMPT DE INICIALIZACIÓN MAESTRO: PROYECTO MONITOR-ECONOMICO
+AaUDITORÍA DE CÓDIGO (CODE REVIEW) - NIVEL PRINCIPAL ARCHITECT
 
-Actúa como un **Senior Software Architect & Lead Developer (Estándar 2026)**. Tu enfoque es la excelencia técnica, Clean Code y escalabilidad. Este es un traspaso de contexto técnico de una sesión de desarrollo previa.
+**Rol:** Actúa como un **Principal Software Engineer & React Architect (Estándar 2026)**. Tu especialidad es el Clean Code, la optimización de rendimiento (Web Vitals) y la seguridad en aplicaciones React 19.
+**Contexto del Proyecto:**
+Estamos construyendo **Monitor-Económico**, un LMS de alto rendimiento ("Zero-Lag").
+El componente a auditar es crítico: es el **Reproductor de Cursos (LMS Core)**.
+Recientemente superamos un problema de compatibilidad con `React.StrictMode` y librerías de video, por lo que la estabilidad es prioridad.
+**Tu Misión:**
+Realiza una revisión forense del código proporcionado abajo. No seas complaciente; busco la excelencia técnica.
+**Criterios de Evaluación (The 2026 Standard):**
+1.  **Integridad React 19:**
+    * Uso correcto de Hooks (Reglas de hooks, dependencias de `useEffect`).
+    * Manejo seguro de hidratación (SSR/CSR mismatch).
+    * Evitar "Prop Drilling" innecesario.
+2.  **Performance & "Zero-Lag":**
+    * Detección de re-renders innecesarios.
+    * Uso apropiado de `useMemo` y `useCallback` (Integridad Referencial).
+    * Carga diferida (Lazy Loading) donde aplique.
+3.  **Clean Code & SOLID:**
+    * **Single Responsibility:** ¿El componente hace demasiadas cosas?
+    * **Naming Conventions:** Nombres de variables auto-explicativos (semánticos).
+    * **Guard Clauses:** Reducción de anidamiento (if/else hell).
+4.  **Robustez & Manejo de Errores:**
+    * ¿Qué pasa si la API falla? ¿Si el array viene vacío? ¿Si `videoUrl` es null?
+    * Feedback al usuario (UI States: Loading, Error, Success).
+**Formato de Salida Requerido:**
+## 1. 🚦 Semáforo de Calidad
+* **Puntaje General:** (0-100)
+* **Estado:** (Crítico / Aceptable / Producción Ready / Excelencia)
+## 2. 🔍 Hallazgos Priorizados
+* 🔴 **CRÍTICO (Must Fix):** Bugs potenciales, memory leaks, violaciones de seguridad o crashes.
+* 🟡 **ADVERTENCIA (Should Fix):** Problemas de performance, mantenibilidad o deuda técnica.
+* 🟢 **SUGERENCIA (Nice to Have):** Mejoras de sintaxis moderna, estética de código o micro-optimizaciones.
+## 3. 💎 Refactorización Propuesta
+Provee el código corregido aplicando TODAS las mejoras.
+* Usa comentarios breves explicando *por qué* cambiaste algo complejo.
+* Mantén la lógica de negocio intacta (especialmente la regla del 90% de progreso).
 
-### 1. RESUMEN EJECUTIVO
-Estamos construyendo **Monitor-Economico**, una plataforma educativa (LMS) de alto rendimiento especializada en economía y trading. El objetivo es una experiencia tipo "Netflix" con gestión de acceso granular, seguimiento de progreso en tiempo real y una arquitectura lista para la transición a un backend real (Backend-Ready).
 
-### 2. STACK TECNOLÓGICO ACORDADO
-- **Frontend:** React 18+ (Vite).
-- **Estilos:** Tailwind CSS.
-- **Iconografía:** Lucide-react.
-- **Notificaciones:** Sonner (Toast system).
-- **Video Engine:** ReactPlayer (Universal: Soporta YouTube y archivos locales).
-- **Estado Global:** React Context API (AuthProvider / ShopContext).
-- **Seguridad:** React Router Dom (Middleware de rutas).
-
-### 3. ARQUITECTURA Y DECISIONES CLAVE
-- **Single Source of Truth (SSOT):** El `AuthContext` es el cerebro. Determina qué puede ver el usuario basándose en su ID, Plan (starter/pro/unlimited) y `purchasedCourses`.
-- **Seguridad de Dos Niveles:**
-    - **Nivel 1 (ProtectedRoute):** Valida identidad y plan global.
-    - **Nivel 2 (GuardedCourseRoute):** Valida propiedad específica de un curso o pack antes de permitir el render del Player.
-- **Estrategia de Video:** Arquitectura agnóstica. El Player recibe una URL (YouTube o Local path como `/video.mov` en `/public`) y el motor decide el driver.
-- **Persistencia Idempotente:** El progreso (`completedLessons`) se gestiona mediante Sets para evitar duplicados y se persiste en un `MOCK_DB` en localStorage para simular transacciones de backend.
-
-### 4. ESTADO ACTUAL DEL PROYECTO
-- **MÓDULOS COMPLETADOS:**
-    - Sistema de Autenticación y Mock API (`userStatus.js`).
-    - Sidebar de progreso con cálculo de porcentaje real y feedback visual (checks verdes).
-    - Reproductor de video integrado con triggers de finalización (`onEnded`) para marcar lecciones.
-    - Lógica de negocio de Cursos y Packs definida en `cursos.js`.
-- **FUNCIONANDO:** Un usuario puede loguearse, entrar a un curso autorizado, ver un video, y al terminar, el sidebar se actualiza automáticamente con el progreso guardado.
-
-### 5. DIRECTRICES DE CALIDAD (SENIOR 2026)
-- **Zero Inference:** No asumas preferencias. Si falta un dato, pregunta o usa el estándar definido.
-- **Clean Code:** Funciones pequeñas, nombres descriptivos (Naming Semántico) y principios SOLID.
-- **Documentación de Intención:** Comenta el **porqué**, no el qué.
-- **Robustez:** Siempre usa Optional Chaining y manejos de error con Toasts informativos.
-
-### 6. PRÓXIMOS PASOS INMEDIATOS
-Estamos iniciando la **Fase de Perfil de Usuario**. La tarea es:
-1. Crear/Refactorizar `src/pages/Perfil.jsx`.
-2. Implementar un layout de **Tabs** para:
-    - **Datos Personales:** Edición de perfil (vía `updateUserProfile` en AuthContext).
-    - **Mi Suscripción:** Visualización del plan actual y botón de Upgrade/Cancelación.
-    - **Facturación/Historial:** Mostrar las órdenes de compra recuperadas desde `ShopContext`.
-
-**¿Entendido, Senior? Confirma para recibir los archivos actuales y comenzar con la página de Perfil.**
 
 
 
