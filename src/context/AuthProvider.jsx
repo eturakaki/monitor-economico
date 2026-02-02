@@ -92,14 +92,35 @@ export const AuthProvider = ({ children }) => {
     );
   }, [user]);
 
-  const updateUserProfile = useCallback(async () => {
+  // ✅ PEGA ESTO EN SU LUGAR
+  const updateUserProfile = useCallback(async (data) => {
     if (!user) return;
-    // Nota: Asumimos que UserStatusService tiene un método updateProfile (si no, habría que crearlo o usar fetchUser tras update)
-    // Por ahora simulamos la actualización optimista o re-fetch
-    toast.success('Perfil actualizado (Simulado)');
-    // setUser({ ...user, ...data }); // Optimistic update
-  }, [user]);
 
+    // 1. Snapshot para Rollback (por si falla internet)
+    const previousUser = { ...user };
+
+    // 2. Optimistic Update (UI Zero-Lag)
+    // Actualizamos la pantalla INMEDIATAMENTE
+    setUser((curr) => ({ ...curr, ...data }));
+
+    // 3. Llamada al Servidor (Background Sync)
+    return toast.promise(
+      UserStatusService.updateProfile(data).then((serverUser) => {
+        // Confirmamos con el dato real del servidor (SSOT)
+        setUser(serverUser);
+        return serverUser;
+      }),
+      {
+        loading: 'Sincronizando cambios...',
+        success: 'Perfil actualizado correctamente',
+        error: (err) => {
+          // 4. Rollback: Si falla, devolvemos al usuario al estado anterior
+          setUser(previousUser);
+          return `Error al guardar: ${err.message}`;
+        },
+      }
+    );
+  }, [user]);
   /**
    * [NUEVO] Lógica de Progreso de Aprendizaje.
    /**

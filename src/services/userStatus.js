@@ -244,6 +244,43 @@ export const UserStatusService = {
 
     return user;
   },
+  
+  /**
+   * [NUEVO] Actualización de Perfil
+   * Recibe datos parciales y actualiza la DB simulada.
+   */
+  async updateProfile(partialData) {
+    await _simulateLatency();
+
+    const sessionData = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
+    if (!sessionData) throw new Error('401: Sesión expirada');
+
+    const currentUser = JSON.parse(sessionData);
+    const db = _getDatabase();
+    const userIndex = db.users.findIndex(u => u.id === currentUser.id);
+
+    if (userIndex === -1) throw new Error('404: Usuario no encontrado');
+
+    // 🛡️ SECURITY LAYER
+    const allowedUpdates = {
+      name: partialData.name,
+      username: partialData.username,
+      bio: partialData.bio,
+      jobTitle: partialData.jobTitle,
+      location: partialData.location,
+      avatar: partialData.avatar,
+      website: partialData.website,
+    };
+
+    const updatedUser = { ...db.users[userIndex], ...allowedUpdates };
+
+    // Commit
+    db.users[userIndex] = updatedUser;
+    _persistUserState(db, updatedUser);
+
+    return updatedUser;
+  },
+
 
   /**
    * Upgrade de Plan (Suscripciones)

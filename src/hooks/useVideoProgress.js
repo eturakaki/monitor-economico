@@ -1,97 +1,109 @@
-/**
- * @file useVideoProgress.js
- * @version 3.9.0-Persistent
- * @description Hook defensivo para rastrear y persistir el progreso de video.
- * @strategy Direct DOM Access + LocalStorage Persistence
- */
+import { useRef, useCallback, useEffect } from 'react';
 
-import { useEffect, useRef } from 'react';
-
-// Constantes de Configuración
 const CONFIG = {
-    COMPLETION_THRESHOLD: 0.9, // 90%
-    HEARTBEAT_MS: 500,         // 500ms
-    STORAGE_KEY_PREFIX: 'mel_progress_' // "Monitor-Economico Learning"
+  COMPLETION_THRESHOLD: 0.9, 
+  SAVE_THROTTLE_MS: 2000,    
+  STORAGE_KEY_PREFIX: 'monitor_progress_'
 };
 
-/**
- * Helper para generar la clave de almacenamiento única por lección
- */
 export const getStoredProgress = (lessonId) => {
-    if (!lessonId) return 0;
-    try {
-        const saved = localStorage.getItem(`${CONFIG.STORAGE_KEY_PREFIX}${lessonId}`);
-        return saved ? parseFloat(saved) : 0;
-    } catch {
-        return 0;
-    }
+  if (!lessonId) return 0;
+  try {
+    const key = `${CONFIG.STORAGE_KEY_PREFIX}${lessonId}`;
+    const saved = localStorage.getItem(key);
+    const parsed = parseFloat(saved);
+    return Number.isFinite(parsed) ? parsed : 0;
+  } catch {
+    // [FIX] Eliminado el argumento (e) no utilizado.
+    // Si falla el parsing, simplemente retornamos 0 sin capturar la variable.
+    return 0;
+  }
 };
 
-export const useVideoProgress = ({ isPlaying, activeLessonId, onComplete }) => {
-    /**
-     * @ref metrics
-     * Source of Truth interna. Mantiene el estado sin provocar re-renders.
-     */
-    const metrics = useRef({
-        totalDuration: 0,
-        hasMarked: false,
-    });
+export const useVideoProgress = ({ activeLessonId, onComplete }) => {
+  const state = useRef({
+    duration: 0,
+    hasMarked: false,
+    lastSaveTime: 0
+  });
 
-    // 1. RESET LOGIC
-    // Cuando cambia la lección, reseteamos las métricas internas.
-    useEffect(() => {
-        metrics.current = {
-            totalDuration: 0,
-            hasMarked: false,
-        };
-    }, [activeLessonId]);
+  // Reset al cambiar de lección
+  useEffect(() => {
+    state.current = { duration: 0, hasMarked: false, lastSaveTime: 0 };
+  }, [activeLessonId]);
 
-    // 2. NUCLEAR HEARTBEAT & PERSISTENCE
-    useEffect(() => {
-        // Guard Clauses: Si no hay lección o no se reproduce, pausa.
-        if (!activeLessonId || !isPlaying || metrics.current.hasMarked) return;
+  // --- 1. MANEJADOR DE DURACIÓN (Híbrido) ---
+  const handleDuration = useCallback((input) => {
+    let duration = 0;
+    
+    // Caso A: ReactPlayer/YouTube (Número directo)
+    if (typeof input === 'number') {
+        duration = input;
+    } 
+    // Caso B: HTML5 Nativo
+    else if (input?.target?.duration) {
+        duration = input.target.duration;
+    }
+    // Caso C: Fallback Evento Nativo profundo
+    else if (input?.nativeEvent?.target?.duration) {
+        duration = input.nativeEvent.target.duration;
+    }
 
-        const intervalId = setInterval(() => {
-            // --- DOM ACCESS (Direct Strategy) ---
-            const nativeVideo = document.querySelector('video');
+    // Guardamos solo si es válido
+    if (Number.isFinite(duration) && duration > 0) {
+        state.current.duration = duration;
+    }
+  }, []);
 
-            if (!nativeVideo) return;
+  // --- 2. MANEJADOR DE PROGRESO (Híbrido) ---
+  const handleProgress = useCallback((progress) => {
+    if (!progress) return;
 
-            try {
-                const { currentTime, duration } = nativeVideo;
+    let currentSeconds = 0;
+    let currentPercent = 0;
 
-                // Validación de integridad de datos
-                if (!Number.isFinite(duration) || duration <= 0) return;
+    // ESTRATEGIA DE EXTRACCIÓN
+    // ---------------------------------------------------------
+    // Caso A: Objeto estándar de ReactPlayer
+    if (typeof progress.playedSeconds === 'number') {
+        currentSeconds = progress.playedSeconds;
+        currentPercent = progress.played;
+    } 
+    // Caso B: Evento Nativo (TU CASO)
+    // El evento nativo NO trae porcentaje, hay que calcularlo: (tiempo / duración)
+    else if (progress.target && typeof progress.target.currentTime === 'number') {
+        currentSeconds = progress.target.currentTime;
+        const totalDuration = state.current.duration;
+        
+        if (totalDuration > 0) {
+            currentPercent = currentSeconds / totalDuration;
+        }
+    }
+    else {
+        return; // Datos desconocidos, abortamos para evitar crash
+    }
+    // ---------------------------------------------------------
 
-                metrics.current.totalDuration = duration;
-                const percentage = currentTime / duration;
+    // 1. COMPLETITUD
+    const isThresholdMet = currentPercent >= CONFIG.COMPLETION_THRESHOLD;
 
-                // A) PERSISTENCIA: Guardamos el progreso exacto (segundos)
-                // Solo guardamos si el video no ha terminado
-                if (percentage < CONFIG.COMPLETION_THRESHOLD) {
-                    localStorage.setItem(
-                        `${CONFIG.STORAGE_KEY_PREFIX}${activeLessonId}`, 
-                        currentTime.toString()
-                    );
-                }
+    if (!state.current.hasMarked && isThresholdMet) {
+      state.current.hasMarked = true;
+      if (onComplete) onComplete();
+    }
 
-                // B) COMPLETION CHECK
-                if (percentage > CONFIG.COMPLETION_THRESHOLD) {
-                    metrics.current.hasMarked = true; 
-                    
-                    // Limpieza: Si ya terminó, borramos el progreso guardado para que
-                    // la próxima vez empiece de 0 (o se mantenga como "visto").
-                    localStorage.removeItem(`${CONFIG.STORAGE_KEY_PREFIX}${activeLessonId}`);
+    // 2. PERSISTENCIA
+    const now = Date.now();
+    if (now - state.current.lastSaveTime > CONFIG.SAVE_THROTTLE_MS) {
+        const key = `${CONFIG.STORAGE_KEY_PREFIX}${activeLessonId}`;
+        // Doble check de seguridad
+        if (typeof currentSeconds === 'number' && !isNaN(currentSeconds)) {
+            localStorage.setItem(key, currentSeconds.toString());
+            state.current.lastSaveTime = now;
+        }
+    }
 
-                    // Notificamos al padre
-                    if (onComplete) onComplete();
-                }
+  }, [activeLessonId, onComplete]);
 
-            } catch {
-                // Silencio intencional
-            }
-        }, CONFIG.HEARTBEAT_MS);
-
-        return () => clearInterval(intervalId);
-    }, [isPlaying, activeLessonId, onComplete]);
+  return { handleDuration, handleProgress, getStoredProgress };
 };
