@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { useShop } from '../context/ShopContext';
 import { useAuth } from '../hooks/useAuth';
 import { useCartAnalysis } from '../hooks/useCartAnalysis';
-import { getCheckoutSchema } from '../utils/checkoutSchemas'; // Asegúrate de que la ruta sea correcta
+import { getCheckoutSchema } from '../utils/checkoutSchemas'; 
 
 // UTILS
 const formatPrice = (value) => new Intl.NumberFormat('es-AR', {
@@ -21,25 +21,20 @@ const formatPrice = (value) => new Intl.NumberFormat('es-AR', {
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { cart, confirmPurchase } = useShop(); 
+  const { cart, processCheckout } = useShop(); 
   const { user, updateUserPlan } = useAuth();
   
   // 1. CEREBRO DE NEGOCIO (Análisis del carrito)
-  // FIX: Eliminado 'hasDigital' no utilizado
   const { requiresShipping, hasPhysical } = useCartAnalysis(cart);
 
   // 2. ESTADOS UI
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [purchasedSnapshot, setPurchasedSnapshot] = useState([]); // Snapshot para pantalla de éxito
-  const [useSameAddress, setUseSameAddress] = useState(true); // UX: Default true
-  // FIX: Estado para capturar el email confirmado y evitar usar watch() en render
+  const [purchasedSnapshot, setPurchasedSnapshot] = useState([]); 
+  const [useSameAddress, setUseSameAddress] = useState(true); 
   const [confirmedEmail, setConfirmedEmail] = useState('');
 
-  // 3. CONFIGURACIÓN DEL FORMULARIO (REACT HOOK FORM + ZOD)
-  // Calculamos qué esquema usar dinámicamente.
-  // TRUCO SENIOR: Si usa "Misma Dirección", relajamos la validación de envío 
-  // porque copiaremos los datos de facturación manualmente al enviar.
+  // 3. CONFIGURACIÓN DEL FORMULARIO
   const activeSchema = useMemo(() => 
     getCheckoutSchema(requiresShipping && !useSameAddress), 
   [requiresShipping, useSameAddress]);
@@ -48,7 +43,6 @@ export default function CheckoutPage() {
     register, 
     handleSubmit, 
     formState: { errors } 
-    // FIX: Eliminados 'setValue' y 'watch' no utilizados/incompatibles
   } = useForm({
     resolver: zodResolver(activeSchema),
     defaultValues: {
@@ -60,7 +54,6 @@ export default function CheckoutPage() {
       cardNumber: '',
       expiry: '',
       cvc: '',
-      // Campos de envío vacíos por defecto
       shippingAddress: '',
       shippingCity: '',
       shippingZip: '',
@@ -71,7 +64,7 @@ export default function CheckoutPage() {
   // 4. PROTECCIÓN DE RUTA
   useEffect(() => {
     if (cart.length === 0 && !paymentSuccess) {
-      navigate('/carrito'); // Redirección silenciosa si recarga y está vacío
+      navigate('/carrito'); 
     }
   }, [cart, paymentSuccess, navigate]);
 
@@ -87,38 +80,40 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
-      // A. PREPARACIÓN DEL PAYLOAD (Lógica de Same Address)
+      // A. PREPARACIÓN DEL PAYLOAD
       const finalData = { ...data };
       
       if (requiresShipping && useSameAddress) {
-        // Inyección explícita de datos para el Backend/Logística
         finalData.shippingAddress = data.billingAddress;
         finalData.shippingCity = data.billingCity;
         finalData.shippingZip = data.billingZip;
       }
 
-      // Simulamos latencia de pasarela (Stripe/MercadoPago)
+      // Simulamos latencia de pasarela
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // B. CAPTURA DE SNAPSHOT (Antes de limpiar el carrito)
+      // B. CAPTURA DE SNAPSHOT
       const itemsPurchased = [...cart];
       setPurchasedSnapshot(itemsPurchased);
-      // FIX: Capturamos el email del formulario en el momento del submit
       setConfirmedEmail(data.email);
 
-      // C. CONFIRMACIÓN Y LIMPIEZA
-      confirmPurchase(); // Esto vacía el carrito en ShopContext
+      // C. CONFIRMACIÓN Y LIMPIEZA (FIX APLICADO AQUÍ) 🚨
+      // Inyectamos el 'total' y la 'data' que ShopContext necesita desesperadamente
+      await processCheckout({
+          amount: total,    
+          ...finalData,     
+          paymentMethod: 'Credit Card' 
+      });
+      
       setPaymentSuccess(true);
 
-      // D. ACTIVACIÓN DE SERVICIOS DIGITALES (Zero-Lag)
-      // Buscamos si hay un plan en el snapshot
+      // D. ACTIVACIÓN DE SERVICIOS DIGITALES
       const planItem = itemsPurchased.find(item => 
         ['plan', 'subscription'].includes(item.type)
       );
 
       if (planItem) {
         console.info(`[Auto-Activation] Actualizando usuario a plan: ${planItem.id}`);
-        // await updateUserPlan(planItem.id); // Descomentar cuando esté conectado a API real
         updateUserPlan(planItem.id); 
       }
 
@@ -130,16 +125,17 @@ export default function CheckoutPage() {
 
     } catch (error) {
       console.error("Payment Error:", error);
-      toast.error('Error en el pago', { description: 'Intenta nuevamente o contacta soporte.' });
+      toast.error('Error en el pago', { 
+        description: error.message || 'Intenta nuevamente o contacta soporte.' 
+      });
       setIsSubmitting(false);
     }
   };
 
   // ---------------------------------------------------------------------------
-  // VISTA: PANTALLA DE ÉXITO (POLIMÓRFICA)
+  // VISTA: PANTALLA DE ÉXITO
   // ---------------------------------------------------------------------------
   if (paymentSuccess) {
-    // Usamos el snapshot porque el carrito real ya está vacío
     const showDigitalSuccess = purchasedSnapshot.some(i => ['plan', 'subscription', 'course'].includes(i.type));
     const showPhysicalSuccess = purchasedSnapshot.some(i => !['plan', 'subscription', 'course'].includes(i.type));
 
@@ -156,11 +152,10 @@ export default function CheckoutPage() {
             Gracias por confiar en Monitor-Económico.
           </p>
 
-          {/* FEEDBACK DINÁMICO */}
           <div className="space-y-3">
             {showDigitalSuccess && (
               <button 
-                onClick={() => navigate('/dashboard')} // O '/perfil'
+                onClick={() => navigate('/dashboard')} 
                 className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-900/20 transition-all flex items-center justify-center gap-2"
               >
                 <Rocket size={18} /> IR AL DASHBOARD AHORA
@@ -171,7 +166,6 @@ export default function CheckoutPage() {
               <div className="p-4 bg-slate-100 dark:bg-slate-900 rounded-xl text-sm text-slate-600 dark:text-slate-400 flex items-start gap-3 text-left">
                 <Truck className="flex-shrink-0 mt-0.5" size={18} />
                 <span>
-                  {/* FIX: Usamos el estado capturado en lugar de watch() */}
                   Te enviaremos el código de seguimiento a <b>{confirmedEmail}</b> en cuanto despachemos tus productos físicos.
                 </span>
               </div>
@@ -193,7 +187,6 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-in fade-in duration-500">
       
-      {/* HEADER */}
       <div className="mb-8">
         <button onClick={() => navigate('/carrito')} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors mb-4 group">
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform"/> Volver al Carrito
@@ -209,21 +202,19 @@ export default function CheckoutPage() {
         <div className="lg:col-span-7 space-y-8">
           <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             
-            {/* 1. DATOS DE FACTURACIÓN (Siempre visibles por Ley/Anti-Fraude) */}
+            {/* 1. DATOS DE FACTURACIÓN */}
             <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
                 <User size={20} className="text-emerald-500"/> Información de Facturación
               </h3>
               
               <div className="grid grid-cols-1 gap-5">
-                {/* Nombre */}
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre Completo</label>
                   <input {...register('fullName')} className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-lg text-sm outline-none transition-all ${errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 dark:border-slate-700 focus:ring-emerald-500'}`} placeholder="Como figura en tu DNI" />
                   {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName.message}</p>}
                 </div>
                 
-                {/* Email */}
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email</label>
                   <div className="relative">
@@ -233,7 +224,6 @@ export default function CheckoutPage() {
                   {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
                 </div>
 
-                {/* Dirección Facturación (Billing) */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Dirección de Facturación</label>
@@ -254,7 +244,7 @@ export default function CheckoutPage() {
               </div>
             </section>
 
-            {/* 2. DATOS DE ENVÍO (Condicional: Solo si requiresShipping) */}
+            {/* 2. DATOS DE ENVÍO */}
             {requiresShipping && (
               <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm animate-in slide-in-from-top-4 duration-500">
                 <div className="flex justify-between items-center mb-6">
@@ -262,7 +252,6 @@ export default function CheckoutPage() {
                     <Truck size={20} className="text-emerald-500"/> Datos de Envío
                   </h3>
                   
-                  {/* UX: Checkbox Inteligente */}
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input 
                       type="checkbox" 
@@ -274,7 +263,6 @@ export default function CheckoutPage() {
                   </label>
                 </div>
 
-                {/* Si no usa la misma dirección, mostramos los campos */}
                 {!useSameAddress && (
                   <div className="grid grid-cols-1 gap-5 animate-in fade-in duration-300">
                      <div className="col-span-2">
@@ -309,9 +297,8 @@ export default function CheckoutPage() {
               </section>
             )}
 
-            {/* 3. DATOS DE PAGO (Tarjeta) */}
+            {/* 3. DATOS DE PAGO */}
             <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
-               {/* Decoración Background */}
               <div className="absolute top-0 right-0 p-4 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
                 <CreditCard size={120} />
               </div>
@@ -321,7 +308,6 @@ export default function CheckoutPage() {
               </h3>
               
               <div className="grid grid-cols-1 gap-5 relative z-10">
-                {/* Número */}
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Número de Tarjeta</label>
                   <div className="relative">
@@ -336,7 +322,6 @@ export default function CheckoutPage() {
                   {errors.cardNumber && <p className="text-red-500 text-xs mt-1">{errors.cardNumber.message}</p>}
                 </div>
                 
-                {/* Vencimiento y CVC */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Vencimiento</label>
@@ -376,7 +361,6 @@ export default function CheckoutPage() {
         <div className="lg:col-span-5">
           <div className="sticky top-24">
             <div className="bg-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl shadow-slate-900/20 relative overflow-hidden ring-1 ring-white/10">
-               {/* Decoración de fondo */}
                <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
                <h3 className="text-lg font-black uppercase tracking-widest mb-6 border-b border-white/10 pb-4">
@@ -407,8 +391,8 @@ export default function CheckoutPage() {
                </div>
 
                <button 
-                 type="submit" // Trigger al formulario
-                 form="checkout-form" // Link al ID del form fuera de este div
+                 type="submit" 
+                 form="checkout-form" 
                  disabled={isSubmitting}
                  className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-xl shadow-lg shadow-emerald-900/50 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3 relative overflow-hidden"
                >

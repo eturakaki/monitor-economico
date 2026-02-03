@@ -165,9 +165,11 @@ const CoursePlayerPage = () => {
     return flatLessons[currentIndex + 1] || null;
   }, [activeLesson, flatLessons]);
 
-  // 4. FALLBACK ROUTING
+ // 4. FALLBACK ROUTING
   useEffect(() => {
-    if (course && srcLessonId && flatLessons.length > 0) {
+    // CORRECCIÓN: Agregamos '!' antes de srcLessonId. 
+    // Solo redirigimos si NO hay una lección seleccionada en la URL.
+    if (course && !srcLessonId && flatLessons.length > 0) {
         // Redirigimos usando el ID que encontramos (courseId)
         navigate(`/curso/${courseId}/leccion/${flatLessons[0].id}`, { replace: true });
     }
