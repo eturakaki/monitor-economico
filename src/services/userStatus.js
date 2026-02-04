@@ -1,24 +1,19 @@
 /**
  * @file userStatus.js
- * @description MOCK API & SECURITY LAYER V2.5 (Backend-Ready)
- * Simula un entorno de backend robusto con gestión de ACLs (Access Control Lists),
- * persistencia de progreso y transacciones atómicas simuladas.
- * * @version 2.5.0 - Architecture Upgrade
- * @author Senior Architect (MonitorEco)
+ * @description MOCK API & SECURITY LAYER V2.6 (Data Sync)
+ * Simula un entorno de backend robusto con gestión de ACLs y consistencia de datos.
+ * * @version 2.6.0 - ID Synchronization
  */
 
 // --- ⚙️ CONFIGURACIÓN DEL ENTORNO ---
 const ENV_CONFIG = {
-  // Latencia: Simulamos "Jitter" de red real para forzar Spinners en UI.
   LATENCY: { MIN: 300, MAX: 1200 }, 
-  // Chaos Monkey: Probabilidad reducida para desarrollo, pero presente.
   FAILURE_RATE: 0.02, 
   STORAGE_KEY: 'monitoreco_session_v2',
   DB_KEY: 'monitoreco_mock_db_v2'
 };
 
 // --- 🗄️ ESQUEMA DE DATOS (DATA CONTRACT) ---
-// Definimos la estructura canónica del usuario para garantizar consistencia.
 const INITIAL_DB = {
   users: [
     { 
@@ -27,10 +22,9 @@ const INITIAL_DB = {
       name: 'Admin User', 
       plan: 'unlimited', 
       role: 'admin', 
-      // [NUEVO] ACL: Listas de control de acceso y progreso
-      purchasedCourses: [], // Admin tiene bypass, pero mantenemos la estructura
+      purchasedCourses: [], 
       completedLessons: [],
-      lastActivity: {}, // Mapa { courseId: lessonId }
+      lastActivity: {}, 
       createdAt: '2025-01-01T00:00:00Z' 
     },
     { 
@@ -39,9 +33,10 @@ const INITIAL_DB = {
       name: 'Trader Pro', 
       plan: 'pro', 
       role: 'user', 
-      purchasedCourses: ['course_1', 'course_2'], // Datos pre-cargados
-      completedLessons: ['l_101'],
-      lastActivity: { 'course_1': 'l_101' },
+      // [FIX] Sincronización con IDs de course.service.js
+      purchasedCourses: ['course_macro_101', 'course_trading_adv'], 
+      completedLessons: ['course_macro_101_l_101'], // IDs consistentes
+      lastActivity: { 'course_macro_101': 'course_macro_101_l_101' },
       createdAt: '2026-01-15T10:30:00Z' 
     },
     { 
@@ -58,7 +53,7 @@ const INITIAL_DB = {
   ]
 };
 
-// --- 🔧 PRIVATE HELPERS (CORE ENGINE) ---
+// --- 🔧 PRIVATE HELPERS ---
 
 const _simulateLatency = () => {
   const delay = Math.floor(
@@ -74,16 +69,10 @@ const _triggerChaosMonkey = () => {
   }
 };
 
-/**
- * Obtiene la DB asegurando migraciones de esquema en caliente.
- * Si el usuario guardado no tiene los campos nuevos, los inyecta.
- */
 const _getDatabase = () => {
   const stored = localStorage.getItem(ENV_CONFIG.DB_KEY);
   const db = stored ? JSON.parse(stored) : INITIAL_DB;
   
-  // Micro-migración: Asegurar que todos los usuarios tengan los arrays nuevos
-  // Esto previene crashes si la DB vieja sigue en localStorage.
   db.users = db.users.map(u => ({
     ...u,
     purchasedCourses: u.purchasedCourses ?? [],
@@ -94,16 +83,9 @@ const _getDatabase = () => {
   return db;
 };
 
-/**
- * Transaction Commit: Guarda en DB y actualiza la sesión activa.
- * Centraliza la lógica de escritura para evitar desincronización.
- */
 const _persistUserState = (db, updatedUser) => {
-  // 1. Guardar en "Disco" (DB Mock)
   localStorage.setItem(ENV_CONFIG.DB_KEY, JSON.stringify(db));
   
-  // 2. Actualizar "Cookie" (Sesión Local)
-  // Solo actualizamos la sesión si el usuario modificado es el actual.
   const currentSession = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
   if (currentSession) {
     const sessionUser = JSON.parse(currentSession);
@@ -113,14 +95,10 @@ const _persistUserState = (db, updatedUser) => {
   }
 };
 
-// --- 🚀 SERVICE LAYER (PUBLIC API) ---
+// --- 🚀 SERVICE LAYER ---
 
 export const UserStatusService = {
   
-  /**
-   * Autenticación básica.
-   * Inicializa al usuario con el esquema completo si es nuevo.
-   */
   async login({ email }) {
     await _simulateLatency();
     _triggerChaosMonkey();
@@ -129,20 +107,18 @@ export const UserStatusService = {
     let user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
     if (!user) {
-      // Registro de usuario nuevo (Pattern: Default Props)
       user = {
         id: `usr_${crypto.randomUUID().split('-')[0]}`,
         email,
         name: email.split('@')[0],
         plan: 'starter',
         role: 'user',
-        purchasedCourses: [], // Init vacío
-        completedLessons: [], // Init vacío
+        purchasedCourses: [], 
+        completedLessons: [], 
         lastActivity: {},
         createdAt: new Date().toISOString()
       };
       db.users.push(user);
-      // Nota: Guardamos toda la DB, no solo el usuario
       localStorage.setItem(ENV_CONFIG.DB_KEY, JSON.stringify(db));
     }
 
@@ -152,7 +128,6 @@ export const UserStatusService = {
 
   async fetchUser() {
     await _simulateLatency();
-    // Bypass de Chaos Monkey para evitar bloqueos en carga inicial (Critical Path)
     
     const sessionData = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
     if (!sessionData) return null;
@@ -160,7 +135,6 @@ export const UserStatusService = {
     const sessionUser = JSON.parse(sessionData);
     const db = _getDatabase();
     
-    // Re-hidratación: Buscamos la versión más fresca del usuario en la DB
     const freshUser = db.users.find(u => u.id === sessionUser.id);
     
     if (!freshUser) {
@@ -177,14 +151,8 @@ export const UserStatusService = {
     return true;
   },
 
-  /**
-   * [CORE] Gestión de Compras y Packs.
-   * Recibe un array de IDs (productIds) para soportar carritos mixtos o packs.
-   * @param {string[]} productIds - Array de IDs de cursos a desbloquear.
-   */
   async grantAccess(productIds) {
     await _simulateLatency();
-    // Validamos sesión
     const sessionData = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
     if (!sessionData) throw new Error('401: Unauthorized');
     
@@ -194,61 +162,15 @@ export const UserStatusService = {
 
     if (userIndex === -1) throw new Error('404: User not found');
 
-    // Lógica de Unión de Sets (Idempotencia)
-    // Evita duplicados si compras un pack que incluye un curso que ya tenías.
     const currentCourses = new Set(db.users[userIndex].purchasedCourses);
     productIds.forEach(id => currentCourses.add(id));
 
-    // Commit
     db.users[userIndex].purchasedCourses = Array.from(currentCourses);
     _persistUserState(db, db.users[userIndex]);
 
     return db.users[userIndex];
   },
 
-  /**
-   * [CORE] Seguimiento de Progreso.
-   * Se llama cuando termina un video (onEnded).
-   * @param {string} courseId - Contexto del curso.
-   * @param {string} lessonId - ID único de la lección terminada.
-   */
-  async updateLessonProgress(courseId, lessonId) {
-    // Latencia mínima para feedback rápido en UI (Optimistic UI support)
-    await new Promise(r => setTimeout(r, 300)); 
-
-    const sessionData = localStorage.getItem(ENV_CONFIG.STORAGE_KEY);
-    if (!sessionData) return null; // Silent fail si no hay sesión
-
-    const currentUser = JSON.parse(sessionData);
-    const db = _getDatabase();
-    const userIndex = db.users.findIndex(u => u.id === currentUser.id);
-
-    if (userIndex === -1) return null;
-
-    const user = db.users[userIndex];
-
-    // 1. Marcar como completada (Set para evitar duplicados)
-    const completedSet = new Set(user.completedLessons);
-    completedSet.add(lessonId);
-    user.completedLessons = Array.from(completedSet);
-
-    // 2. Actualizar puntero de "Última actividad" para Resume
-    user.lastActivity = {
-        ...user.lastActivity,
-        [courseId]: lessonId
-    };
-
-    // Commit
-    db.users[userIndex] = user;
-    _persistUserState(db, user);
-
-    return user;
-  },
-  
-  /**
-   * [NUEVO] Actualización de Perfil
-   * Recibe datos parciales y actualiza la DB simulada.
-   */
   async updateProfile(partialData) {
     await _simulateLatency();
 
@@ -261,7 +183,6 @@ export const UserStatusService = {
 
     if (userIndex === -1) throw new Error('404: Usuario no encontrado');
 
-    // 🛡️ SECURITY LAYER
     const allowedUpdates = {
       name: partialData.name,
       username: partialData.username,
@@ -273,18 +194,11 @@ export const UserStatusService = {
     };
 
     const updatedUser = { ...db.users[userIndex], ...allowedUpdates };
-
-    // Commit
-    db.users[userIndex] = updatedUser;
     _persistUserState(db, updatedUser);
 
     return updatedUser;
   },
 
-
-  /**
-   * Upgrade de Plan (Suscripciones)
-   */
   async updatePlan(newPlanId) {
     await _simulateLatency();
     _triggerChaosMonkey();
@@ -301,10 +215,7 @@ export const UserStatusService = {
     const db = _getDatabase();
     const userIndex = db.users.findIndex(u => u.id === currentUser.id);
     
-    // Actualizar Plan
     db.users[userIndex].plan = newPlanId;
-    
-    // Commit
     _persistUserState(db, db.users[userIndex]);
 
     return db.users[userIndex];

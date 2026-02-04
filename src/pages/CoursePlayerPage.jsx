@@ -2,7 +2,7 @@
  * @file CoursePlayerPage.jsx
  * @description Controlador Principal: Layout estilo Udemy con Sidebar Izquierdo.
  * @architecture Smart Container / Event-Driven
- * @version 3.2.0 (Self-Healing Router Params)
+ * @version 3.3.0 (Async Smart Resume)
  */
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -23,7 +23,8 @@ import { PlayerSidebar } from '../components/player/PlayerSideBar';
 import VideoErrorBoundary from '../components/player/VideoErrorBoundary';
 
 // --- DOMAIN LOGIC ---
-import { useVideoProgress, getStoredProgress } from '../hooks/useVideoProgress';
+// [PATCH 1] Eliminado 'getStoredProgress' (Ya no existe, ahora es fetchStoredTime del hook)
+import { useVideoProgress } from '../hooks/useVideoProgress';
 
 // ==========================================
 // ⚙️ CONFIGURATION
@@ -131,7 +132,6 @@ const CoursePlayerPage = () => {
   const params = useParams();
   const navigate = useNavigate();
 
-  // [FIX CRÍTICO]: Leemos 'courseId' O 'id'. Así funciona con TU App.jsx actual sin tocar nada más.
   const courseId = params.courseId || params.id;
   const srcLessonId = params.lessonId;
   
@@ -167,13 +167,11 @@ const CoursePlayerPage = () => {
 
  // 4. FALLBACK ROUTING
   useEffect(() => {
-    // CORRECCIÓN: Agregamos '!' antes de srcLessonId. 
-    // Solo redirigimos si NO hay una lección seleccionada en la URL.
     if (course && !srcLessonId && flatLessons.length > 0) {
-        // Redirigimos usando el ID que encontramos (courseId)
         navigate(`/curso/${courseId}/leccion/${flatLessons[0].id}`, { replace: true });
     }
   }, [course, srcLessonId, flatLessons, courseId, navigate]);
+
   // ==========================================
   // 🕹️ LOGIC: AUTO-ADVANCE
   // ==========================================
@@ -232,8 +230,8 @@ const CoursePlayerPage = () => {
       }
   }, [courseId, activeLesson, nextLesson, markLessonAsCompleted, triggerAutoAdvance]);
 
-  // Hook de Progreso
-  const { handleProgress, handleDuration } = useVideoProgress({
+  // [PATCH 2] Destructuring: Obtenemos 'fetchStoredTime' del Hook
+  const { handleProgress, handleDuration, fetchStoredTime } = useVideoProgress({
       activeLessonId: activeLesson?.id,
       onComplete: handleLessonCompleted
   });
@@ -242,21 +240,26 @@ const CoursePlayerPage = () => {
   // 🎮 PLAYER HANDLERS
   // ==========================================
 
-  const handlePlayerReady = useCallback(() => {
+  // [PATCH 3] Async Handler: Esperamos la promesa de fetchStoredTime
+  const handlePlayerReady = useCallback(async () => {
       setIsReady(true);
       
       if (activeLesson?.id && playerRef.current) {
-          const savedTime = getStoredProgress(activeLesson.id);
-          // Smart Resume
-          if (savedTime > 5 && !isLessonCompleted(activeLesson.id)) {
-              try {
+          try {
+              // Obtenemos tiempo de forma asíncrona (Soporte API/Mock)
+              const savedTime = await fetchStoredTime();
+              
+              // Smart Resume Lógica
+              if (savedTime > 5 && !isLessonCompleted(activeLesson.id)) {
+                  console.log(`[SmartResume] Restaurando en: ${savedTime}s`);
+                  // Buscamos el segundo exacto
                   playerRef.current.seekTo(savedTime, 'seconds');
-              } catch {
-                  // Fallo silencioso intencional si el seek falla
               }
+          } catch (error) {
+              console.warn("[Player] Error recuperando tiempo:", error);
           }
       }
-  }, [activeLesson, isLessonCompleted]);
+  }, [activeLesson, isLessonCompleted, fetchStoredTime]);
 
   // Limpieza
   useEffect(() => {
@@ -336,30 +339,27 @@ const CoursePlayerPage = () => {
 
                     <VideoErrorBoundary onRetry={() => setIsPlaying(true)}>
                         {activeLesson ? (
-                            // Ubicación aproximada: Línea 330-350 de CoursePlayerPage.jsx
-<ReactPlayer
-    key={activeLesson.id} 
-    ref={playerRef}
-    // Usamos una src limpia
-    src={activeLesson.videoSrc || activeLesson.videoSrc || ''} 
-    width="100%"
-    height="100%"
-    playing={isPlaying} 
-    controls={true}
-    config={PLAYER_CONFIG}
-    style={{ backgroundColor: '#000' }} 
-    
-    // Handlers corregidos para la API de ReactPlayer
-    onReady={handlePlayerReady}
-    onProgress={handleProgress}
-    onDurationChange={handleDuration} // ReactPlayer lo mapeará internamente de forma correcta
-    onEnded={handleLessonCompleted} // Simplificamos: al terminar, completa lección
-    onPlay={() => {
-        setIsPlaying(true);
-        cancelAutoAdvance(); 
-    }}
-    onPause={() => setIsPlaying(false)}
-/>
+                            <ReactPlayer
+                                key={activeLesson.id} 
+                                ref={playerRef}
+                                src={activeLesson.videoSrc || ''} 
+                                width="100%"
+                                height="100%"
+                                playing={isPlaying} 
+                                controls={true}
+                                config={PLAYER_CONFIG}
+                                style={{ backgroundColor: '#000' }} 
+                                
+                                onReady={handlePlayerReady}
+                                onProgress={handleProgress}
+                                onDurationChange={handleDuration}
+                                onEnded={handleLessonCompleted} 
+                                onPlay={() => {
+                                    setIsPlaying(true);
+                                    cancelAutoAdvance(); 
+                                }}
+                                onPause={() => setIsPlaying(false)}
+                            />
                         ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center text-gray-500">
                                 <Play size={48} className="text-gray-700 opacity-50" />

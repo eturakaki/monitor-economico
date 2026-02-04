@@ -1,33 +1,26 @@
+/**
+ * @file useVideoProgress.js
+ * @description HOOK DE TELEMETRÍA DE VIDEO
+ * Gestiona la detección de progreso, throttling de guardado y completitud.
+ * * @version 2.0.0 (Service-Connected)
+ */
+
 import { useRef, useCallback, useEffect } from 'react';
+import { progressService } from '../services/learning/progress.service';
 
 const CONFIG = {
   COMPLETION_THRESHOLD: 0.9, 
-  SAVE_THROTTLE_MS: 2000,    
-  STORAGE_KEY_PREFIX: 'monitor_progress_'
+  SAVE_THROTTLE_MS: 5000, // Aumentado a 5s para reducir tráfico de red real
 };
 
-export const getStoredProgress = (lessonId) => {
-  if (!lessonId) return 0;
-  try {
-    const key = `${CONFIG.STORAGE_KEY_PREFIX}${lessonId}`;
-    const saved = localStorage.getItem(key);
-    const parsed = parseFloat(saved);
-    return Number.isFinite(parsed) ? parsed : 0;
-  } catch {
-    // [FIX] Eliminado el argumento (e) no utilizado.
-    // Si falla el parsing, simplemente retornamos 0 sin capturar la variable.
-    return 0;
-  }
-};
-
-export const useVideoProgress = ({ activeLessonId, onComplete }) => {
+export const useVideoProgress = ({ courseId, activeLessonId, onComplete }) => {
   const state = useRef({
     duration: 0,
     hasMarked: false,
     lastSaveTime: 0
   });
 
-  // Reset al cambiar de lección
+  // Reset de estado interno al cambiar de lección
   useEffect(() => {
     state.current = { duration: 0, hasMarked: false, lastSaveTime: 0 };
   }, [activeLessonId]);
@@ -36,74 +29,77 @@ export const useVideoProgress = ({ activeLessonId, onComplete }) => {
   const handleDuration = useCallback((input) => {
     let duration = 0;
     
-    // Caso A: ReactPlayer/YouTube (Número directo)
+    // Extracción robusta de duración (HTML5 / ReactPlayer)
     if (typeof input === 'number') {
         duration = input;
-    } 
-    // Caso B: HTML5 Nativo
-    else if (input?.target?.duration) {
+    } else if (input?.target?.duration) {
         duration = input.target.duration;
-    }
-    // Caso C: Fallback Evento Nativo profundo
-    else if (input?.nativeEvent?.target?.duration) {
+    } else if (input?.nativeEvent?.target?.duration) {
         duration = input.nativeEvent.target.duration;
     }
 
-    // Guardamos solo si es válido
     if (Number.isFinite(duration) && duration > 0) {
         state.current.duration = duration;
     }
   }, []);
 
-  // --- 2. MANEJADOR DE PROGRESO (Híbrido) ---
+  // --- 2. MANEJADOR DE PROGRESO (Core Logic) ---
   const handleProgress = useCallback((progress) => {
     if (!progress) return;
 
     let currentSeconds = 0;
     let currentPercent = 0;
 
-    // ESTRATEGIA DE EXTRACCIÓN
-    // ---------------------------------------------------------
-    // Caso A: Objeto estándar de ReactPlayer
+    // A. Extracción de Tiempo
     if (typeof progress.playedSeconds === 'number') {
         currentSeconds = progress.playedSeconds;
         currentPercent = progress.played;
-    } 
-    // Caso B: Evento Nativo (TU CASO)
-    // El evento nativo NO trae porcentaje, hay que calcularlo: (tiempo / duración)
-    else if (progress.target && typeof progress.target.currentTime === 'number') {
+    } else if (progress.target && typeof progress.target.currentTime === 'number') {
         currentSeconds = progress.target.currentTime;
         const totalDuration = state.current.duration;
-        
         if (totalDuration > 0) {
             currentPercent = currentSeconds / totalDuration;
         }
+    } else {
+        return; 
     }
-    else {
-        return; // Datos desconocidos, abortamos para evitar crash
-    }
-    // ---------------------------------------------------------
 
-    // 1. COMPLETITUD
+    // B. Lógica de Completitud (Threshold)
     const isThresholdMet = currentPercent >= CONFIG.COMPLETION_THRESHOLD;
 
     if (!state.current.hasMarked && isThresholdMet) {
       state.current.hasMarked = true;
+      
+      // 1. Notificar al Servicio (Persistencia)
+      progressService.markLessonAsCompleted(courseId, activeLessonId)
+        .catch(err => console.warn("Fallo al marcar completado:", err));
+
+      // 2. Notificar a la UI (Callback)
       if (onComplete) onComplete();
     }
 
-    // 2. PERSISTENCIA
+    // C. Persistencia de "Watch Time" (Throttling)
     const now = Date.now();
     if (now - state.current.lastSaveTime > CONFIG.SAVE_THROTTLE_MS) {
-        const key = `${CONFIG.STORAGE_KEY_PREFIX}${activeLessonId}`;
         // Doble check de seguridad
         if (typeof currentSeconds === 'number' && !isNaN(currentSeconds)) {
-            localStorage.setItem(key, currentSeconds.toString());
+            
+            // Guardado Asíncrono (Fire and Forget)
+            progressService.saveWatchTime(activeLessonId, currentSeconds)
+                .catch(err => console.warn("Error guardando progreso:", err));
+            
             state.current.lastSaveTime = now;
         }
     }
 
-  }, [activeLessonId, onComplete]);
+  }, [courseId, activeLessonId, onComplete]);
 
-  return { handleDuration, handleProgress, getStoredProgress };
+  // --- 3. HELPER DE RECUPERACIÓN (Async) ---
+  // Nota: Ahora devuelve una Promesa, el componente debe esperarla.
+  const fetchStoredTime = useCallback(async () => {
+    if (!activeLessonId) return 0;
+    return await progressService.getWatchTime(activeLessonId);
+  }, [activeLessonId]);
+
+  return { handleDuration, handleProgress, fetchStoredTime };
 };

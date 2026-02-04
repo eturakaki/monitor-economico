@@ -1,9 +1,12 @@
 /**
  * MOCK DATA LAYER - UPDATED (HTTPS SECURE)
+ * * @version 2.1.0 - ID Synchronization (course_macro_101)
  */
 
 export const courseContentMock = {
-  'course_1': { 
+  // [FIX] CORRECCIÓN DE LLAVE: De 'course_1' a 'course_macro_101'
+  // Esto sincroniza la data con el userStatus.js y el course.service.js
+  'course_macro_101': { 
     introVideo: 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', 
     title: 'Master en Análisis Técnico',
     modules: [
@@ -33,7 +36,6 @@ export const courseContentMock = {
             duration: '08:45', 
             type: 'video', 
             isFree: false,
-            // CORRECCIÓN LÁSER: Unificación de propiedad 'videoUrl' -> 'videoSrc'
             videoSrc: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
           }
         ]
@@ -48,7 +50,6 @@ export const courseContentMock = {
             duration: '15:00', 
             type: 'video', 
             isFree: false, 
-            // CORRECCIÓN LÁSER: Unificación de propiedad 'videoUrl' -> 'videoSrc'
             videoSrc: 'https://www.w3schools.com/html/mov_bbb.mp4'
           }
         ]

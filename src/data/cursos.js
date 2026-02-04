@@ -2,11 +2,11 @@ import { LineChart, BarChart3, Wallet, Building2, TrendingUp } from 'lucide-reac
 
 export const cursos = [
   {
-    id: 'course_1',
+    id: 'course_macro_101', // ✅ ID MAESTRO (Sincronizado)
     type: 'curso',
-    title: 'Master en Análisis Técnico', // [CHANGE] Standardized key
-    description: 'Domina la lectura de gráficos, patrones de velas y osciladores avanzados para operar como un institucional.', // [CHANGE] Standardized key
-    price: 45000, // [CHANGE] Standardized key
+    title: 'Master en Análisis Técnico', 
+    description: 'Domina la lectura de gráficos, patrones de velas y osciladores avanzados para operar como un institucional.', 
+    price: 45000, 
     nivel: 'Intermedio',
     duracion: '12 Horas',
     estudiantes: 1240,
@@ -14,10 +14,10 @@ export const cursos = [
     badge: 'BEST SELLER',
     color: 'emerald',
     Icono: LineChart,
-    image: 'https://images.unsplash.com/photo-1611974765270-ca12586343bb?q=80&w=1000&auto=format&fit=crop' // [CHANGE] Standardized key
+    image: 'https://images.unsplash.com/photo-1611974765270-ca12586343bb?q=80&w=1000&auto=format&fit=crop' 
   },
   {
-    id: 'course_2',
+    id: 'course_trading_adv', // ✅ ID MAESTRO (Sincronizado)
     type: 'curso',
     title: 'Valuación de Empresas (DCF)',
     description: 'Aprende a calcular el valor intrínseco de una compañía utilizando el método de Flujos de Fondos Descontados.',
@@ -32,7 +32,7 @@ export const cursos = [
     image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1000&auto=format&fit=crop'
   },
   {
-    id: 'course_3',
+    id: 'course_bonds_arg', // ✅ ID PROFESIONAL (Antes course_3)
     type: 'curso',
     title: 'Bonos y Renta Fija Arg.',
     description: 'Guía completa sobre Renta Fija Argentina: Bonos Soberanos, ONs, CER y Dollar Link.',
@@ -47,7 +47,7 @@ export const cursos = [
     image: 'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=1000&auto=format&fit=crop'
   },
   {
-    id: 'course_4',
+    id: 'course_portfolio_mgmt', // ✅ ID PROFESIONAL (Antes course_4)
     type: 'curso',
     title: 'Gestión de Portafolios',
     description: 'Cómo armar una cartera "All-Weather" que resista inflación, deflación y crisis cambiarias.',

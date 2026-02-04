@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { courseService } from '../services/courseService';
+import { courseService } from '../services/learning/course.service';
 
 /**
  * Hook personalizado para gestionar la obtención de datos del curso.
