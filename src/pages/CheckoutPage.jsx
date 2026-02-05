@@ -13,6 +13,8 @@ import { useShop } from '../context/ShopContext';
 import { useAuth } from '../hooks/useAuth';
 import { useCartAnalysis } from '../hooks/useCartAnalysis';
 import { getCheckoutSchema } from '../utils/checkoutSchemas'; 
+// ✅ IMPORTACIÓN CRÍTICA PARA LA CORRECCIÓN
+import { UserStatusService } from '../services/userStatus'; 
 
 // UTILS
 const formatPrice = (value) => new Intl.NumberFormat('es-AR', {
@@ -22,6 +24,7 @@ const formatPrice = (value) => new Intl.NumberFormat('es-AR', {
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, processCheckout } = useShop(); 
+  // Extraemos refreshUser si existe, o confiamos en que grantAccess persiste en DB
   const { user, updateUserPlan } = useAuth();
   
   // 1. CEREBRO DE NEGOCIO (Análisis del carrito)
@@ -97,8 +100,8 @@ export default function CheckoutPage() {
       setPurchasedSnapshot(itemsPurchased);
       setConfirmedEmail(data.email);
 
-      // C. CONFIRMACIÓN Y LIMPIEZA (FIX APLICADO AQUÍ) 🚨
-      // Inyectamos el 'total' y la 'data' que ShopContext necesita desesperadamente
+      // C. CONFIRMACIÓN Y LIMPIEZA
+      // Inyectamos el 'total' y la 'data' que ShopContext necesita
       await processCheckout({
           amount: total,    
           ...finalData,     
@@ -107,14 +110,34 @@ export default function CheckoutPage() {
       
       setPaymentSuccess(true);
 
-      // D. ACTIVACIÓN DE SERVICIOS DIGITALES
+      // --- LOGICA DE FULFILLMENT (ENTREGA DE ACTIVOS) ---
+
+      // D. ACTIVACIÓN DE SUSCRIPCIONES (PLANS)
       const planItem = itemsPurchased.find(item => 
         ['plan', 'subscription'].includes(item.type)
       );
 
       if (planItem) {
         console.info(`[Auto-Activation] Actualizando usuario a plan: ${planItem.id}`);
-        updateUserPlan(planItem.id); 
+        await updateUserPlan(planItem.id); 
+      }
+
+      // E. ACTIVACIÓN DE CURSOS (CORRECCIÓN "LÁSER" 🛠️)
+      // Filtramos solo los productos que son cursos digitales unitarios
+      const digitalCourses = itemsPurchased.filter(item => 
+        ['course', 'curso'].includes(item.type || item.category)
+      );
+
+      if (digitalCourses.length > 0) {
+        const courseIds = digitalCourses.map(c => c.id);
+        console.info(`[Auto-Activation] Otorgando acceso perpetuo a: ${courseIds.join(', ')}`);
+        
+        // 1. Persistimos en la "Base de Datos" (UserStatusService)
+        await UserStatusService.grantAccess(courseIds);
+        
+        // Nota: Al usar grantAccess, el localStorage se actualiza.
+        // Si useAuth escucha cambios de storage o recarga al navegar, 
+        // el usuario verá sus cursos inmediatamente.
       }
 
       toast.success('¡Pago Aprobado!', {
@@ -136,8 +159,8 @@ export default function CheckoutPage() {
   // VISTA: PANTALLA DE ÉXITO
   // ---------------------------------------------------------------------------
   if (paymentSuccess) {
-    const showDigitalSuccess = purchasedSnapshot.some(i => ['plan', 'subscription', 'course'].includes(i.type));
-    const showPhysicalSuccess = purchasedSnapshot.some(i => !['plan', 'subscription', 'course'].includes(i.type));
+    const showDigitalSuccess = purchasedSnapshot.some(i => ['plan', 'subscription', 'course', 'curso'].includes(i.type || i.category));
+    const showPhysicalSuccess = purchasedSnapshot.some(i => !['plan', 'subscription', 'course', 'curso'].includes(i.type || i.category));
 
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-900 animate-in zoom-in duration-300">
@@ -155,10 +178,10 @@ export default function CheckoutPage() {
           <div className="space-y-3">
             {showDigitalSuccess && (
               <button 
-                onClick={() => navigate('/dashboard')} 
+                onClick={() => navigate('/mis-cursos')} 
                 className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-900/20 transition-all flex items-center justify-center gap-2"
               >
-                <Rocket size={18} /> IR AL DASHBOARD AHORA
+                <Rocket size={18} /> IR A MIS CURSOS
               </button>
             )}
             

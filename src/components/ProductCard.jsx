@@ -7,20 +7,17 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// --- CORRECCIÓN DE RUTAS (FIX) ---
-// Usamos '../' porque 'components' y 'context' son hermanos dentro de 'src'
+// --- CONTEXTOS & HOOKS ---
 import { useShop } from '../context/ShopContext';       
 import { useWishlist } from '../context/WishlistContext'; 
+import { useAuth } from '../hooks/useAuth'; // ✅ [NUEVO] Conexión al SSOT de Permisos
 
 export function ProductCard({ product }) {
   const navigate = useNavigate();
   
-  // --- 2. HOOKS DESACOPLADOS ---
-  // A. Lógica Transaccional (Carrito)
-  // [MODIFICADO] Agregamos 'hasPurchased' para verificar historial
-  const { addToCart, removeFromCart, cart, hasPurchased } = useShop();
-  
-  // B. Lógica de Engagement (Wishlist - NUEVO CEREBRO)
+  // --- 1. HOOKS (CAPA DE LÓGICA) ---
+  const { hasAccessToCourse } = useAuth(); // ✅ ACL: Preguntamos por DERECHOS, no por compras
+  const { addToCart, removeFromCart, cart } = useShop(); // Solo para gestión del carrito
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const { 
@@ -29,7 +26,6 @@ export function ProductCard({ product }) {
     title = 'Sin Título', 
     description,          
     price = 0,            
-    // nivel,  <-- ELIMINADO: No se usa en la UI actualmente, limpiamos el linter.
     duracion, 
     rating = 0, 
     estudiantes, 
@@ -39,15 +35,20 @@ export function ProductCard({ product }) {
     image                 
   } = product || {};
 
-  // --- 3. ESTADOS DERIVADOS ---
+  // --- 2. LÓGICA DE ESTADO (COMPUTED PROPERTIES) ---
+  
   const isLiked = isInWishlist(id);
   const isAdded = cart.some(item => item.id === id);
 
-  // [NUEVO] Lógica de Propiedad: 
-  // Si ya lo compraste Y NO es un libro, lo marcamos como adquirido.
-  const isPurchased = hasPurchased(id) && type !== 'libro';
+  // ✅ [FIX CRÍTICO] La Verdad Única (SSOT):
+  // Usamos hasAccessToCourse del AuthProvider. 
+  // Esto devuelve TRUE si:
+  // a) Es Admin, b) Tiene Plan Unlimited, o c) Compró el curso individualmente.
+  // Mantenemos la exclusión de 'libros' si esa es tu regla de negocio actual.
+  const hasAccess = hasAccessToCourse(id);
+  const isUnlocked = hasAccess && type !== 'libro';
 
-  // Icono por defecto (Mantenemos tu lógica visual)
+  // Configuración Visual
   let IconoPrincipal = IconoProp || Video;
   if (!IconoProp) {
       switch (type) {
@@ -61,29 +62,29 @@ export function ProductCard({ product }) {
     style: 'currency', currency: 'ARS', minimumFractionDigits: 0
   }).format(price);
 
-  // --- HANDLERS ---
+  // --- 3. HANDLERS (INTERACCIÓN) ---
 
-  // Handler para Carrito (Mantenemos tu lógica de Toggle + Protección)
-  const handleCartAction = (e) => {
+  const handlePrimaryAction = (e) => {
     e.stopPropagation();
 
-    // [NUEVO] Si ya es tuyo, te llevo a verlo en lugar de comprarlo
-    if (isPurchased) {
-       navigate('/mis-cursos');
+    // A. MODO ACCESO: Si ya tiene permiso (Plan o Compra), entra directo.
+    if (isUnlocked) {
+       // UX IMPROVEMENT: Navegar directo al player/curso, no a la lista genérica
+       navigate(`/curso/${id}`); 
        return;
     }
 
+    // B. MODO COMPRA: Gestión del carrito
     if (isAdded) {
         removeFromCart(id);
-        toast.info("Eliminado del carrito", { duration: 2000 });
+        toast.info("Eliminado del carrito");
     } else {
         addToCart(product);
     }
   };
 
-  // Handler para Wishlist (NUEVO)
   const handleWishlistAction = (e) => {
-    e.stopPropagation(); // Evitamos navegar al detalle
+    e.stopPropagation(); 
     if (isLiked) {
         removeFromWishlist(id);
     } else {
@@ -97,7 +98,7 @@ export function ProductCard({ product }) {
       className="group relative flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-black/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
     >
       
-      {/* --- ZONA SUPERIOR --- */}
+      {/* --- ZONA IMAGEN --- */}
       <div className="relative h-48 overflow-hidden bg-slate-100 dark:bg-slate-800">
         {image ? (
             <>
@@ -114,14 +115,12 @@ export function ProductCard({ product }) {
             </div>
         )}
 
-        {/* Badge */}
         <div className="absolute top-3 left-3 z-20">
              <span className="backdrop-blur-md bg-white/90 dark:bg-slate-900/90 text-slate-900 dark:text-white text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider shadow-sm border border-slate-200 dark:border-slate-700">
                 {type}
             </span>
         </div>
 
-        {/* Wishlist Toggle CONECTADO */}
         <button 
             onClick={handleWishlistAction}
             className={`absolute top-3 right-3 z-20 p-2 rounded-full backdrop-blur-md shadow-sm border border-white/20 transition-all active:scale-90 ${
@@ -134,7 +133,7 @@ export function ProductCard({ product }) {
         </button>
       </div>
 
-      {/* --- ZONA INFERIOR --- */}
+      {/* --- ZONA CONTENIDO --- */}
       <div className="p-5 flex-1 flex flex-col">
         
         {badge && (
@@ -152,7 +151,6 @@ export function ProductCard({ product }) {
             {description}
         </p>
 
-        {/* Metadatos */}
         <div className="grid grid-cols-2 gap-y-2 mb-6 text-xs text-slate-500 dark:text-slate-400 font-medium">
             {duracion && (
                 <div className="flex items-center gap-1.5"><Clock size={14} className="text-emerald-500"/> {duracion}</div>
@@ -166,32 +164,37 @@ export function ProductCard({ product }) {
         {/* Footer */}
         <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex flex-col">
-                <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Precio</span>
+                <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">
+                    {isUnlocked ? 'Estado' : 'Precio'}
+                </span>
                 <span className="text-xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
-                    {/* [VISUAL] Si ya lo compraste, mostramos 'ADQUIRIDO' en lugar del precio */}
-                    {isPurchased ? 'ADQUIRIDO' : precioFinal}
+                    {/* ✅ UX: Feedback Visual Claro */}
+                    {isUnlocked ? (
+                        <span className="text-emerald-600 dark:text-emerald-400">ACCESO TOTAL</span>
+                    ) : (
+                        precioFinal
+                    )}
                 </span>
             </div>
 
-            {/* Botón de Compra Inteligente */}
             <button 
-              onClick={handleCartAction}
+              onClick={handlePrimaryAction}
               className={`
                 group/btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all shadow-lg active:scale-95
-                ${isPurchased 
-                    // ESTILO: YA COMPRADO (Azul)
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+                ${isUnlocked 
+                    // ESTILO: PLAY (Usuario Premium/Dueño)
+                    ? 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-900/20 pl-5'
                     : isAdded 
-                        // ESTILO: EN CARRITO (Verde)
-                        ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 dark:hover:border-rose-800' 
-                        // ESTILO: NORMAL (Negro/Blanco)
+                        // ESTILO: EN CARRITO
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30 dark:hover:text-rose-400' 
+                        // ESTILO: COMPRAR
                         : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-emerald-600 dark:hover:bg-emerald-400 hover:text-white dark:hover:text-slate-900 shadow-slate-900/20'
                 }
               `}
             >
-                {isPurchased ? (
+                {isUnlocked ? (
                     <>
-                        <PlayCircle size={16} /> Ver Curso
+                         VER AHORA <PlayCircle size={16} className="fill-current" />
                     </>
                 ) : isAdded ? (
                     <>

@@ -31,8 +31,12 @@ const useStudentLibrary = (user) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Si no hay usuario o no tiene compras, reseteamos y terminamos.
-    if (!user || !user.purchasedCourses?.length) {
+    // CORRECCIÓN LÓGICA: Determinar acceso global
+    const hasGlobalAccess = user?.plan === 'unlimited' || user?.role === 'admin';
+    const hasPurchases = user?.purchasedCourses?.length > 0;
+
+    // Si no hay usuario, o no tiene acceso global Y no tiene compras, terminamos.
+    if (!user || (!hasGlobalAccess && !hasPurchases)) {
       setLibrary([]);
       setIsLoading(false);
       return;
@@ -51,10 +55,12 @@ const useStudentLibrary = (user) => {
           progressService.getAllCompletedLessons()
         ]);
         
-        // 1. Filtramos solo los cursos que el usuario posee
-        const ownedCourses = allCourses.filter(course => 
-          user.purchasedCourses.includes(course.id)
-        );
+        // 1. CORRECCIÓN DE FILTRADO:
+        // Si es 'unlimited', tiene acceso a TODO el catálogo.
+        // Si no, filtramos por IDs comprados.
+        const ownedCourses = hasGlobalAccess 
+          ? allCourses 
+          : allCourses.filter(course => user.purchasedCourses?.includes(course.id));
 
         // 2. HIDRATACIÓN "IN-MEMORY" (CPU vs NETWORK)
         // Calculamos el % de cada curso cruzando arrays en memoria.

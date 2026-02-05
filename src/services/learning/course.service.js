@@ -1,177 +1,88 @@
 /**
  * @file course.service.js
  * @description SERVICIO DE CATÁLOGO Y CONTENIDO (Learning Domain)
- * Gestiona la obtención de cursos, libros y planes.
- * * @version 2.0.1 (Player Ready)
- * * @path src/services/learning/course.service.js
+ * UNIFIED VERSION: Actúa como puente entre Marketing Data (cursos.js) y Content Data (courseContentMock.js).
+ * @version 3.0.0 (Unified Data Source)
+ * @path src/services/learning/course.service.js
  */
 
-// CORRECCIÓN: Ajuste de ruta a '../core/api.client'
 import apiClient, { IS_MOCK_MODE } from '../core/api.client';
 
-// --- MOCK CATALOG (Datos Ligeros para Tarjetas) ---
-const MOCK_CATALOG = [
-  {
-    id: 'course_macro_101',
-    type: 'curso',
-    title: 'Fundamentos de Macroeconomía',
-    description: 'Entiende cómo funcionan las tasas de interés, inflación y el PBI real.',
-    price: 45000,
-    rating: 4.8,
-    estudiantes: 1240,
-    duracion: '12h 30m',
-    badge: 'Best Seller',
-    color: 'emerald',
-    image: null, 
-    lessonsCount: 24
-  },
-  {
-    id: 'course_trading_adv',
-    type: 'curso',
-    title: 'Trading Institucional Avanzado',
-    description: 'Estrategias de liquidez y order blocks para operar como los bancos.',
-    price: 89000,
-    rating: 4.9,
-    estudiantes: 850,
-    duracion: '18h 15m',
-    badge: 'NUEVO',
-    color: 'violet',
-    lessonsCount: 32
-  },
-  {
-    id: 'book_financial_history',
-    type: 'libro',
-    title: 'Historia de las Crisis Financieras',
-    description: 'Edición física tapa dura. Envío a todo el país.',
-    price: 25000,
-    rating: 5.0,
-    estudiantes: 300, 
-    duracion: null, 
-    badge: 'Envío Gratis',
-    color: 'amber',
-    image: null
-  },
-  {
-    id: 'plan_pro_anual',
-    type: 'plan', 
-    title: 'Suscripción PRO Anual',
-    description: 'Acceso total a todos los cursos, reportes y la terminal financiera.',
-    price: 150000,
-    rating: 5.0,
-    estudiantes: 2100,
-    duracion: '1 Año',
-    badge: 'Recomendado',
-    color: 'blue',
-    image: null
-  }
-];
+// --- IMPORTACIÓN DE FUENTES DE DATOS (SINGLE SOURCE OF TRUTH) ---
+// Importamos los datos estáticos desde la capa de datos compartida
+import { cursos } from '../../data/cursos';
+import { courseContentMock } from '../../data/courseContentMock';
 
-// --- HELPER: GENERADOR DE CONTENIDO PROFUNDO (Para el Player) ---
-const _getMockContent = (courseId) => {
-    // Estructura estándar que espera el componente <CoursePlayerPage />
-    // USAMOS 'courseId' para generar IDs únicos y evitar colisiones
-    return {
-        modules: [
-            {
-                id: `${courseId}_mod_1`, // <--- AHORA LO USAMOS AQUÍ
-                title: 'Módulo 1: Introducción y Contexto',
-                lessons: [
-                    { 
-                        id: `${courseId}_l_101`, 
-                        title: 'Bienvenida al Curso', 
-                        duration: '05:00', 
-                        videoSrc: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
-                        isFree: true,
-                        isCompleted: true 
-                    },
-                    { 
-                        id: `${courseId}_l_102`, 
-                        title: 'Configuración del Entorno', 
-                        duration: '12:30', 
-                        videoSrc: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-                        isFree: false,
-                        isCompleted: false 
-                    }
-                ]
-            },
-            {
-                id: `${courseId}_mod_2`,
-                title: 'Módulo 2: Conceptos Nucleares',
-                lessons: [
-                    { 
-                        id: `${courseId}_l_201`, 
-                        title: 'La Teoría del Dinero', 
-                        duration: '25:15', 
-                        videoSrc: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-                        isFree: false 
-                    },
-                    { 
-                        id: `${courseId}_l_202`, 
-                        title: 'Bancos Centrales', 
-                        duration: '45:00', 
-                        videoSrc: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-                        isFree: false 
-                    }
-                ]
-            }
-        ]
-    };
-};
-
+// --- HELPER: SIMULACIÓN DE LATENCIA ---
 const _simulateDelay = () => new Promise(resolve => setTimeout(resolve, 800));
 
 export const courseService = {
 
   /**
-   * Obtiene el catálogo completo (Ligero).
+   * Obtiene el catálogo completo.
+   * En modo MOCK, retorna directamente el array maestro de marketing.
    */
   async getAllCourses() {
     if (IS_MOCK_MODE) {
       await _simulateDelay();
-      return MOCK_CATALOG;
+      return cursos;
     }
     return apiClient.get('/courses');
   },
 
   /**
-   * Obtiene el detalle COMPLETO de un curso (Incluye Módulos y Videos).
+   * Obtiene el detalle COMPLETO de un curso (Marketing + Módulos + Videos).
+   * Realiza un MERGE estratégico entre el catálogo (info venta) y el mock (info player).
    * @param {string} id 
    */
   async getCourseById(id) {
     if (IS_MOCK_MODE) {
       await _simulateDelay();
-      const course = MOCK_CATALOG.find(c => c.id === id);
+
+      // 1. Buscamos en la capa de Marketing (Catálogo General)
+      // Esto nos da Título, Precio, Imagen, Descripción, etc.
+      const courseCatalog = cursos.find(c => c.id === id);
       
-      if (!course) {
-        throw new Error(`Curso con ID ${id} no encontrado.`);
+      if (!courseCatalog) {
+        throw new Error(`Curso con ID ${id} no encontrado en el catálogo.`);
       }
 
-      // 💉 INYECCIÓN DE CONTENIDO:
-      // Si es un curso, le pegamos los módulos simulados para que el Player funcione.
-      if (course.type === 'curso' || course.type === 'course') {
+      // 2. Buscamos en la capa de Contenido (Videos/Módulos/Lecciones)
+      // Usamos el ID como clave en el objeto courseContentMock
+      const courseContent = courseContentMock[id];
+
+      // 3. MERGE / FUSIÓN DE DATOS
+      if (courseContent) {
+          // Si existe contenido específico, lo mezclamos con la info del catálogo.
+          // El contenido tiene prioridad en caso de propiedades duplicadas.
           return {
-              ...course,
-              ..._getMockContent(id) // <--- AQUÍ ESTÁ LA MAGIA QUE PEDISTE
+              ...courseCatalog,
+              ...courseContent
           };
       }
 
-      // Si es libro o plan, devolvemos tal cual
-      return course;
+      // 4. Fallback: Si el curso existe en marketing pero no tiene contenido definido en el mock.
+      // Devolvemos el curso con un array modules vacío para evitar crash en el Frontend.
+      return {
+          ...courseCatalog,
+          modules: [] 
+      };
     }
     
-    // Modo Real
+    // Modo Real (API)
     return apiClient.get(`/courses/${id}`);
   },
 
   /**
-   * Búsqueda simple.
+   * Búsqueda simple sobre el array de marketing.
    */
   async searchCourses(query) {
     if (IS_MOCK_MODE) {
         await _simulateDelay();
-        if (!query) return MOCK_CATALOG;
+        if (!query) return cursos;
         const lowerQ = query.toLowerCase();
-        return MOCK_CATALOG.filter(c => 
+        
+        return cursos.filter(c => 
             c.title.toLowerCase().includes(lowerQ) || 
             c.description.toLowerCase().includes(lowerQ)
         );
