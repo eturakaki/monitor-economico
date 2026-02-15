@@ -165,13 +165,13 @@ const CoursePlayerLayout = () => {
                 >
                     
                     {/* 1. REPRODUCTOR DE VIDEO (Sticky) */}
-                    <div className="w-full bg-black sticky top-0 z-10 shadow-xl">
+                    <div className="w-full bg-black z-10 shadow-xl">
                         <div className="aspect-video w-full max-h-[75vh] mx-auto relative bg-black">
                             <VideoErrorBoundary onRetry={() => window.location.reload()}>
                                 {activeLesson?.videoSrc ? (
                                     <ReactPlayer
                                         key={activeLesson.id} 
-                                        url={activeLesson.videoSrc}
+                                        src ={activeLesson.videoSrc}
                                         width="100%"
                                         height="100%"
                                         controls

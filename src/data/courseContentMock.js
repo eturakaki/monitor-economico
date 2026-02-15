@@ -28,7 +28,7 @@ export const courseContentMock = {
             duration: '12:00', 
             type: 'video', 
             isFree: false,
-            videoSrc: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' 
+            videoSrc: 'https://www.w3schools.com/html/mov_bbb.mp4' 
           },
           { 
             id: 'l_103', 
@@ -36,7 +36,7 @@ export const courseContentMock = {
             duration: '08:45', 
             type: 'video', 
             isFree: false,
-            videoSrc: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+            videoSrc: 'https://www.youtube.com/watch?v=uEtORunWh5I&list=RDMMuEtORunWh5I&index=1&pp=8AUB'
           }
         ]
       },
