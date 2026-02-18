@@ -5,7 +5,7 @@ import { LineChart } from 'lucide-react';
 import { sectores } from '../data/sectores';
 
 // Importamos el componente Navbar que ahora contiene toda la lógica
-import { Navbar } from './layout/Navbar'; 
+import { Navbar } from './layout/NavBar'; 
 
 export function Layout() {
   // LIMPIEZA TOTAL:

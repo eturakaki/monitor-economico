@@ -47,7 +47,7 @@ import { CanastaRegional } from './pages/herramientas/Inflacion (Mod1)/CanastaRe
 
 // --- MÓDULO II: INVERSIONES ---
 import { RadarLiquidez } from './pages/herramientas/inversiones (mod 2)/RadarLiquidez';
-import { PlazoFijoUVA } from './pages/herramientas/inversiones (mod 2)/PlazoFijoUVA';
+import { PlazoFijoUVA } from './pages/herramientas/inversiones (mod 2)/PlazoFijoUva';
 import { CarryTrade } from './pages/herramientas/inversiones (mod 2)/CarryTrade';
 import { RutasDolar } from './pages/herramientas/inversiones (mod 2)/RutasDolar';
 import { CalculadoraBonos } from './pages/herramientas/inversiones (mod 2)/CalculadoraBonos';
