@@ -81,6 +81,23 @@ Acción de seguimiento: cuando React Router publique una versión que resuelva e
 
 ---
 
+## 💳 PCI-DSS: datos de tarjeta en el Checkout
+
+`CheckoutPage.jsx` captura `cardNumber`, `expiry` y `cvc` en un formulario propio (sección "3. DATOS DE PAGO"). Eso es aceptable **solo** porque hoy el checkout es 100% mock: esos datos nunca salen del navegador ni tocan un backend real ni un log (ver corrección en `checkout.service.js` arriba: el log de la transacción simulada ya no incluye `paymentData` completo).
+
+**En cuanto se conecte una pasarela de pago real, este formulario no puede usarse tal cual.** El motivo es PCI-DSS, el estándar de seguridad de datos de tarjetas: apenas un número de tarjeta pasa por código propio — aunque sea solo para reenviarlo a Stripe o MercadoPago — la infraestructura entra en el "alcance" (scope) de PCI-DSS. Eso implica cuestionarios SAQ, requisitos de segmentación de red, logging auditado, etc. — carga de compliance que no tiene sentido para un proyecto de este tamaño, y que además es fácil de evitar.
+
+**Solución correcta:** usar los widgets embebidos del procesador de pago, donde los campos de tarjeta son iframes que controla el procesador, no nuestro código:
+
+- **MercadoPago Checkout Pro** (o Checkout API con Secure Fields) — recomendado acá porque Argentina es el mercado principal de la app.
+- **Stripe Elements** — alternativa si en algún momento hace falta cobrar en otras monedas/mercados.
+
+En ambos casos el número de tarjeta viaja directo del navegador del usuario al procesador de pago; nuestro frontend nunca lo ve, y nuestro backend solo recibe un token/ID de pago ya tokenizado. Eso deja a la app en el nivel de compliance más bajo (SAQ A) en vez del más exigente.
+
+Hay un comentario de advertencia en el propio código, arriba de la sección "3. DATOS DE PAGO" en `CheckoutPage.jsx`, para que nadie conecte ese formulario a un backend real sin antes reemplazarlo por Checkout Pro / Stripe Elements.
+
+---
+
 ## 🔴 Pendiente antes de salir a producción
 
 Esto no se puede resolver desde el frontend — requiere backend:
@@ -118,6 +135,43 @@ Tenés una página `/api-keys` donde los usuarios gestionan sus claves. Reglas p
 4. **Activá 2FA en GitHub** (ambos).
 5. **Nada de datos sensibles en `console.log`** — quedan visibles en la consola del navegador en producción.
 6. **Revisá los PRs.** Cuatro ojos ven más que dos, sobre todo en código que toca auth o pagos.
+
+---
+
+## ✅ Checklist de ciberseguridad — estado actual
+
+Foto del estado de seguridad, organizada por quién es responsable de resolver cada ítem.
+
+### Cubierto (frontend, ya resuelto)
+
+- [x] `.env` protegido en `.gitignore`; `.env.example` documentado sin secretos.
+- [x] Sin token placeholder falso en el cliente HTTP (`api.client.js`).
+- [x] `IS_MOCK_MODE` respeta `VITE_USE_MOCKS` (no queda forzado a `true`).
+- [x] `ProtectedRoute` usa `allowedPlans`/`redirectPath` correctamente (bug de autorización corregido).
+- [x] Open redirect en login/register mitigado (`src/utils/safeRedirect.js`).
+- [x] Dependencias actualizadas con `npm audit fix` (sin `--force`); lo que queda pendiente está documentado arriba, con motivo.
+- [x] Sin logs de datos de tarjeta ni de otros datos sensibles en `console.*` (`checkout.service.js`, revisado el resto del código en busca de logs similares).
+- [x] CI (`.github/workflows/ci.yml`) corre lint y build en cada push/PR, y reporta —sin bloquear— vulnerabilidades de dependencias en cada corrida (`npm audit --omit=dev --audit-level=high`).
+- [x] Riesgo de captura de tarjeta propia (PCI-DSS) documentado y marcado en el código (ver sección arriba).
+
+### Depende del hosting (Vercel/Netlify/Nginx, etc.) — no se configura desde el código de React
+
+- [ ] **CSP** (`Content-Security-Policy`): restringe de qué orígenes se puede cargar script/estilos/conexiones. Se define como header HTTP en el hosting, no en el bundle de Vite.
+- [ ] **HSTS** (`Strict-Transport-Security`): fuerza HTTPS en el navegador. También es un header HTTP del hosting (Vercel/Netlify lo agregan por defecto en varios casos, pero conviene verificarlo explícitamente).
+- [ ] **X-Frame-Options** (o `frame-ancestors` en la CSP): evita que el sitio se pueda embeber en un iframe ajeno (clickjacking).
+- [ ] **X-Content-Type-Options: nosniff**: evita que el navegador "adivine" el tipo de contenido de una respuesta y ejecute algo que no debería.
+
+Ninguno de estos cuatro depende de código React: se configuran en `vercel.json`, `netlify.toml`, o la config del servidor/CDN que sirva el build estático. Queda pendiente definirlos según qué hosting se use en producción.
+
+### Depende del backend (todavía no existe)
+
+- [ ] Autenticación real (hash de contraseña con bcrypt/argon2; hoy el mock no valida password).
+- [ ] Sesión en cookie `httpOnly` + `Secure` + `SameSite=Lax` en vez de `localStorage`.
+- [ ] Autorización re-verificada en cada endpoint (`ProtectedRoute` es solo UX, no seguridad real).
+- [ ] Rate limiting en login, para frenar fuerza bruta.
+- [ ] CORS restringido al dominio propio (recordar: con `withCredentials: true` no se puede usar `Access-Control-Allow-Origin: *`).
+- [ ] Validación de inputs repetida server-side (zod en el cliente no alcanza; el cliente es manipulable).
+- [ ] Tokenización de pagos vía MercadoPago/Stripe (ver sección PCI-DSS arriba) — el backend nunca debe recibir `cardNumber`/`cvc` en texto plano, ni loguearlos.
 
 ---
 

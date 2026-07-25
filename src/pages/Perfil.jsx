@@ -53,12 +53,11 @@ const Perfil = () => {
         
         {/* === SECCIÓN A: IDENTIDAD PÚBLICA (Future Forum Profile) === */}
         {/* Este Header será lo que vean otros usuarios al hacer click en tu nombre en el Foro */}
-        <ProfileHeader 
-            user={user} 
-            onAvatarChange={(newAvatar) => {
-                console.log("Avatar request:", newAvatar);
+        <ProfileHeader
+            user={user}
+            onAvatarChange={() => {
                 // Aquí conectaremos updateProfile en el futuro si se hace desde el header
-            }} 
+            }}
         />
 
         {/* === SECCIÓN B: PANEL DE CONTROL (Privado) === */}
