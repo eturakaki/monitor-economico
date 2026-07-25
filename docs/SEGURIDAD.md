@@ -58,6 +58,27 @@ Está bien para un mock de desarrollo, pero es crítico no olvidarlo. Le agregu�
 
 Creado, documentando `VITE_API_URL` y `VITE_USE_MOCKS`, con una advertencia explícita sobre qué **nunca** poner en variables `VITE_*`.
 
+### 7. Dependencias vulnerables (`npm audit fix`)
+
+Se corrió `npm audit fix` (sin `--force`, para no arrastrar breaking changes sin revisar). Bajó de 16 a 7 vulnerabilidades. Se verificó que `npm run lint` y `npm run build` siguen en verde después del update.
+
+Quedan pendientes, deliberadamente sin tocar:
+
+- **`brace-expansion` (vía `eslint`/`minimatch`)**: el fix requiere `eslint@10` (breaking change). Es una dependencia de desarrollo (lint), no viaja al bundle de producción — riesgo bajo, se evalúa en otro momento junto con la migración de config de ESLint.
+- **`react-router` / `react-router-dom`**: ya estamos en la última versión publicada (`7.18.1`); no hay un release que corrija los avisos abiertos. Ver detalle abajo.
+
+#### Sobre los avisos de `react-router` sin fix disponible
+
+`npm audit` reporta varios CVEs contra `react-router` (RCE en deserialización de `turbo-stream`, XSS en RSC, DoS en manifest/route-matching, CSRF en RSC, etc.). Ya estamos en la versión más nueva publicada y **no hay upgrade disponible que los corrija** todavía.
+
+Lo importante: **la gran mayoría de estos avisos aplican a modos que esta app no usa** — Server-Side Rendering (SSR), React Server Components (RSC), el modo `unstable_middleware`/`single-fetch` de un server de React Router, o el endpoint `__manifest`. Este proyecto es un **SPA 100% client-side** servido como archivos estáticos (Vite build, `BrowserRouter`, sin server de React Router ni RSC) — esa superficie no existe acá.
+
+La única excepción que sí nos toca en un SPA es el **open redirect vía path `//` o `/\`** (`GHSA-2j2x-hqr9-3h42`, `GHSA-wrjc-x8rr-h8h6`): un `<Link>`/`navigate()` que reciba un path controlado por el usuario (por ejemplo `location.state.from.pathname` tras el login) y empiece con `//` o `/\` puede ser reinterpretado por el navegador como una URL absoluta a otro dominio.
+
+**Mitigación aplicada manualmente** (no depende de la librería): `src/utils/safeRedirect.js` expone `isSafeInternalPath`/`getSafeRedirectPath`, que solo acepta paths que empiecen con `/` simple (rechaza `//` y `/\`). Se usa en `Login.jsx` y `Register.jsx` para validar `location.state?.from?.pathname` antes de navegar; si no es un path interno seguro, redirige a `/dashboard`.
+
+Acción de seguimiento: cuando React Router publique una versión que resuelva estos CVEs, correr `npm audit fix` de nuevo y evaluar si el helper de `safeRedirect.js` puede simplificarse o se mantiene como defensa en profundidad.
+
 ---
 
 ## 🔴 Pendiente antes de salir a producción
