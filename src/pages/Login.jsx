@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth'; // ✅ Importando desde el nuevo hook
 import { LineChart, Lock, Mail, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
+import { getSafeRedirectPath } from '../utils/safeRedirect';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function Login() {
   // Si lo hace, te redirige automáticamente.
   useEffect(() => {
     if (isAuthenticated) {
-      const origin = location.state?.from?.pathname || '/dashboard';
+      const origin = getSafeRedirectPath(location.state?.from?.pathname);
       navigate(origin, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);

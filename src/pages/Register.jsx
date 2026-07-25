@@ -11,8 +11,9 @@ import {
   EyeOff, 
   Check, 
   X 
-} from 'lucide-react'; 
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { getSafeRedirectPath } from '../utils/safeRedirect';
 
 // --- CONSTANTES DE CONFIGURACIÓN ---
 const PASSWORD_MIN_LENGTH = 8; // Estándar 2026 más seguro
@@ -233,7 +234,7 @@ export const Register = () => {
   // Redirección inteligente si ya está logueado
   useEffect(() => {
     if (isAuthenticated) {
-      const origin = location.state?.from?.pathname || '/dashboard';
+      const origin = getSafeRedirectPath(location.state?.from?.pathname);
       navigate(origin, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);
