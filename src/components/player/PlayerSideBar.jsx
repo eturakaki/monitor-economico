@@ -5,12 +5,12 @@
  * @version 3.0.0 (Udemy Style - Pay-per-Course)
  */
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import { 
-  ChevronDown, Check, Play, X, BarChart3 
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  ChevronDown, Check, Play, X, BarChart3
 } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useCoursePlayer } from '../../context/CoursePlayerContext';
 
 // --- CONSTANTS & STYLES ---
 // Definimos tokens de diseño inspirados en interfaces de aprendizaje modernas
@@ -126,7 +126,10 @@ const LessonItem = React.memo(({ lesson, isActive, isCompleted, onClick }) => {
 });
 
 export const PlayerSidebar = ({ content, activeLessonId, isOpen, onClose }) => {
-  const { isLessonCompleted, user } = useAuth();
+  // progressService (vía CoursePlayerContext) es la única fuente de verdad
+  // del progreso: evita depender de user.completedLessons, que usa el mismo
+  // ID compuesto pero no está pensado como fuente primaria de lectura acá.
+  const { isLessonCompleted, progressPercentage } = useCoursePlayer();
   const [openModules, setOpenModules] = useState([]);
   const navigate = useNavigate();
 
@@ -146,19 +149,6 @@ export const PlayerSidebar = ({ content, activeLessonId, isOpen, onClose }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLessonId]); 
-
-  // Cálculo de Progreso
-  const courseProgress = useMemo(() => {
-    if (!content?.modules || !user) return 0;
-    const allLessons = content.modules.flatMap(m => m.lessons);
-    if (!allLessons.length) return 0;
-
-    const completedCount = allLessons.reduce((acc, l) => 
-      acc + (isLessonCompleted(l.id) ? 1 : 0), 0
-    );
-
-    return Math.round((completedCount / allLessons.length) * 100);
-  }, [content, user, isLessonCompleted]);
 
   const handleToggleModule = (modId) => {
     setOpenModules(prev => 
@@ -216,11 +206,11 @@ export const PlayerSidebar = ({ content, activeLessonId, isOpen, onClose }) => {
              <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-emerald-500 rounded-full transition-all duration-700 ease-out" 
-                  style={{ width: `${courseProgress}%` }} 
+                  style={{ width: `${progressPercentage}%` }}
                 />
              </div>
              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 w-10 text-right">
-                {courseProgress}%
+                {progressPercentage}%
              </span>
           </div>
         </div>

@@ -6,16 +6,19 @@
  * @path src/pages/CoursePlayerPage.jsx
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactPlayer from 'react-player';
-import { 
-  Loader2, Menu, ChevronLeft, ChevronRight, 
-  PlayCircle, CheckCircle, Download, FileText, Info 
+import {
+  Loader2, Menu, ChevronLeft, ChevronRight,
+  PlayCircle, CheckCircle, Download, FileText, Info
 } from 'lucide-react';
 
 // --- CONTEXT ---
 import { CoursePlayerProvider, useCoursePlayer } from '../context/CoursePlayerContext';
+
+// --- HOOKS ---
+import { useVideoProgress } from '../hooks/useVideoProgress';
 
 // --- COMPONENTS ---
 import { PlayerSidebar } from '../components/player/PlayerSideBar';
@@ -45,13 +48,14 @@ const TabButton = ({ label, isActive, onClick, icon: Icon }) => (
 // ==========================================
 const CoursePlayerLayout = () => {
     // 1. CONSUMIR CONTEXTO
-    const { 
-        course, 
-        activeLesson, 
-        isLoading, 
-        error, 
-        isSidebarOpen, 
-        toggleSidebar, 
+    const {
+        course,
+        courseId,
+        activeLesson,
+        isLoading,
+        error,
+        isSidebarOpen,
+        toggleSidebar,
         markCurrentAsCompleted,
         nextLesson,
         previousLesson,
@@ -61,11 +65,48 @@ const CoursePlayerLayout = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
     const [isPlaying, setIsPlaying] = useState(false);
-    
+
     // Referencia al contenedor principal para manipular el scroll
     const contentRef = useRef(null);
+    // Referencia al reproductor, para poder buscar (seek) al retomar una lección
+    const playerRef = useRef(null);
+    const resumeTimeRef = useRef(0);
+    const resumeAppliedRef = useRef(false);
 
-    // 2. UX: SCROLL TO TOP ON LESSON CHANGE
+    // 2. TELEMETRÍA DE VIDEO: detección de 90%, guardado de watch time y resume.
+    // Hooks van siempre antes de cualquier return condicional (Rules of Hooks).
+    const { handleDuration, handleProgress, fetchStoredTime } = useVideoProgress({
+        courseId,
+        activeLessonId: activeLesson?.id,
+        onComplete: markCurrentAsCompleted,
+    });
+
+    // Al cambiar de lección, buscamos el segundo guardado para retomar ahí.
+    useEffect(() => {
+        resumeAppliedRef.current = false;
+        resumeTimeRef.current = 0;
+
+        if (!activeLesson?.id) return;
+
+        let cancelled = false;
+        fetchStoredTime().then((seconds) => {
+            if (!cancelled) resumeTimeRef.current = seconds;
+        });
+
+        return () => { cancelled = true; };
+    }, [activeLesson?.id, fetchStoredTime]);
+
+    // Cuando el player conoce la duración (metadata lista), aplicamos el seek
+    // de resume una única vez por lección.
+    const handleLoadedDuration = useCallback((event) => {
+        handleDuration(event);
+        if (!resumeAppliedRef.current && resumeTimeRef.current > 0 && playerRef.current) {
+            playerRef.current.currentTime = resumeTimeRef.current;
+        }
+        resumeAppliedRef.current = true;
+    }, [handleDuration]);
+
+    // 3. UX: SCROLL TO TOP ON LESSON CHANGE
     // Detectamos cambio de lección y reseteamos el scroll del contenedor <main>
     useEffect(() => {
         if (contentRef.current) {
@@ -73,7 +114,7 @@ const CoursePlayerLayout = () => {
         }
     }, [activeLesson?.id]);
 
-    // 3. ESTADOS DE CARGA Y ERROR
+    // 4. ESTADOS DE CARGA Y ERROR
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen bg-white dark:bg-[#0B1121]">
@@ -170,7 +211,8 @@ const CoursePlayerLayout = () => {
                             <VideoErrorBoundary onRetry={() => window.location.reload()}>
                                 {activeLesson?.videoSrc ? (
                                     <ReactPlayer
-                                        key={activeLesson.id} 
+                                        ref={playerRef}
+                                        key={activeLesson.id}
                                         src ={activeLesson.videoSrc}
                                         width="100%"
                                         height="100%"
@@ -179,6 +221,8 @@ const CoursePlayerLayout = () => {
                                         onPlay={() => setIsPlaying(true)}
                                         onPause={() => setIsPlaying(false)}
                                         onEnded={handleVideoEnd}
+                                        onTimeUpdate={handleProgress}
+                                        onDurationChange={handleLoadedDuration}
                                         config={{
                                             youtube: { playerVars: { showinfo: 0, modestbranding: 1 } }
                                         }}

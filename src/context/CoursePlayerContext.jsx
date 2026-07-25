@@ -11,8 +11,8 @@ import { toast } from 'sonner';
 
 // --- SERVICIOS ---
 import { courseService } from '../services/learning/course.service';
-// Asumimos existencia de este servicio
-import { progressService } from '../services/learning/progress.service'; 
+import { progressService } from '../services/learning/progress.service';
+import { buildLessonProgressId } from '../utils/progressId';
 
 // --- HOOKS ---
 import { useAuth } from '../hooks/useAuth';
@@ -31,8 +31,10 @@ export const CoursePlayerProvider = ({ children, courseId, lessonId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isSidebarOpen, setSidebarOpen] = useState(false);
-    
-    // Estado para "Optimistic UI" del progreso (Ids de lecciones completadas)
+
+    // Set de IDs compuestos (`${courseId}_${lessonId}`) de lecciones completadas.
+    // progressService es la ÚNICA fuente de verdad del progreso: no se depende
+    // de flags embebidos en el contenido del curso (course.service.js nunca los setea).
     const [completedLessonIds, setCompletedLessonIds] = useState(new Set());
 
     const { user } = useAuth();
@@ -43,26 +45,23 @@ export const CoursePlayerProvider = ({ children, courseId, lessonId }) => {
 
         const initPlayer = async () => {
             if (!courseId) return;
-            
+
             setIsLoading(true);
             try {
-                // A. Cargar metadata del curso + contenido
-                const courseData = await courseService.getCourseById(courseId);
-                
+                // A. Cargar metadata/contenido del curso y el progreso real en paralelo
+                const [courseData, allCompletedIds] = await Promise.all([
+                    courseService.getCourseById(courseId),
+                    progressService.getAllCompletedLessons()
+                ]);
+
                 if (isMounted) {
                     setCourse(courseData);
-                    
-                    // B. Sincronizar progreso inicial
-                    const initialCompleted = new Set();
-                    
-                    // Si el curso ya trae flags isCompleted (del merge en backend/servicio)
-                    if (courseData.modules) {
-                        courseData.modules.forEach(m => {
-                            m.lessons.forEach(l => {
-                                if (l.isCompleted) initialCompleted.add(l.id);
-                            });
-                        });
-                    }
+
+                    // B. Filtramos el progreso global a las lecciones de ESTE curso
+                    const coursePrefix = `${courseId}_`;
+                    const initialCompleted = new Set(
+                        allCompletedIds.filter((id) => id.startsWith(coursePrefix))
+                    );
                     setCompletedLessonIds(initialCompleted);
                 }
             } catch (err) {
@@ -128,28 +127,25 @@ export const CoursePlayerProvider = ({ children, courseId, lessonId }) => {
      */
     const markCurrentAsCompleted = useCallback(async () => {
         if (!activeLesson || !user) return;
-        
-        const targetId = activeLesson.id;
+
+        const progressId = buildLessonProgressId(courseId, activeLesson.id);
 
         // 1. Optimistic Update (UI Instantánea)
         setCompletedLessonIds(prev => {
             const newSet = new Set(prev);
-            newSet.add(targetId);
+            newSet.add(progressId);
             return newSet;
         });
 
         // 2. Persistencia (API Call)
         try {
-            // [FIX] Validamos y llamamos al método con el nombre correcto: markLessonAsCompleted
-            if (progressService && typeof progressService.markLessonAsCompleted === 'function') {
-                await progressService.markLessonAsCompleted(courseId, targetId);
-            }
+            await progressService.markLessonAsCompleted(courseId, activeLesson.id);
         } catch (error) {
             console.error("Error saving progress:", error);
             // Rollback en caso de error
             setCompletedLessonIds(prev => {
                 const newSet = new Set(prev);
-                newSet.delete(targetId);
+                newSet.delete(progressId);
                 return newSet;
             });
             toast.error("No se pudo guardar el progreso.");
@@ -157,17 +153,18 @@ export const CoursePlayerProvider = ({ children, courseId, lessonId }) => {
     }, [activeLesson, courseId, user]);
 
     /**
-     * Verifica si una lección específica está completada
+     * Verifica si una lección específica (por su ID crudo, ej. "l_101") está completada.
      */
     const isLessonCompleted = useCallback((id) => {
-        return completedLessonIds.has(id);
-    }, [completedLessonIds]);
+        return completedLessonIds.has(buildLessonProgressId(courseId, id));
+    }, [completedLessonIds, courseId]);
 
 
     // 5. EXPORTAR VALORES
     const value = {
         // State
         course,
+        courseId,
         activeLesson,
         isLoading,
         error,

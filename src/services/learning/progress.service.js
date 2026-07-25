@@ -7,6 +7,7 @@
  */
 
 import apiClient, { IS_MOCK_MODE } from '../core/api.client';
+import { buildLessonProgressId } from '../../utils/progressId';
 
 // --- MOCK DB HELPERS ---
 const MOCK_PROGRESS_KEY = 'monitor_learning_progress_db';
@@ -29,27 +30,31 @@ export const progressService = {
 
   /**
    * SMART RESUME: Guarda el segundo exacto.
+   * lessonId se namespacea por curso (ver buildLessonProgressId) porque los
+   * IDs de lección se repiten entre cursos distintos.
    */
-  async saveWatchTime(lessonId, seconds) {
+  async saveWatchTime(courseId, lessonId, seconds) {
+    const progressId = buildLessonProgressId(courseId, lessonId);
     if (IS_MOCK_MODE) {
       const db = _getMockDb();
-      db.watchTime[lessonId] = seconds;
+      db.watchTime[progressId] = seconds;
       _saveMockDb(db);
       return { success: true, savedAt: seconds };
     }
-    return apiClient.post('/progress/watch-time', { lessonId, seconds });
+    return apiClient.post('/progress/watch-time', { lessonId: progressId, seconds });
   },
 
   /**
    * Recupera el tiempo guardado.
    */
-  async getWatchTime(lessonId) {
+  async getWatchTime(courseId, lessonId) {
+    const progressId = buildLessonProgressId(courseId, lessonId);
     if (IS_MOCK_MODE) {
       const db = _getMockDb();
-      return db.watchTime[lessonId] || 0;
+      return db.watchTime[progressId] || 0;
     }
     try {
-      const response = await apiClient.get(`/progress/watch-time/${lessonId}`);
+      const response = await apiClient.get(`/progress/watch-time/${progressId}`);
       return response.seconds || 0;
     } catch  {
       return 0;
@@ -60,11 +65,12 @@ export const progressService = {
    * Marca lección como completada.
    */
   async markLessonAsCompleted(courseId, lessonId) {
+    const progressId = buildLessonProgressId(courseId, lessonId);
     if (IS_MOCK_MODE) {
       await _simulateNetwork();
       const db = _getMockDb();
       const completedSet = new Set(db.completed || []);
-      completedSet.add(lessonId);
+      completedSet.add(progressId);
       db.completed = Array.from(completedSet);
       _saveMockDb(db);
       return { success: true, status: 'completed' };
@@ -105,13 +111,12 @@ export const progressService = {
     if (!course || !course.id || !allCompletedIds) return 0;
     
     // Denominador: Si no viene definido, asumimos 1 para evitar división por cero
-    const totalLessons = course.lessonsCount || 10; 
+    const totalLessons = course.lessonsCount || 10;
 
     // Numerador: Contamos cuántas lecciones de ESTE curso están en la lista global
-    // Lógica: Asumimos convención de IDs "${courseId}_" o coincidencia exacta si es simple
-    const completedCount = allCompletedIds.filter(id => 
-      id.startsWith(`${course.id}_`) || id.includes(course.id)
-    ).length;
+    // (IDs con formato "${courseId}_${lessonId}", ver buildLessonProgressId)
+    const coursePrefix = `${course.id}_`;
+    const completedCount = allCompletedIds.filter(id => id.startsWith(coursePrefix)).length;
 
     const percent = Math.round((completedCount / totalLessons) * 100);
     return Math.min(percent, 100); // Cap en 100%

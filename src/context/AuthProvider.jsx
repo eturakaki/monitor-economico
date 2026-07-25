@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { UserStatusService } from '../services/userStatus';
+import { progressService } from '../services/learning/progress.service';
+import { buildLessonProgressId } from '../utils/progressId';
 import { AuthContext } from './AuthContext.jsx'; // Asegura que este archivo exporte createContext
 
 /**
@@ -122,38 +124,37 @@ export const AuthProvider = ({ children }) => {
     );
   }, [user]);
   /**
-   * [NUEVO] Lógica de Progreso de Aprendizaje.
-   /**
-   * [CORREGIDO] Lógica de Progreso de Aprendizaje.
-   * Implementa Optimistic UI (Zero-Lag) y actualización defensiva.
+   * Lógica de Progreso de Aprendizaje.
+   * Implementa Optimistic UI (Zero-Lag). progressService es la ÚNICA fuente
+   * de verdad del progreso; user.completedLessons es un espejo sincronizado
+   * para consumo rápido desde AuthContext (ACL, UI), no la fuente de datos.
    */
   const markLessonAsCompleted = useCallback(async (courseId, lessonId) => {
     if (!user) return;
 
+    const progressId = buildLessonProgressId(courseId, lessonId);
+
     // 1. Check de duplicados: Si ya la tiene, abortamos para no ensuciar el estado.
-    if (user.completedLessons?.includes(lessonId)) return;
+    if (user.completedLessons?.includes(progressId)) return;
 
     // 2. OPTIMISTIC UPDATE: Actualizamos la memoria INMEDIATAMENTE.
     // Usamos el patrón de "Functional State Update" para garantizar que no perdemos
     // datos si el usuario hace click muy rápido (concurrencia de React).
     setUser((prevUser) => {
         // Protección extra por si el usuario se deslogueó en el interin
-        if (!prevUser) return null; 
+        if (!prevUser) return null;
 
         return {
             ...prevUser, // Mantenemos nombre, plan, email, etc. (Defensive Merge)
-            completedLessons: [...(prevUser.completedLessons || []), lessonId]
+            completedLessons: [...(prevUser.completedLessons || []), progressId]
         };
     });
 
     try {
-      // 3. BACKGROUND SYNC: Persistencia asíncrona.
+      // 3. BACKGROUND SYNC: Persistencia asíncrona en progressService (Learning Domain).
       // Ya no bloqueamos la UI esperando esto. El usuario ya vio su check verde.
-      await UserStatusService.updateLessonProgress(courseId, lessonId);
-      
-      // Nota: No hacemos setUser(response) aquí para evitar sobrescribir
-      // la versión optimista con datos viejos o parciales del backend.
-      
+      await progressService.markLessonAsCompleted(courseId, lessonId);
+
     } catch (error) {
       console.error('[Auth] Sync error:', error);
       // UX Decision: No revertimos el estado (Rollback) para no frustrar al usuario.
