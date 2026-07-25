@@ -83,11 +83,11 @@ export const useVideoProgress = ({ courseId, activeLessonId, onComplete }) => {
     if (now - state.current.lastSaveTime > CONFIG.SAVE_THROTTLE_MS) {
         // Doble check de seguridad
         if (typeof currentSeconds === 'number' && !isNaN(currentSeconds)) {
-            
+
             // Guardado Asíncrono (Fire and Forget)
-            progressService.saveWatchTime(activeLessonId, currentSeconds)
+            progressService.saveWatchTime(courseId, activeLessonId, currentSeconds)
                 .catch(err => console.warn("Error guardando progreso:", err));
-            
+
             state.current.lastSaveTime = now;
         }
     }
@@ -97,9 +97,9 @@ export const useVideoProgress = ({ courseId, activeLessonId, onComplete }) => {
   // --- 3. HELPER DE RECUPERACIÓN (Async) ---
   // Nota: Ahora devuelve una Promesa, el componente debe esperarla.
   const fetchStoredTime = useCallback(async () => {
-    if (!activeLessonId) return 0;
-    return await progressService.getWatchTime(activeLessonId);
-  }, [activeLessonId]);
+    if (!courseId || !activeLessonId) return 0;
+    return await progressService.getWatchTime(courseId, activeLessonId);
+  }, [courseId, activeLessonId]);
 
   return { handleDuration, handleProgress, fetchStoredTime };
 };
