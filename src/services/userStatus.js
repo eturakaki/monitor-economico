@@ -99,6 +99,15 @@ const _persistUserState = (db, updatedUser) => {
 
 export const UserStatusService = {
   
+  /**
+   * ⚠️  MOCK DE DESARROLLO — NO ES AUTENTICACIÓN REAL.
+   * No valida contraseña: acepta cualquier email y crea el usuario si no existe.
+   * Sirve para probar la UI sin backend.
+   *
+   * ANTES DE PRODUCCIÓN es OBLIGATORIO reemplazarlo por una llamada al backend
+   * que verifique credenciales (hash bcrypt/argon2) y devuelva la sesión.
+   * El rol y el plan deben venir SIEMPRE del servidor, nunca decidirse en el cliente.
+   */
   async login({ email }) {
     await _simulateLatency();
     _triggerChaosMonkey();

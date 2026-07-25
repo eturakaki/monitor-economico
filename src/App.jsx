@@ -1,186 +1,209 @@
-import { Routes, Route } from 'react-router-dom'; // CORRECCIÓN: Importación crítica faltante
-import { Toaster } from 'sonner'; // CORRECCIÓN: Necesario para el componente <Toaster /> usado al final
+import { lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
-// --- UTILS & HOOKS ---
-import { useAuth } from './hooks/useAuth';
-import ScrollToTop from './components/ScrollToTop';   
-import ProtectedRoute from './components/auth/ProtectedRoute'; 
-
-// --- CONTEXTS ---
-import { ShopProvider } from './context/ShopContext';
+// --- ESTRUCTURALES (carga inmediata: se usan en todas las vistas) ---
+import ScrollToTop from './components/ScrollToTop';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import { Layout } from './components/Layout';
+import { LearningLayout } from './components/layout/LearningLayout';
+import { CartDrawer } from './components/shop/CartDrawer';
 import { WishlistProvider } from './context/WishlistContext';
 
-// --- LAYOUTS ---
-import { Layout } from './components/Layout'; // Layout Comercial (Navbar + Footer)
-import { LearningLayout } from './components/layout/LearningLayout'; // [NUEVO] Layout Inmersivo
+/**
+ * Helper de carga diferida (code-splitting).
+ * Soporta tanto named exports como default exports.
+ * Cada página se descarga sólo cuando el usuario entra a su ruta.
+ */
+const lazyPage = (loader, name) =>
+  lazy(() => loader().then((m) => ({ default: m[name] ?? m.default })));
 
-// --- PÁGINAS ---
-import { Home } from './pages/Home';
-import { DetalleIndicador } from './pages/DetalleIndicador';
-import { Categorias } from './pages/Categorias';
-import { Glosario } from './pages/TEMP_Glosario';
-import { DescargaPremium } from './pages/DescargaPremiun'; 
-import Planes from './pages/Planes'; 
-import { NotFound } from './pages/NotFound';
-import { SobreMi } from './pages/SobreMi';
-import { Contacto } from './pages/Contacto';
-import Dashboard from './pages/DashBoard';
-import Perfil from './pages/Perfil'; 
-import ApiDashboard from './pages/ApiDashboard'; 
-import { InvestorTestPage } from './pages/features/test-inversor/InvestorTestPage';
+// --- PÁGINAS GENERALES ---
+const Home = lazyPage(() => import('./pages/Home'), 'Home');
+const Glosario = lazyPage(() => import('./pages/Glosario'), 'Glosario');
+const SobreMi = lazyPage(() => import('./pages/SobreMi'), 'SobreMi');
+const Contacto = lazyPage(() => import('./pages/Contacto'), 'Contacto');
+const Planes = lazyPage(() => import('./pages/Planes'), 'Planes');
+const NotFound = lazyPage(() => import('./pages/NotFound'), 'NotFound');
+const Terminos = lazyPage(() => import('./pages/Terminos'), 'Terminos');
+const ApiDocs = lazyPage(() => import('./pages/ApiDocs'), 'ApiDocs');
+const Categorias = lazyPage(() => import('./pages/Categorias'), 'Categorias');
+const Mercados = lazyPage(() => import('./pages/Mercados'), 'Mercados');
+const DetalleIndicador = lazyPage(() => import('./pages/DetalleIndicador'), 'DetalleIndicador');
+const DescargaPremium = lazyPage(() => import('./pages/DescargaPremium'), 'DescargaPremium');
 
-// --- HUB DE HERRAMIENTAS & MERCADOS ---
-import { Calculadoras } from './pages/Herramientas';
-import { Mercados } from './pages/Mercados';
+// --- AUTENTICACIÓN ---
+const Login = lazyPage(() => import('./pages/Login'), 'Login');
+const Register = lazyPage(() => import('./pages/Register'), 'Register');
+const Recovery = lazyPage(() => import('./pages/Recovery'), 'Recovery');
 
-// =====================================================================
-// 🛠️ SECCIÓN DE HERRAMIENTAS (CALCULADORAS) - RESTAURADAS
-// =====================================================================
+// --- ÁREA PRIVADA ---
+const Dashboard = lazyPage(() => import('./pages/DashBoard'), 'Dashboard');
+const Perfil = lazyPage(() => import('./pages/Perfil'), 'Perfil');
+const AnalyticsPage = lazyPage(() => import('./pages/Analytics'), 'Analytics');
+const ApiDashboard = lazyPage(() => import('./pages/ApiDashboard'), 'ApiDashboard');
+
+// --- E-COMMERCE ---
+const CartPage = lazyPage(() => import('./pages/CartPage'), 'CartPage');
+const WishlistPage = lazyPage(() => import('./pages/WishListPage'), 'WishlistPage');
+const CheckoutPage = lazyPage(() => import('./pages/CheckoutPage'), 'CheckoutPage');
+const PurchasesPage = lazyPage(() => import('./pages/PurchasesPage'), 'PurchasesPage');
+
+// --- ACADEMIA ---
+const Academia = lazyPage(() => import('./pages/Academia'), 'Academia');
+const Libreria = lazyPage(() => import('./pages/Libreria'), 'Libreria');
+const MyCoursesPage = lazyPage(() => import('./pages/MyCoursesPage'), 'MyCoursesPage');
+const CoursePlayerPage = lazyPage(() => import('./pages/CoursePlayerPage'), 'CoursePlayerPage');
+const InvestorTestPage = lazyPage(
+  () => import('./pages/features/test-inversor/InvestorTestPage'),
+  'InvestorTestPage'
+);
+
+// --- HUB DE HERRAMIENTAS ---
+const Calculadoras = lazyPage(() => import('./pages/Herramientas'), 'Calculadoras');
 
 // --- MÓDULO I: INFLACIÓN ---
-import { AjusteInflacion } from './pages/herramientas/Inflacion (Mod1)/AjusteInflacion';
-import { SalarioReal } from './pages/herramientas/Inflacion (Mod1)/SalarioReal';
-import { Stockeo } from './pages/herramientas/Inflacion (Mod1)/Stockeo';
-import { MiIPC } from './pages/herramientas/Inflacion (Mod1)/MiIPC';
-import { ProyectorTarifas } from './pages/herramientas/Inflacion (Mod1)/ProyectorTarifas';
-import { CanastaRegional } from './pages/herramientas/Inflacion (Mod1)/CanastaRegional';
+const AjusteInflacion = lazyPage(() => import('./pages/herramientas/inflacion/AjusteInflacion'), 'AjusteInflacion');
+const SalarioReal = lazyPage(() => import('./pages/herramientas/inflacion/SalarioReal'), 'SalarioReal');
+const Stockeo = lazyPage(() => import('./pages/herramientas/inflacion/Stockeo'), 'Stockeo');
+const MiIPC = lazyPage(() => import('./pages/herramientas/inflacion/MiIPC'), 'MiIPC');
+const ProyectorTarifas = lazyPage(() => import('./pages/herramientas/inflacion/ProyectorTarifas'), 'ProyectorTarifas');
+const CanastaRegional = lazyPage(() => import('./pages/herramientas/inflacion/CanastaRegional'), 'CanastaRegional');
 
 // --- MÓDULO II: INVERSIONES ---
-import { RadarLiquidez } from './pages/herramientas/inversiones (mod 2)/RadarLiquidez';
-import { PlazoFijoUVA } from './pages/herramientas/inversiones (mod 2)/PlazoFijoUva';
-import { CarryTrade } from './pages/herramientas/inversiones (mod 2)/CarryTrade';
-import { RutasDolar } from './pages/herramientas/inversiones (mod 2)/RutasDolar';
-import { CalculadoraBonos } from './pages/herramientas/inversiones (mod 2)/CalculadoraBonos';
-import { ArbitrajeCedears } from './pages/herramientas/inversiones (mod 2)/ArbitrajeCedears';
-import { InflacionUsdSpy } from './pages/herramientas/inversiones (mod 2)/InflacionUsdSpy';
-import { CalculadoraRetiro } from './pages/herramientas/inversiones (mod 2)/CalculadoraRetiro';
-import { BandasCambiarias } from './pages/herramientas/inversiones (mod 2)/BandasCambiarias';
-import { MonitorMercado } from './pages/herramientas/inversiones (mod 2)/MonitorMercado';
-import { ScannerBonos } from './pages/herramientas/inversiones (mod 2)/ScannerBonos';
-import { FlujoFondosBonos } from './pages/herramientas/inversiones (mod 2)/FlujoFondosBonos';
-import { CalendarioDividendos } from './pages/herramientas/inversiones (mod 2)/CalendarioDividendos';
+const RadarLiquidez = lazyPage(() => import('./pages/herramientas/inversiones/RadarLiquidez'), 'RadarLiquidez');
+const PlazoFijoUVA = lazyPage(() => import('./pages/herramientas/inversiones/PlazoFijoUva'), 'PlazoFijoUVA');
+const CarryTrade = lazyPage(() => import('./pages/herramientas/inversiones/CarryTrade'), 'CarryTrade');
+const RutasDolar = lazyPage(() => import('./pages/herramientas/inversiones/RutasDolar'), 'RutasDolar');
+const CalculadoraBonos = lazyPage(() => import('./pages/herramientas/inversiones/CalculadoraBonos'), 'CalculadoraBonos');
+const ArbitrajeCedears = lazyPage(() => import('./pages/herramientas/inversiones/ArbitrajeCedears'), 'ArbitrajeCedears');
+const InflacionUsdSpy = lazyPage(() => import('./pages/herramientas/inversiones/InflacionUsdSpy'), 'InflacionUsdSpy');
+const CalculadoraRetiro = lazyPage(() => import('./pages/herramientas/inversiones/CalculadoraRetiro'), 'CalculadoraRetiro');
+const BandasCambiarias = lazyPage(() => import('./pages/herramientas/inversiones/BandasCambiarias'), 'BandasCambiarias');
+const MonitorMercado = lazyPage(() => import('./pages/herramientas/inversiones/MonitorMercado'), 'MonitorMercado');
+const ScannerBonos = lazyPage(() => import('./pages/herramientas/inversiones/ScannerBonos'), 'ScannerBonos');
+const FlujoFondosBonos = lazyPage(() => import('./pages/herramientas/inversiones/FlujoFondosBonos'), 'FlujoFondosBonos');
+const CalendarioDividendos = lazyPage(() => import('./pages/herramientas/inversiones/CalendarioDividendos'), 'CalendarioDividendos');
 
 // --- MÓDULO III: CRÉDITO ---
-import { DecodificadorCFT } from './pages/herramientas/credito(mod3)/DecodificadorCFT';
-import { BolaNieve } from './pages/herramientas/credito(mod3)/BolaNieve';
-import { CapacidadEndeudamiento } from './pages/herramientas/credito(mod3)/CapacidadEndeudamiento';
-import { ConsolidadorDeudas } from './pages/herramientas/credito(mod3)/ConsolidadorDeudas';
-import { SimuladorPrendario } from './pages/herramientas/credito(mod3)/SimuladorPrendario';
-import { CuotaSimple } from './pages/herramientas/credito(mod3)/CuotaSimple';
+const DecodificadorCFT = lazyPage(() => import('./pages/herramientas/credito/DecodificadorCFT'), 'DecodificadorCFT');
+const BolaNieve = lazyPage(() => import('./pages/herramientas/credito/BolaNieve'), 'BolaNieve');
+const CapacidadEndeudamiento = lazyPage(() => import('./pages/herramientas/credito/CapacidadEndeudamiento'), 'CapacidadEndeudamiento');
+const ConsolidadorDeudas = lazyPage(() => import('./pages/herramientas/credito/ConsolidadorDeudas'), 'ConsolidadorDeudas');
+const SimuladorPrendario = lazyPage(() => import('./pages/herramientas/credito/SimuladorPrendario'), 'SimuladorPrendario');
+const CuotaSimple = lazyPage(() => import('./pages/herramientas/credito/CuotaSimple'), 'CuotaSimple');
 
 // --- MÓDULO IV: INMOBILIARIO ---
-import { ComprarAlquilar } from './pages/herramientas/inmobiliario(mod4)/ComprarAlquilar';
-import { HipotecarioUVA } from './pages/herramientas/inmobiliario(mod4)/HipotecarioUVA';
-import { ActualizadorAlquiler } from './pages/herramientas/inmobiliario(mod4)/ActualizadorAlquiler';
-import { CostosIngreso } from './pages/herramientas/inmobiliario(mod4)/CostosIngreso';
-import { RentabilidadInmueble } from './pages/herramientas/inmobiliario(mod4)/RentabilidadInmueble';
-import { CostoConstruccion } from './pages/herramientas/inmobiliario(mod4)/CostoConstruccion';
-import { GastosEscritura } from './pages/herramientas/inmobiliario(mod4)/GastosEscritura';
+const ComprarAlquilar = lazyPage(() => import('./pages/herramientas/inmobiliario/ComprarAlquilar'), 'ComprarAlquilar');
+const HipotecarioUVA = lazyPage(() => import('./pages/herramientas/inmobiliario/HipotecarioUVA'), 'HipotecarioUVA');
+const ActualizadorAlquiler = lazyPage(() => import('./pages/herramientas/inmobiliario/ActualizadorAlquiler'), 'ActualizadorAlquiler');
+const CostosIngreso = lazyPage(() => import('./pages/herramientas/inmobiliario/CostosIngreso'), 'CostosIngreso');
+const RentabilidadInmueble = lazyPage(() => import('./pages/herramientas/inmobiliario/RentabilidadInmueble'), 'RentabilidadInmueble');
+const CostoConstruccion = lazyPage(() => import('./pages/herramientas/inmobiliario/CostoConstruccion'), 'CostoConstruccion');
+const GastosEscritura = lazyPage(() => import('./pages/herramientas/inmobiliario/GastosEscritura'), 'GastosEscritura');
 
 // --- MÓDULO V: FISCAL ---
-import { CalculadoraCourier } from './pages/herramientas/fiscal(mod5)/CalculadoraCourier';
-import { GrossingUp } from './pages/herramientas/fiscal(mod5)/GrossingUp';
-import { RetencionesSircreb } from './pages/herramientas/fiscal(mod5)/RetencionesSircreb';
-import { CalculadoraGanancias } from './pages/herramientas/fiscal(mod5)/CalculadoraGanancias';
-import { CategorizadorMonotributo } from './pages/herramientas/fiscal(mod5)/CategorizadorMonotributo';
-import { ExportacionServicios } from './pages/herramientas/fiscal(mod5)/ExportacionServicios';
+const CalculadoraCourier = lazyPage(() => import('./pages/herramientas/fiscal/CalculadoraCourier'), 'CalculadoraCourier');
+const GrossingUp = lazyPage(() => import('./pages/herramientas/fiscal/GrossingUp'), 'GrossingUp');
+const RetencionesSircreb = lazyPage(() => import('./pages/herramientas/fiscal/RetencionesSircreb'), 'RetencionesSircreb');
+const CalculadoraGanancias = lazyPage(() => import('./pages/herramientas/fiscal/CalculadoraGanancias'), 'CalculadoraGanancias');
+const CategorizadorMonotributo = lazyPage(() => import('./pages/herramientas/fiscal/CategorizadorMonotributo'), 'CategorizadorMonotributo');
+const ExportacionServicios = lazyPage(() => import('./pages/herramientas/fiscal/ExportacionServicios'), 'ExportacionServicios');
 
 // --- MÓDULO VI: ESTILO DE VIDA ---
-import { CalculadoraDolarTarjeta } from './pages/herramientas/estilo-vida(mod6)/CalculadoraDolarTarjeta';
-import { PresupuestoViaje } from './pages/herramientas/estilo-vida(mod6)/PresupuestoViaje';
-import { GestorSuscripciones } from './pages/herramientas/estilo-vida(mod6)/GestorSuscripciones';
-import { OptimizadorOfertas } from './pages/herramientas/estilo-vida(mod6)/OptimizadorOfertas';
+const CalculadoraDolarTarjeta = lazyPage(() => import('./pages/herramientas/estilo-vida/CalculadoraDolarTarjeta'), 'CalculadoraDolarTarjeta');
+const PresupuestoViaje = lazyPage(() => import('./pages/herramientas/estilo-vida/PresupuestoViaje'), 'PresupuestoViaje');
+const GestorSuscripciones = lazyPage(() => import('./pages/herramientas/estilo-vida/GestorSuscripciones'), 'GestorSuscripciones');
+const OptimizadorOfertas = lazyPage(() => import('./pages/herramientas/estilo-vida/OptimizadorOfertas'), 'OptimizadorOfertas');
 
 // --- MÓDULO VII: CORPORATIVO ---
-import { DescuentoCheques } from './pages/herramientas/corporativo(mod7)/DescuentoCheques';
-import { SimuladorMontecarlo } from './pages/herramientas/corporativo(mod7)/SimuladorMontecarlo';
+const DescuentoCheques = lazyPage(() => import('./pages/herramientas/corporativo/DescuentoCheques'), 'DescuentoCheques');
+const SimuladorMontecarlo = lazyPage(() => import('./pages/herramientas/corporativo/SimuladorMontecarlo'), 'SimuladorMontecarlo');
 
-import AnalyticsPage from './pages/Analytics';
-import Terminos from './pages/Terminos'; 
-import ApiDocs from './pages/ApiDocs';   
-import Login  from './pages/Login';
-import { Register } from './pages/Register';
-import Recovery from './pages/Recovery';
-import Academia from './pages/Academia';
-import Libreria from './pages/Libreria';
+/** Fallback mientras se descarga el chunk de una página. */
+const PageLoader = () => (
+  <div className="flex min-h-[60vh] w-full items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-emerald-600 dark:text-emerald-400" />
+  </div>
+);
 
-// SHOP COMPONENTS
-import { CartDrawer } from './components/shop/CartDrawer'; 
-import CartPage from './pages/CartPage';
-import WishlistPage from './pages/WishListPage'; 
-import CheckoutPage from './pages/CheckoutPage'; 
-import PurchasesPage from './pages/PurchasesPage'; 
-import MyCoursesPage from './pages/MyCoursesPage';
-import CoursePlayerPage from './pages/CoursePlayerPage';
 function App() {
-  const { user } = useAuth(); 
-
   return (
-    <ShopProvider>
-      <WishlistProvider>
-        
-        <ScrollToTop />
-        <CartDrawer />
+    <WishlistProvider>
+      <ScrollToTop />
+      <CartDrawer />
 
+      <Suspense fallback={<PageLoader />}>
         <Routes>
-          
-          {/* ======================================================
-              ZONA A: PÁGINAS STANDALONE (Auth, Legal, Landing)
-              ====================================================== */}
+          {/* ==========================================================
+              ZONA A: PÁGINAS STANDALONE (Auth, Legal)
+              ========================================================== */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/recovery" element={<Recovery />} />
           <Route path="/terminosdeuso" element={<Terminos />} />
           <Route path="/apidocs" element={<ApiDocs />} />
-          <Route path="/recovery" element={<Recovery />} />
-          
 
-          {/* ======================================================
-              ZONA B: PLATAFORMA COMERCIAL (Con Navbar & Footer)
-              ====================================================== */}
-          <Route element={<Layout />}> 
-            
-            {/* 1. PUBLIC ROUTES */}
+          {/* ==========================================================
+              ZONA B: PLATAFORMA COMERCIAL (Navbar + Footer)
+              ========================================================== */}
+          <Route element={<Layout />}>
+            {/* 1. RUTAS PÚBLICAS */}
             <Route path="/" element={<Home />} />
             <Route path="/glosario" element={<Glosario />} />
             <Route path="/sobre-mi" element={<SobreMi />} />
             <Route path="/contacto" element={<Contacto />} />
-            <Route path="/planes" element={<div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300"><Planes /></div>} />
+            <Route
+              path="/planes"
+              element={
+                <div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300">
+                  <Planes />
+                </div>
+              }
+            />
 
-            {/* 2. PROTECTED USER ROUTES (Dashboard, Shop, Profile) */}
+            {/* 2. RUTAS PROTEGIDAS (requieren sesión) */}
             <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/perfil" element={<Perfil />} />
-                <Route path="/analytics" element={<AnalyticsPage />} />
-                
-                {/* E-Commerce Management */}
-                <Route path="/mis-compras" element={<PurchasesPage />} />
-                <Route path="/mis-cursos" element={<MyCoursesPage />} /> {/* Catálogo de mis cursos */}
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/exportar" element={<div className="bg-slate-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300"><DescargaPremium /></div>} />
-                
-                {/* Tiers Avanzados */}
-                <Route element={<ProtectedRoute isAllowed={!!user && ['pro', 'unlimited'].includes(user.plan)} redirectTo="/planes" />}>
-                   {/* Rutas Pro */}
-                </Route>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/perfil" element={<Perfil />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
 
-                <Route element={<ProtectedRoute isAllowed={!!user && user.plan === 'unlimited'} redirectTo="/planes" />}>
-                    <Route path="/api-keys" element={<ApiDashboard />} />
-                </Route>
+              {/* E-Commerce */}
+              <Route path="/mis-compras" element={<PurchasesPage />} />
+              <Route path="/mis-cursos" element={<MyCoursesPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route
+                path="/exportar"
+                element={
+                  <div className="bg-slate-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
+                    <DescargaPremium />
+                  </div>
+                }
+              />
+
+              {/* 3. TIER UNLIMITED
+                  NOTA: este chequeo es sólo UX. La autorización real
+                  debe validarse en el backend en cada request. */}
+              <Route element={<ProtectedRoute allowedPlans={['unlimited']} redirectPath="/planes" />}>
+                <Route path="/api-keys" element={<ApiDashboard />} />
+              </Route>
             </Route>
-            {/* =======================================================
-                ZONA DE HERRAMIENTAS (PÚBLICAS / FREEMIUM)
-                ======================================================= */}
-            
+
+            {/* ==========================================================
+                HERRAMIENTAS (públicas / freemium)
+                ========================================================== */}
             <Route path="/herramientas" element={<Calculadoras />} />
 
-            {/* Módulos de Herramientas (Listado plano respetado) */}
+            {/* Módulo I: Inflación */}
             <Route path="/calculadoras/inflacion/ajuste" element={<AjusteInflacion />} />
             <Route path="/calculadoras/inflacion/salario-real" element={<SalarioReal />} />
             <Route path="/calculadoras/inflacion/stockeo" element={<Stockeo />} />
             <Route path="/calculadoras/inflacion/mi-ipc" element={<MiIPC />} />
             <Route path="/calculadoras/inflacion/tarifas" element={<ProyectorTarifas />} />
             <Route path="/calculadoras/inflacion/canasta-regional" element={<CanastaRegional />} />
-            
+
+            {/* Módulo II: Inversiones */}
             <Route path="/calculadoras/inversiones/liquidez" element={<RadarLiquidez />} />
             <Route path="/calculadoras/inversiones/bonos" element={<CalculadoraBonos />} />
             <Route path="/calculadoras/inversiones/cedears" element={<ArbitrajeCedears />} />
@@ -194,14 +217,16 @@ function App() {
             <Route path="/calculadoras/inversiones/scanner-bonos" element={<ScannerBonos />} />
             <Route path="/calculadoras/inversiones/flujo-bonos" element={<FlujoFondosBonos />} />
             <Route path="/calculadoras/inversiones/dividendos" element={<CalendarioDividendos />} />
-            
+
+            {/* Módulo III: Crédito */}
             <Route path="/calculadoras/credito/cft" element={<DecodificadorCFT />} />
             <Route path="/calculadoras/credito/bola-nieve" element={<BolaNieve />} />
             <Route path="/calculadoras/credito/capacidad" element={<CapacidadEndeudamiento />} />
             <Route path="/calculadoras/credito/consolidacion" element={<ConsolidadorDeudas />} />
             <Route path="/calculadoras/credito/prendarios" element={<SimuladorPrendario />} />
             <Route path="/calculadoras/credito/cuota-simple" element={<CuotaSimple />} />
-            
+
+            {/* Módulo IV: Inmobiliario */}
             <Route path="/calculadoras/inmobiliario/comprar-alquilar" element={<ComprarAlquilar />} />
             <Route path="/calculadoras/inmobiliario/hipotecario-uva" element={<HipotecarioUVA />} />
             <Route path="/calculadoras/inmobiliario/alquiler" element={<ActualizadorAlquiler />} />
@@ -209,23 +234,26 @@ function App() {
             <Route path="/calculadoras/inmobiliario/rentabilidad" element={<RentabilidadInmueble />} />
             <Route path="/calculadoras/inmobiliario/construccion" element={<CostoConstruccion />} />
             <Route path="/calculadoras/inmobiliario/escrituracion" element={<GastosEscritura />} />
-            
+
+            {/* Módulo V: Fiscal */}
             <Route path="/calculadoras/fiscal/importaciones" element={<CalculadoraCourier />} />
             <Route path="/calculadoras/fiscal/grossing-up" element={<GrossingUp />} />
             <Route path="/calculadoras/fiscal/sircreb" element={<RetencionesSircreb />} />
             <Route path="/calculadoras/fiscal/ganancias" element={<CalculadoraGanancias />} />
             <Route path="/calculadoras/fiscal/monotributo" element={<CategorizadorMonotributo />} />
             <Route path="/calculadoras/fiscal/exportacion" element={<ExportacionServicios />} />
-            
+
+            {/* Módulo VI: Estilo de vida */}
             <Route path="/calculadoras/vida/dolar-tarjeta" element={<CalculadoraDolarTarjeta />} />
             <Route path="/calculadoras/vida/viajes" element={<PresupuestoViaje />} />
             <Route path="/calculadoras/vida/suscripciones" element={<GestorSuscripciones />} />
             <Route path="/calculadoras/vida/ofertas" element={<OptimizadorOfertas />} />
-            
+
+            {/* Módulo VII: Corporativo */}
             <Route path="/calculadoras/corporativo/cheques" element={<DescuentoCheques />} />
             <Route path="/calculadoras/corporativo/montecarlo" element={<SimuladorMontecarlo />} />
 
-  
+            {/* Catálogo y mercados */}
             <Route path="/academia" element={<Academia />} />
             <Route path="/libreria" element={<Libreria />} />
             <Route path="/carrito" element={<CartPage />} />
@@ -234,45 +262,28 @@ function App() {
             <Route path="/mercados" element={<Mercados />} />
             <Route path="/indicador/:id" element={<DetalleIndicador />} />
             <Route path="/test-inversor" element={<InvestorTestPage />} />
+          </Route>
 
-          </Route> {/* FIN ZONA B (Layout Comercial) */}
-
-
-          {/* ======================================================
-              ZONA C: ENTORNO DE APRENDIZAJE (Inmersivo)
-              ====================================================== 
-              Aquí es donde ocurre la magia. Sacamos estas rutas del Layout 
-              principal y las envolvemos en LearningLayout.
-          */}
+          {/* ==========================================================
+              ZONA C: ENTORNO DE APRENDIZAJE (inmersivo)
+              ========================================================== */}
           <Route element={<ProtectedRoute />}>
             <Route element={<LearningLayout />}>
-              
-              {/* 1. RUTA ESPECÍFICA (La nueva "Verdad"): 
-                  Permite navegar directamente a una lección (ej: F5, Links compartidos).
-                  El componente leerá ambos IDs: courseId y lessonId. 
-              */}
+              {/* Ruta canónica: lección específica (permite F5 y links compartidos) */}
               <Route path="/curso/:courseId/leccion/:lessonId" element={<CoursePlayerPage />} />
-
-              {/* 2. RUTA GENÉRICA (Legacy / Fallback): 
-                  Mantiene compatibilidad. Si entras aquí, el componente 
-                  cargará la lección 1 por defecto (como hace hoy).
-              */}
+              {/* Fallback: carga la primera lección del curso */}
               <Route path="/curso/:id" element={<CoursePlayerPage />} />
-              
-              {/* Alias opcional (lo mantenemos por si lo usabas) */}
               <Route path="/curso/:id/learn" element={<CoursePlayerPage />} />
-              
             </Route>
           </Route>
 
-
           {/* 404 GLOBAL */}
           <Route path="*" element={<NotFound />} />
-
         </Routes>
-        <Toaster richColors position="bottom-right" duration={2000} />
-      </WishlistProvider>
-    </ShopProvider>
+      </Suspense>
+
+      <Toaster richColors position="bottom-right" duration={2000} />
+    </WishlistProvider>
   );
 }
 

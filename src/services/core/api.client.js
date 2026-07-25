@@ -17,12 +17,17 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Bandera global para que los Servicios sepan si deben usar mocks.
 // Esto permite que el tree-shaking elimine los mocks en el build de producción si se configura bien.
-export const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCKS === 'true' || true; // Default true por ahora
+// Mocks activos por defecto (todavía no hay backend real).
+// A diferencia del `|| true` anterior, ahora SÍ se pueden apagar:
+// poné VITE_USE_MOCKS=false en tu .env para pegarle al backend.
+export const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCKS !== 'false';
 
 // 2. CREACIÓN DE LA INSTANCIA (El "Camión" de transporte)
 const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000, // 10 segundos (Regla general aprobada por Auditor)
+  timeout: 10000, // 10 segundos
+  // Permite que el backend use cookies httpOnly (más seguro que localStorage)
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -42,9 +47,11 @@ apiClient.interceptors.request.use(
         const parsedSession = JSON.parse(sessionData);
         // Asumimos que el objeto usuario tiene un campo 'token' (o simulamos uno)
         // Si no tienes token aún, el backend mock lo ignorará, pero la tubería ya está lista.
-        const token = parsedSession.token || 'mock-token-placeholder';
-        
-        config.headers.Authorization = `Bearer ${token}`;
+        // Sólo adjuntamos el header si hay un token real.
+        // Nunca inventamos un token placeholder: enmascara errores de auth.
+        if (parsedSession?.token) {
+          config.headers.Authorization = `Bearer ${parsedSession.token}`;
+        }
       } catch (e) {
         console.warn('Error al leer sesión para request', e);
       }
