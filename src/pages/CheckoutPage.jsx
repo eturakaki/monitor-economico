@@ -320,7 +320,15 @@ export default function CheckoutPage() {
               </section>
             )}
 
-            {/* 3. DATOS DE PAGO */}
+            {/* 3. DATOS DE PAGO
+                ⚠️ ADVERTENCIA PCI-DSS: este formulario captura cardNumber, expiry y cvc
+                directamente en nuestro código. Eso pone al proyecto en alcance de PCI-DSS
+                en cuanto se conecte una pasarela real (nuestro servidor "toca" datos de
+                tarjeta). NO conectar este formulario a un backend propio en producción.
+                Antes de salir de mocks, reemplazar esta sección por MercadoPago Checkout Pro
+                o Stripe Elements: el número de tarjeta viaja directo del navegador del
+                usuario al procesador, sin pasar por nuestro código ni nuestro servidor.
+                Detalle y justificación en docs/SEGURIDAD.md. */}
             <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
                 <CreditCard size={120} />

@@ -23,8 +23,11 @@ export const checkoutService = {
 
     // --- MODO MOCK (Simulación) ---
     if (IS_MOCK_MODE) {
-      console.info('💳 [Checkout] Iniciando transacción simulada...', paymentData);
-      
+      // Nunca loguear paymentData completo: incluye cardNumber, expiry y cvc.
+      console.info('💳 [Checkout] Iniciando transacción simulada...', {
+        amount: paymentData.amount
+      });
+
       await _simulateProcessing();
 
       // VALIDACIÓN SIMULADA
