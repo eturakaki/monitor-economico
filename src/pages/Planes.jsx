@@ -52,7 +52,7 @@ const Planes = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-200 dark:bg-slate-900 py-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       
       {/* HEADER */}
       <div className="text-center max-w-3xl mx-auto mb-16">
@@ -81,7 +81,7 @@ const Planes = () => {
                 relative flex flex-col p-8 rounded-2xl border transition-all duration-300 h-full
                 ${plan.recommended 
                   ? 'bg-white dark:bg-slate-800 border-emerald-500 shadow-2xl scale-100 lg:scale-105 z-10' 
-                  : 'bg-white dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700/50'
+                  : 'bg-white dark:bg-slate-800/40 border-slate-300 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700/50'
                 }
                 ${isCurrentPlan ? 'ring-2 ring-emerald-500/50 ring-offset-2 dark:ring-offset-slate-900' : ''}
               `}

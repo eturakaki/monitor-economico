@@ -38,17 +38,17 @@ export function MiIPC() {
       <div className="grid lg:grid-cols-12 gap-8">
         
         {/* PANEL DE CARGA */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-          <h3 className="text-sm font-bold text-gray-500 uppercase mb-4">Desglose de Gastos</h3>
-          
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+          <h3 className="text-sm font-bold text-slate-500 uppercase mb-4">Desglose de Gastos</h3>
+
           <div className="space-y-3 mb-6">
             {items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800">
+              <div key={item.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-100 dark:border-slate-800">
                 <div>
-                  <p className="font-bold text-gray-800 dark:text-white">{item.categoria}</p>
-                  <p className="text-xs text-gray-500">{formatMoney(item.gasto)} • Inflación: <span className="text-rose-500">{item.inflacion}%</span></p>
+                  <p className="font-bold text-slate-800 dark:text-white">{item.categoria}</p>
+                  <p className="text-xs text-slate-500">{formatMoney(item.gasto)} • Inflación: <span className="text-rose-500">{item.inflacion}%</span></p>
                 </div>
-                <button onClick={() => eliminarItem(item.id)} className="text-gray-400 hover:text-rose-500 transition-colors"><Trash2 size={18}/></button>
+                <button onClick={() => eliminarItem(item.id)} className="text-slate-600 dark:text-slate-400 hover:text-rose-500 transition-colors"><Trash2 size={18}/></button>
               </div>
             ))}
           </div>
@@ -56,16 +56,16 @@ export function MiIPC() {
           {/* Formulario Agregar */}
           <div className="grid grid-cols-12 gap-2 items-end bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
             <div className="col-span-5">
-              <label className="text-xs text-gray-500 block mb-1">Categoría</label>
-              <input type="text" placeholder="Ej: Educación" value={newItem.categoria} onChange={e => setNewItem({...newItem, categoria: e.target.value})} className="w-full p-2 rounded-lg text-sm bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700" />
+              <label className="text-xs text-slate-500 block mb-1">Categoría</label>
+              <input type="text" placeholder="Ej: Educación" value={newItem.categoria} onChange={e => setNewItem({...newItem, categoria: e.target.value})} className="w-full p-2 rounded-lg text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700" />
             </div>
             <div className="col-span-3">
-              <label className="text-xs text-gray-500 block mb-1">Gasto ($)</label>
-              <input type="number" placeholder="50000" value={newItem.gasto} onChange={e => setNewItem({...newItem, gasto: e.target.value})} className="w-full p-2 rounded-lg text-sm bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700" />
+              <label className="text-xs text-slate-500 block mb-1">Gasto ($)</label>
+              <input type="number" placeholder="50000" value={newItem.gasto} onChange={e => setNewItem({...newItem, gasto: e.target.value})} className="w-full p-2 rounded-lg text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700" />
             </div>
             <div className="col-span-2">
-               <label className="text-xs text-gray-500 block mb-1">Infl. %</label>
-               <input type="number" placeholder="5" value={newItem.inflacion} onChange={e => setNewItem({...newItem, inflacion: e.target.value})} className="w-full p-2 rounded-lg text-sm bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700" />
+               <label className="text-xs text-slate-500 block mb-1">Infl. %</label>
+               <input type="number" placeholder="5" value={newItem.inflacion} onChange={e => setNewItem({...newItem, inflacion: e.target.value})} className="w-full p-2 rounded-lg text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700" />
             </div>
             <div className="col-span-2">
               <button onClick={agregarItem} className="w-full p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex justify-center items-center transition-colors"><Plus size={20}/></button>
@@ -89,8 +89,8 @@ export function MiIPC() {
              </div>
           </div>
 
-          <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4 text-center">Composición de tu Gasto</h4>
+          <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4 text-center">Composición de tu Gasto</h4>
              <div className="w-full h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>

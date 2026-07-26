@@ -31,28 +31,28 @@ export function PresupuestoViaje() {
       <div className="grid lg:grid-cols-12 gap-8">
          
          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
                <div className="mb-4">
-                  <label className="text-xs font-bold text-gray-500 uppercase mb-1">Duración (Días)</label>
-                  <input type="number" value={dias} onChange={e => setDias(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-1">Duración (Días)</label>
+                  <input type="number" value={dias} onChange={e => setDias(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                </div>
                <div className="mb-4">
-                  <label className="text-xs font-bold text-gray-500 uppercase mb-1">Costo Vuelo (Total)</label>
-                  <input type="number" value={vuelo} onChange={e => setVuelo(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-1">Costo Vuelo (Total)</label>
+                  <input type="number" value={vuelo} onChange={e => setVuelo(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                </div>
                <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                     <label className="text-xs font-bold text-gray-500 uppercase mb-1">Hotel x Noche</label>
-                     <input type="number" value={hotelNoche} onChange={e => setHotelNoche(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                     <label className="text-xs font-bold text-slate-500 uppercase mb-1">Hotel x Noche</label>
+                     <input type="number" value={hotelNoche} onChange={e => setHotelNoche(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                   </div>
                   <div>
-                     <label className="text-xs font-bold text-gray-500 uppercase mb-1">Gastos Diarios</label>
-                     <input type="number" value={comidaDia} onChange={e => setComidaDia(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                     <label className="text-xs font-bold text-slate-500 uppercase mb-1">Gastos Diarios</label>
+                     <input type="number" value={comidaDia} onChange={e => setComidaDia(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                   </div>
                </div>
                <div>
-                   <label className="text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Cambio ($)</label>
-                   <input type="number" value={tipoCambio} onChange={e => setTipoCambio(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                   <label className="text-xs font-bold text-slate-500 uppercase mb-1">Tipo de Cambio ($)</label>
+                   <input type="number" value={tipoCambio} onChange={e => setTipoCambio(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                </div>
             </div>
          </div>
@@ -66,26 +66,26 @@ export function PresupuestoViaje() {
              </div>
 
              <div className="grid gap-3">
-                <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl">
                    <div className="flex items-center gap-3">
                       <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded"><Plane size={20} className="text-slate-500"/></div>
-                      <span className="font-bold text-gray-700 dark:text-white">Aéreos</span>
+                      <span className="font-bold text-slate-700 dark:text-white">Aéreos</span>
                    </div>
-                   <span className="font-black text-gray-900 dark:text-white">{formatUSD(vuelo)}</span>
+                   <span className="font-black text-slate-900 dark:text-white">{formatUSD(vuelo)}</span>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl">
                    <div className="flex items-center gap-3">
                       <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded"><Hotel size={20} className="text-slate-500"/></div>
-                      <span className="font-bold text-gray-700 dark:text-white">Alojamiento ({dias} noches)</span>
+                      <span className="font-bold text-slate-700 dark:text-white">Alojamiento ({dias} noches)</span>
                    </div>
-                   <span className="font-black text-gray-900 dark:text-white">{formatUSD(presupuesto.totalHotel)}</span>
+                   <span className="font-black text-slate-900 dark:text-white">{formatUSD(presupuesto.totalHotel)}</span>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl">
                    <div className="flex items-center gap-3">
                       <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded"><Utensils size={20} className="text-slate-500"/></div>
-                      <span className="font-bold text-gray-700 dark:text-white">Viáticos y Comida</span>
+                      <span className="font-bold text-slate-700 dark:text-white">Viáticos y Comida</span>
                    </div>
-                   <span className="font-black text-gray-900 dark:text-white">{formatUSD(presupuesto.totalComida)}</span>
+                   <span className="font-black text-slate-900 dark:text-white">{formatUSD(presupuesto.totalComida)}</span>
                 </div>
              </div>
          </div>

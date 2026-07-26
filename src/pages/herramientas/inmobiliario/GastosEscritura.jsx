@@ -27,13 +27,13 @@ export function GastosEscritura() {
     >
       <div className="grid lg:grid-cols-12 gap-8">
         
-         <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+         <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md space-y-6">
             <div>
-               <label className="text-xs font-bold text-gray-500 uppercase mb-1">Valor Escritura (USD)</label>
-               <input type="number" value={valorPropiedad} onChange={e => setValorPropiedad(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+               <label className="text-xs font-bold text-slate-500 uppercase mb-1">Valor Escritura (USD)</label>
+               <input type="number" value={valorPropiedad} onChange={e => setValorPropiedad(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
             </div>
             <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
-               <p className="text-xs font-bold text-gray-500 uppercase mb-2">Parámetros Estimados</p>
+               <p className="text-xs font-bold text-slate-500 uppercase mb-2">Parámetros Estimados</p>
                <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                      <span>Honorarios Escribano (+IVA)</span>
@@ -62,14 +62,14 @@ export function GastosEscritura() {
                   { lbl: 'Impuesto Sellos', val: costoSellos },
                   { lbl: 'Gestoría / Varios', val: costoOtros },
                ].map((item) => (
-                  <div key={item.lbl} className="flex justify-between items-center p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl">
-                     <span className="font-medium text-gray-700 dark:text-slate-300">{item.lbl}</span>
-                     <span className="font-bold text-gray-900 dark:text-white">{formatUSD(item.val)}</span>
+                  <div key={item.lbl} className="flex justify-between items-center p-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl">
+                     <span className="font-medium text-slate-700 dark:text-slate-300">{item.lbl}</span>
+                     <span className="font-bold text-slate-900 dark:text-white">{formatUSD(item.val)}</span>
                   </div>
                ))}
             </div>
-            
-            <p className="text-xs text-gray-400 text-center">* Los valores son indicativos. El escribano puede ajustar honorarios y el tipo de cambio oficial aplica a sellos.</p>
+
+            <p className="text-xs text-slate-600 dark:text-slate-400 text-center">* Los valores son indicativos. El escribano puede ajustar honorarios y el tipo de cambio oficial aplica a sellos.</p>
          </div>
 
       </div>

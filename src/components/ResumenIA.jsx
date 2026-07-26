@@ -31,7 +31,7 @@ export function ResumenIA() {
               <span className="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
                 {item.valor}
               </span>
-              <span className="text-xs md:text-sm font-medium text-gray-400 mt-1 uppercase tracking-wider">
+              <span className="text-xs md:text-sm font-medium text-slate-400 mt-1 uppercase tracking-wider">
                 {/* Usamos titulo o label, segun como lo tengas en monitores.js */}
                 {item.titulo} 
               </span>
@@ -41,7 +41,7 @@ export function ResumenIA() {
 
         {/* Texto de Análisis (Viene de la IA) */}
         <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-          <p className="text-sm md:text-base leading-relaxed text-gray-200">
+          <p className="text-sm md:text-base leading-relaxed text-slate-200">
             <span className="font-bold text-blue-300">Insights: </span>
             {analisisData.analisis}
           </p>

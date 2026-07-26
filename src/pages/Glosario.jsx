@@ -42,7 +42,7 @@ export function Glosario() {
   // 4. INTERFAZ VISUAL
   // ========================================================================
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1121] transition-colors duration-300 font-sans pb-20">
+    <div className="min-h-screen bg-slate-200 dark:bg-[#0B1121] transition-colors duration-300 font-sans pb-20">
       
       {/* --- HEADER TIPO PORTADA (Dark Mode Force) --- */}
       <div className="bg-slate-900 py-20 px-4 border-b border-white/10 relative overflow-hidden">
@@ -94,7 +94,7 @@ export function Glosario() {
                 const isOpen = itemAbierto === searchId;
 
                 return (
-                  <div key={index} className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-gray-300 dark:border-slate-700 shadow-sm overflow-hidden hover:border-emerald-500/50 hover:scale-[1.01] transition-all">
+                  <div key={index} className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-md overflow-hidden hover:border-emerald-500/50 hover:scale-[1.01] transition-all">
                     
                     {/* CABECERA */}
                     <button 
@@ -121,7 +121,7 @@ export function Glosario() {
 
                     {/* CONTENIDO */}
                     {isOpen && (
-                      <div className="px-6 pb-6 pt-2 border-t-2 border-gray-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 animate-in slide-in-from-top-2 duration-200">
+                      <div className="px-6 pb-6 pt-2 border-t-2 border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 animate-in slide-in-from-top-2 duration-200">
                         
                         <div className="mb-5 mt-2">
                            <p className="text-slate-700 dark:text-slate-300 text-lg leading-relaxed">
@@ -131,7 +131,7 @@ export function Glosario() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {/* Fórmula Card */}
-                          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border-2 border-gray-300 dark:border-slate-700">
+                          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border-2 border-slate-300 dark:border-slate-700">
                              <span className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">
                                Fórmula / Cálculo
                              </span>
@@ -158,9 +158,9 @@ export function Glosario() {
               })}
 
               {resultadosBusqueda.length === 0 && (
-                <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-gray-300 dark:border-slate-700">
+                <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-300 dark:border-slate-700">
                   <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search size={24} className="text-slate-400" />
+                    <Search size={24} className="text-slate-600 dark:text-slate-400" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">No encontramos nada.</h3>
                   <p className="text-slate-500 dark:text-slate-400">Probá buscando por sector o usando palabras más simples.</p>
@@ -182,11 +182,11 @@ export function Glosario() {
              
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                {sectores.map((sector) => (
-                 <div key={sector.id} className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-gray-300 dark:border-slate-700 shadow-sm overflow-hidden hover:border-gray-400 dark:hover:border-slate-600 transition-all">
-                   
+                 <div key={sector.id} className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-md overflow-hidden hover:border-slate-400 dark:hover:border-slate-600 transition-all">
+
                    {/* Cabecera Sector */}
-                   <div className={`px-6 py-4 flex items-center gap-3 border-b-2 border-gray-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30`}>
-                     <div className={`p-2 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 ${sector.bgHeader || 'bg-white dark:bg-slate-800'} ${sector.textHeader}`}>
+                   <div className={`px-6 py-4 flex items-center gap-3 border-b-2 border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30`}>
+                     <div className={`p-2 rounded-lg shadow-md border border-slate-300 dark:border-slate-700 ${sector.bgHeader || 'bg-white dark:bg-slate-800'} ${sector.textHeader}`}>
                        <sector.Icono size={20} />
                      </div>
                      <h3 className={`font-bold text-lg text-slate-900 dark:text-white`}>{sector.titulo}</h3>
@@ -210,14 +210,14 @@ export function Glosario() {
                                `}
                              >
                                <span>{item.nombre}</span>
-                               {isOpen ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+                               {isOpen ? <ChevronUp size={16} className="text-slate-600 dark:text-slate-400" /> : <ChevronDown size={16} className="text-slate-600 dark:text-slate-400" />}
                              </button>
 
                              {isOpen && (
                                <div className="px-4 pb-5 pt-2 bg-white dark:bg-slate-900 animate-in slide-in-from-top-2 duration-200">
                                  {/* Definición */}
                                  <div className="mb-4">
-                                   <span className="inline-block px-2 py-0.5 rounded-full border-2 border-gray-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 bg-slate-50 dark:bg-slate-800">
+                                   <span className="inline-block px-2 py-0.5 rounded-full border-2 border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 bg-slate-50 dark:bg-slate-800">
                                      Definición
                                    </span>
                                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{item.definicion}</p>
@@ -225,7 +225,7 @@ export function Glosario() {
                                  
                                  {/* Fórmula */}
                                  <div className="mb-4">
-                                   <span className="inline-block px-2 py-0.5 rounded-full border-2 border-gray-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 bg-slate-50 dark:bg-slate-800">
+                                   <span className="inline-block px-2 py-0.5 rounded-full border-2 border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 bg-slate-50 dark:bg-slate-800">
                                      Fórmula
                                    </span>
                                    <div className="bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-emerald-400 tabular-nums">
@@ -261,12 +261,12 @@ export function Glosario() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {calculos.map((calc, index) => (
-              <div key={index} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border-2 border-gray-300 dark:border-slate-700 shadow-sm hover:border-blue-500/50 transition-all group">
+              <div key={index} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-md hover:border-blue-500/50 transition-all group">
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">{calc.titulo}</h3>
                 <div className="bg-slate-950 rounded-xl p-4 mb-4 font-mono text-xs text-emerald-400 overflow-x-auto border border-slate-800 shadow-inner tabular-nums">
                   {calc.formula}
                 </div>
-                <div className="flex gap-3 items-start text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-gray-200 dark:border-slate-800">
+                <div className="flex gap-3 items-start text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-300 dark:border-slate-800">
                   <span className="font-bold text-slate-900 dark:text-slate-200 uppercase tracking-wider shrink-0 mt-0.5 text-[10px]">Ejemplo:</span>
                   <p>{calc.ejemplo}</p>
                 </div>
@@ -276,14 +276,14 @@ export function Glosario() {
         </div>
 
         {/* --- SECCIÓN 4: NOTAS METODOLÓGICAS --- */}
-        <div className="mt-16 bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-10 border-2 border-gray-300 dark:border-slate-700 shadow-sm relative overflow-hidden">
+        <div className="mt-16 bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-10 border-2 border-slate-300 dark:border-slate-700 shadow-md relative overflow-hidden">
           
           <div className="absolute top-0 right-0 p-12 opacity-[0.03] dark:opacity-[0.07] pointer-events-none">
              <BookOpen size={150} className="dark:text-white" />
           </div>
 
           <h3 className="text-xl font-black text-slate-900 dark:text-white mb-8 flex items-center gap-3 relative z-10">
-            <div className="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl border border-gray-200 dark:border-slate-700">
+            <div className="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700">
                <Info size={22} />
             </div>
             Notas Metodológicas

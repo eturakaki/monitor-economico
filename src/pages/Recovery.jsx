@@ -32,8 +32,8 @@ export const Recovery = () => {
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B1121] px-4 transition-colors">
-        <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl text-center border border-slate-200 dark:border-slate-800">
+      <div className="min-h-screen flex items-center justify-center bg-slate-200 dark:bg-[#0B1121] px-4 transition-colors">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl text-center border border-slate-300 dark:border-slate-800">
           <div className="mx-auto w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6">
             <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
           </div>
@@ -58,13 +58,13 @@ export const Recovery = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B1121] px-4 transition-colors">
-      
+    <div className="min-h-screen flex items-center justify-center bg-slate-200 dark:bg-[#0B1121] px-4 transition-colors">
+
       {/* Botón Volver Flotante */}
       <div className="absolute top-6 left-6">
-        <Link 
-          to="/login" 
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-bold text-slate-600 dark:text-slate-400 hover:border-emerald-500 hover:text-emerald-500 transition-all shadow-sm"
+        <Link
+          to="/login"
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-sm font-bold text-slate-600 dark:text-slate-400 hover:border-emerald-500 hover:text-emerald-500 transition-all shadow-md"
         >
           <ArrowLeft size={16} /> <span className="hidden sm:inline">Volver</span>
         </Link>
@@ -83,12 +83,12 @@ export const Recovery = () => {
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl border border-slate-300 dark:border-slate-800">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Email Registrado</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-3.5 text-slate-400 w-5 h-5" />
+                <Mail className="absolute left-4 top-3.5 text-slate-600 dark:text-slate-400 w-5 h-5" />
                 <input 
                   type="email" 
                   required
@@ -117,7 +117,7 @@ export const Recovery = () => {
           </form>
 
           <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               ¿Todavía tienes problemas? <a href="#" className="text-emerald-500 font-bold hover:underline">Contactar Soporte</a>
             </p>
           </div>

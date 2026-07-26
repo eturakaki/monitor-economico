@@ -22,21 +22,21 @@ export function ActualizadorAlquiler() {
     >
       <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 items-center">
          
-         <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+         <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md space-y-6">
             <div>
-               <label className="text-xs font-bold text-gray-500 uppercase mb-1">Alquiler Actual</label>
-               <input type="number" value={alquilerActual} onChange={e => setAlquilerActual(Number(e.target.value))} className="w-full p-4 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl text-2xl font-black dark:text-white" />
+               <label className="text-xs font-bold text-slate-500 uppercase mb-1">Alquiler Actual</label>
+               <input type="number" value={alquilerActual} onChange={e => setAlquilerActual(Number(e.target.value))} className="w-full p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-2xl font-black dark:text-white" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                   <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Índice</label>
+                   <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Índice</label>
                    <div className="flex flex-col gap-2">
                       {['ICL', 'IPC', 'Casa Propia'].map(m => (
-                         <button 
-                            key={m} 
+                         <button
+                            key={m}
                             onClick={() => setMetodo(m)}
-                            className={`py-2 px-3 rounded-lg text-xs font-bold transition-colors text-left ${metodo === m ? 'bg-emerald-500 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-500'}`}
+                            className={`py-2 px-3 rounded-lg text-xs font-bold transition-colors text-left ${metodo === m ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}
                          >
                             {m}
                          </button>
@@ -44,13 +44,13 @@ export function ActualizadorAlquiler() {
                    </div>
                 </div>
                 <div>
-                   <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Frecuencia</label>
+                   <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Frecuencia</label>
                    <div className="flex flex-col gap-2">
                       {[12, 6, 3].map(m => (
-                         <button 
-                            key={m} 
+                         <button
+                            key={m}
                             onClick={() => setFrecuencia(m)} // <--- USO DEL SETTER
-                            className={`py-2 px-3 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 ${frecuencia === m ? 'bg-emerald-500 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-500'}`}
+                            className={`py-2 px-3 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 ${frecuencia === m ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}
                          >
                             <CalendarClock size={14} />
                             Cada {m} meses
@@ -61,9 +61,9 @@ export function ActualizadorAlquiler() {
             </div>
 
             <div>
-               <label className="text-xs font-bold text-gray-500 uppercase mb-1">Variación Acumulada (%)</label>
-               <input type="number" value={indiceVariacion} onChange={e => setIndiceVariacion(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
-               <p className="text-xs text-gray-400 mt-2">
+               <label className="text-xs font-bold text-slate-500 uppercase mb-1">Variación Acumulada (%)</label>
+               <input type="number" value={indiceVariacion} onChange={e => setIndiceVariacion(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
+               <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">
                   *Ingresa el % acumulado del índice <strong>{metodo}</strong> para el período de <strong>{frecuencia} meses</strong>.
                </p>
             </div>
@@ -79,12 +79,12 @@ export function ActualizadorAlquiler() {
                </div>
             </div>
 
-            <div className="bg-gray-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 flex justify-between items-center">
+            <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 flex justify-between items-center">
                <div className="flex items-center gap-3">
                   <div className="p-3 bg-white dark:bg-slate-800 rounded-lg text-emerald-500 shadow-sm"><RefreshCw size={24}/></div>
                   <div>
-                     <p className="text-sm font-bold text-gray-900 dark:text-white">Aumento Neto</p>
-                     <p className="text-xs text-gray-500">Diferencia de bolsillo</p>
+                     <p className="text-sm font-bold text-slate-900 dark:text-white">Aumento Neto</p>
+                     <p className="text-xs text-slate-500">Diferencia de bolsillo</p>
                   </div>
                </div>
                <p className="text-xl font-black text-emerald-600">+{formatMoney(diferencia)}</p>

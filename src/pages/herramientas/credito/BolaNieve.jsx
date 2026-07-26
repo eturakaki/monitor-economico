@@ -33,19 +33,19 @@ export function BolaNieve() {
         
         {/* INPUTS */}
         <div className="lg:col-span-4 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Deuda Total Tarjeta</label>
-                 <input type="number" value={deudaTotal} onChange={e => setDeudaTotal(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Deuda Total Tarjeta</label>
+                 <input type="number" value={deudaTotal} onChange={e => setDeudaTotal(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Pago Mínimo Realizado</label>
-                 <input type="number" value={pagoMinimo} onChange={e => setPagoMinimo(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Pago Mínimo Realizado</label>
+                 <input type="number" value={pagoMinimo} onChange={e => setPagoMinimo(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
               <div className="mb-2">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">TNA Refinanciación (%)</label>
-                 <input type="number" value={tna} onChange={e => setTna(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
-                 <p className="text-[10px] text-gray-400 mt-1">*Suele ser mucho más alta que un préstamo personal.</p>
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">TNA Refinanciación (%)</label>
+                 <input type="number" value={tna} onChange={e => setTna(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-1">*Suele ser mucho más alta que un préstamo personal.</p>
               </div>
            </div>
         </div>
@@ -66,8 +66,8 @@ export function BolaNieve() {
                </div>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-6">Proyección de Crecimiento de Deuda</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Proyección de Crecimiento de Deuda</h4>
              <div className="w-full h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={proyeccion} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>

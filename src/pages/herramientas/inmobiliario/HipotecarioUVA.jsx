@@ -64,38 +64,38 @@ export function HipotecarioUVA() {
         
         {/* INPUTS */}
         <div className="lg:col-span-4 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Valor Propiedad (USD)</label>
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Valor Propiedad (USD)</label>
                  {/* Asumimos tipo de cambio 1:1 para simplificar o inputs en pesos */}
-                 <input type="number" value={propiedad} onChange={e => setPropiedad(Number(e.target.value))} className="w-full p-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <input type="number" value={propiedad} onChange={e => setPropiedad(Number(e.target.value))} className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 mb-4">
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1">% Financiado</label>
-                    <input type="number" value={ltv} onChange={e => setLtv(Number(e.target.value))} className="w-full p-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-1">% Financiado</label>
+                    <input type="number" value={ltv} onChange={e => setLtv(Number(e.target.value))} className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1">Años</label>
-                    <input type="number" value={anios} onChange={e => setAnios(Number(e.target.value))} className="w-full p-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-1">Años</label>
+                    <input type="number" value={anios} onChange={e => setAnios(Number(e.target.value))} className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
               </div>
 
-              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-4">
+              <div className="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-4">
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase">Tasa Banco (UVA + %)</label>
-                    <input type="range" min="3" max="15" step="0.5" value={tnaUva} onChange={e => setTnaUva(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-indigo-500" />
+                    <label className="text-xs font-bold text-slate-500 uppercase">Tasa Banco (UVA + %)</label>
+                    <input type="range" min="3" max="15" step="0.5" value={tnaUva} onChange={e => setTnaUva(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-indigo-500" />
                     <p className="text-right text-xs font-bold text-indigo-500">{tnaUva}%</p>
                  </div>
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase">Inflación Proyectada</label>
-                    <input type="range" min="1" max="15" step="0.5" value={inflacionMensual} onChange={e => setInflacionMensual(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-rose-500" />
+                    <label className="text-xs font-bold text-slate-500 uppercase">Inflación Proyectada</label>
+                    <input type="range" min="1" max="15" step="0.5" value={inflacionMensual} onChange={e => setInflacionMensual(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-rose-500" />
                     <p className="text-right text-xs font-bold text-rose-500">{inflacionMensual}% mensual</p>
                  </div>
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase">Ajuste de Tu Sueldo</label>
-                    <input type="range" min="1" max="15" step="0.5" value={ajusteSalarial} onChange={e => setAjusteSalarial(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-emerald-500" />
+                    <label className="text-xs font-bold text-slate-500 uppercase">Ajuste de Tu Sueldo</label>
+                    <input type="range" min="1" max="15" step="0.5" value={ajusteSalarial} onChange={e => setAjusteSalarial(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-emerald-500" />
                     <p className="text-right text-xs font-bold text-emerald-500">{ajusteSalarial}% mensual</p>
                  </div>
               </div>
@@ -117,7 +117,7 @@ export function HipotecarioUVA() {
                        {analisis.descalce > 0 ? 'Riesgo de Licuación' : 'Salario Protegido'}
                     </p>
                  </div>
-                 <p className="text-sm text-gray-600 dark:text-slate-300 leading-tight">
+                 <p className="text-sm text-slate-600 dark:text-slate-300 leading-tight">
                     {analisis.descalce > 0 
                        ? `La cuota sube ${analisis.descalce.toFixed(1)}% más rápido que tu sueldo cada mes.` 
                        : `Tu sueldo le gana a la cuota por ${Math.abs(analisis.descalce).toFixed(1)}% mensual.`}
@@ -125,8 +125,8 @@ export function HipotecarioUVA() {
               </div>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[350px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Proyección a 5 Años (Estrés)</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[350px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Proyección a 5 Años (Estrés)</h4>
              <div className="w-full h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={analisis.data}>

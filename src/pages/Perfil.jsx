@@ -48,7 +48,7 @@ const Perfil = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1121] py-12 px-4 transition-colors duration-300 font-sans">
+    <div className="min-h-screen bg-slate-200 dark:bg-[#0B1121] py-12 px-4 transition-colors duration-300 font-sans">
       <div className="max-w-5xl mx-auto">
         
         {/* === SECCIÓN A: IDENTIDAD PÚBLICA (Future Forum Profile) === */}
@@ -79,7 +79,7 @@ const Perfil = () => {
                                     : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-700'
                                 }`}
                             >
-                                <Icon size={18} className={isActive ? 'text-indigo-600 dark:text-white' : 'text-slate-400'} />
+                                <Icon size={18} className={isActive ? 'text-indigo-600 dark:text-white' : 'text-slate-600 dark:text-slate-400'} />
                                 {tab.label}
                             </button>
                         );

@@ -55,7 +55,7 @@ const WishlistCard = ({ item, onRemove, onAddToCart }) => {
   };
 
   return (
-    <div className="group relative flex flex-col h-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-black/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+    <div className="group relative flex flex-col h-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-black/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
       
       {/* 1. HEADER VISUAL: Color e Identidad */}
       <div className={`relative h-28 overflow-hidden ${theme.light} transition-colors`}>
@@ -74,7 +74,7 @@ const WishlistCard = ({ item, onRemove, onAddToCart }) => {
           {/* Botón Eliminar */}
           <button 
             onClick={() => onRemove(item.id)}
-            className="p-2 rounded-full bg-white/60 dark:bg-black/30 hover:bg-rose-500 hover:text-white text-slate-400 transition-all backdrop-blur-md shadow-sm"
+            className="p-2 rounded-full bg-white/60 dark:bg-black/30 hover:bg-rose-500 hover:text-white text-slate-600 dark:text-slate-400 transition-all backdrop-blur-md shadow-sm"
             title="Quitar de favoritos"
           >
             <Trash2 size={16} />
@@ -126,10 +126,10 @@ const WishlistCard = ({ item, onRemove, onAddToCart }) => {
              {/* Fallback si no hay data, mostramos chips de calidad */}
              {!item.duracion && !item.rating && (
                  <>
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-600 dark:text-slate-400">
                         <ShieldCheck size={12} className="text-emerald-500"/> VERIFICADO
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-600 dark:text-slate-400">
                         <TrendingUp size={12} className="text-blue-500"/> ACTUALIZADO
                     </div>
                  </>
@@ -139,7 +139,7 @@ const WishlistCard = ({ item, onRemove, onAddToCart }) => {
         {/* 3. ACTION ZONE */}
         <div className="mt-auto flex items-center justify-between gap-3">
             <div className="flex flex-col">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Precio</span>
+                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">Precio</span>
                 <span className="text-xl font-black text-slate-900 dark:text-white">
                     ${item.price?.toLocaleString() || '0'}
                 </span>

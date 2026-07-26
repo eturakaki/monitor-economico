@@ -24,7 +24,7 @@ export function Layout() {
       </main>
       
       {/* 3. FOOTER (Información estática) */}
-      <footer className="bg-gray-900 text-white border-gray-800 mt-auto">
+      <footer className="bg-slate-900 text-white border-slate-800 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             
@@ -38,17 +38,17 @@ export function Layout() {
                   Monitor<span className="text-emerald-500">Eco</span>
                 </span>
               </div>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-slate-400 text-sm leading-relaxed">
                 Datos macroeconómicos de Argentina en tiempo real. Análisis profesional para la toma de decisiones.
               </p>
             </div>
             
             {/* Acceso Rápido Column */}
              <div className="col-span-1 md:col-span-2">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Acceso Rápido</h3>
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Acceso Rápido</h3>
               <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                 {sectores.slice(0, 6).map((sector) => (
-                  <Link key={sector.id} to={`/categoria/${sector.id}`} className="text-gray-400 hover:text-emerald-400 text-sm transition-colors flex items-center gap-2">
+                  <Link key={sector.id} to={`/categoria/${sector.id}`} className="text-slate-400 hover:text-emerald-400 text-sm transition-colors flex items-center gap-2">
                     <span className={`w-1.5 h-1.5 rounded-full bg-${sector.color}-500`}></span>
                     {sector.titulo}
                   </Link>
@@ -58,8 +58,8 @@ export function Layout() {
             
             {/* Info Column */}
             <div className="col-span-1">
-               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Info</h3>
-               <ul className="space-y-2 text-sm text-gray-400">
+               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Info</h3>
+               <ul className="space-y-2 text-sm text-slate-400">
                  <li><Link to="/glosario" className="hover:text-white transition-colors">Glosario</Link></li>
                  <li><Link to="/sobre-mi" className="hover:text-white transition-colors">Acerca de mí</Link></li>
                <li><Link to="/contacto" className="hover:text-white transition-colors">Contacto</Link></li>
@@ -71,7 +71,7 @@ export function Layout() {
             </div>
 
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-xs text-gray-500">
+          <div className="border-t border-slate-800 mt-12 pt-8 text-center text-xs text-slate-500">
             <p>© 2026 MonitorEco. Desarrollado en Argentina.</p>
             <p> Derechos Reservados. Iñaki Etura</p>
           </div>

@@ -144,7 +144,7 @@ export function SimuladorPrendario() {
         
         {/* === INPUTS === */}
         <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6 self-start">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
             <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
               <Car className="w-4 h-4 text-indigo-500" /> Datos del Vehículo
             </h3>
@@ -153,7 +153,7 @@ export function SimuladorPrendario() {
               <div>
                  <InputGroup label="Monto a Financiar" value={montoFinanciar} onChange={setMontoFinanciar} error={isLtvImpossible} />
                  <div className="flex justify-between mt-2 px-1 items-center">
-                   <span className="text-[10px] uppercase font-bold text-slate-400">LTV (Cobertura)</span>
+                   <span className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400">LTV (Cobertura)</span>
                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded flex items-center gap-1 ${
                      isLtvImpossible ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' :
                      isLtvHigh ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' :
@@ -173,7 +173,7 @@ export function SimuladorPrendario() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
             <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-500" /> Mercado Financiero
             </h3>
@@ -195,7 +195,7 @@ export function SimuladorPrendario() {
           </div>
 
           {/* TOTALES */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md overflow-hidden">
              <div className="p-4 bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2">
                 <Coins className="w-4 h-4 text-slate-500" />
                 <h4 className="text-xs font-black uppercase text-slate-600 dark:text-slate-400">Total a Devolver (Capital + Intereses)</h4>
@@ -237,7 +237,7 @@ export function SimuladorPrendario() {
           </div>
 
          {/* === GRÁFICO MANUAL (NO RESPONSIVE CONTAINER) === */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
              <div className="flex justify-between items-center mb-6">
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white">Proyección de Pagos</h4>
                 <div className="flex gap-4">
@@ -254,7 +254,7 @@ export function SimuladorPrendario() {
                 {/* 1. LOADING STATE */}
                 {(chartDims.width === 0 || chartDims.height === 0) && (
                     <div className="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-900/50 rounded animate-pulse">
-                        <span className="text-xs font-mono text-slate-400">Calculando geometría...</span>
+                        <span className="text-xs font-mono text-slate-600 dark:text-slate-400">Calculando geometría...</span>
                     </div>
                 )}
 
@@ -293,7 +293,7 @@ export function SimuladorPrendario() {
                 </span>
              </button>
              {showTable && proyeccion?.data && (
-                <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 max-h-[400px] shadow-inner bg-slate-50/50 dark:bg-black/20">
+                <div className="mt-4 overflow-x-auto rounded-xl border border-slate-300 dark:border-slate-800 max-h-[400px] shadow-inner bg-slate-50/50 dark:bg-black/20">
                    <table className="w-full text-sm text-left">
                       <thead className="bg-slate-50 dark:bg-slate-950 text-xs uppercase text-slate-500 font-bold sticky top-0 backdrop-blur-md">
                          <tr>
@@ -306,7 +306,7 @@ export function SimuladorPrendario() {
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 bg-white dark:bg-slate-900">
                          {proyeccion.data.map((row) => (
                             <tr key={row.mes} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                               <td className="px-6 py-3 font-mono text-xs text-slate-400">{row.mes}</td>
+                               <td className="px-6 py-3 font-mono text-xs text-slate-600 dark:text-slate-400">{row.mes}</td>
                                <td className="px-6 py-3 font-mono font-medium text-slate-700 dark:text-slate-300">{money(row.fija)}</td>
                                <td className="px-6 py-3 font-mono font-medium text-slate-700 dark:text-slate-300">{money(row.uva)}</td>
                                <td className={`px-6 py-3 font-mono font-bold text-right ${row.diff > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{row.diff > 0 ? '+' : ''}{money(row.diff)}</td>
@@ -332,7 +332,7 @@ const InputGroup = ({ label, value, onChange, icon: Icon, error }) => (
        {Icon && <Icon size={12} />} {label}
     </label>
     <div className="relative group">
-       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors font-mono">$</span>
+       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400 group-focus-within:text-indigo-500 transition-colors font-mono">$</span>
        <input type="number" value={value ?? ''} onChange={(e) => onChange(Number(e.target.value))} className={`w-full pl-7 pr-3 py-3 bg-slate-50 dark:bg-slate-950 border rounded-xl font-mono font-bold focus:ring-2 outline-none transition-all shadow-sm ${error ? 'border-rose-300 text-rose-600 focus:ring-rose-500/20' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500'}`} />
     </div>
   </div>
@@ -352,7 +352,7 @@ const HybridInput = ({ label, value, setValue, min, max, step, suffix, color, ex
             </div>
             <input type="range" min={min} max={max} step={step} value={value ?? 0} onChange={(e) => setValue(Number(e.target.value))} className={`w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 ${theme.accent} focus:outline-none focus:ring-2 focus:ring-opacity-50`} />
             <div className="flex justify-between mt-2 h-4">
-                <div className="flex gap-2"><span className="text-[10px] text-slate-400 font-medium font-mono">{min}{suffix}</span><span className="text-[10px] text-slate-400 font-medium font-mono">-</span><span className="text-[10px] text-slate-400 font-medium font-mono">{max}{suffix}</span></div>
+                <div className="flex gap-2"><span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium font-mono">{min}{suffix}</span><span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium font-mono">-</span><span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium font-mono">{max}{suffix}</span></div>
                 {extraInfo && <span className="text-[10px] text-slate-500 font-bold ml-auto">{extraInfo}</span>}
                 {warning && <span className="text-[10px] text-rose-500 flex items-center gap-1 ml-auto font-bold animate-pulse"><AlertCircle size={10}/> {warning}</span>}
             </div>
@@ -367,14 +367,14 @@ const ResultCard = ({ title, amount, cft, ratio, color, details, warning }) => {
    const borderClass = color === 'indigo' ? 'border-l-indigo-500' : 'border-l-emerald-500';
    const textClass = color === 'indigo' ? 'text-indigo-600 dark:text-indigo-400' : 'text-emerald-600 dark:text-emerald-400';
    return (
-      <div className={`relative p-6 bg-white dark:bg-slate-900 rounded-2xl border-l-4 ${borderClass} border-y border-r border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow`}>
+      <div className={`relative p-6 bg-white dark:bg-slate-900 rounded-2xl border-l-4 ${borderClass} border-y border-r border-slate-300 dark:border-slate-800 shadow-md flex flex-col justify-between hover:shadow-lg transition-shadow`}>
          <div>
             <div className="flex justify-between items-start mb-3">
                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">{title}</p>
                <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500 border border-slate-200 dark:border-slate-700">CFT {(cft ?? 0).toFixed(0)}%</span>
             </div>
             <p className={`text-3xl font-black ${textClass} tracking-tight mb-2 font-mono`}>{new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount ?? 0)}</p>
-            <p className="text-xs text-slate-400 font-medium mb-6">{details}</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-6">{details}</p>
          </div>
          <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
             <div className="flex justify-between text-[10px] uppercase font-bold text-slate-500 mb-2"><span>Impacto en Ingresos</span><span className={(ratio ?? 0) > 30 ? 'text-rose-500' : 'text-emerald-500'}>{(ratio ?? 0).toFixed(1)}%</span></div>

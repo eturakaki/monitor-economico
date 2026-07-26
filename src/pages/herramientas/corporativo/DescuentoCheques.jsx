@@ -40,30 +40,30 @@ export function DescuentoCheques() {
         
         {/* INPUTS */}
         <div className="lg:col-span-5 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Valor Nominal del Cheque</label>
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Valor Nominal del Cheque</label>
                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
-                    <input type="number" value={valorNominal} onChange={e => setValorNominal(Number(e.target.value))} className="w-full pl-8 p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl text-xl font-black dark:text-white outline-none focus:ring-2 focus:ring-slate-500" />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400 font-bold">$</span>
+                    <input type="number" value={valorNominal} onChange={e => setValorNominal(Number(e.target.value))} className="w-full pl-8 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xl font-black dark:text-white outline-none focus:ring-2 focus:ring-slate-500" />
                  </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-4">
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1"><CalendarDays size={12}/> Plazo (Días)</label>
-                    <input type="number" value={dias} onChange={e => setDias(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-1 flex items-center gap-1"><CalendarDays size={12}/> Plazo (Días)</label>
+                    <input type="number" value={dias} onChange={e => setDias(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1"><Percent size={12}/> TNA Descuento</label>
-                    <input type="number" value={tna} onChange={e => setTna(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-1 flex items-center gap-1"><Percent size={12}/> TNA Descuento</label>
+                    <input type="number" value={tna} onChange={e => setTna(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
               </div>
 
               <div>
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Comisiones + Sellos (%)</label>
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Comisiones + Sellos (%)</label>
                  <div className="flex items-center gap-3">
-                    <input type="range" min="0" max="5" step="0.1" value={gastosFijos} onChange={e => setGastosFijos(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-slate-600 cursor-pointer" />
+                    <input type="range" min="0" max="5" step="0.1" value={gastosFijos} onChange={e => setGastosFijos(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-slate-600 cursor-pointer" />
                     <span className="font-bold text-slate-700 dark:text-slate-300 w-12 text-right">{gastosFijos}%</span>
                  </div>
               </div>
@@ -82,7 +82,7 @@ export function DescuentoCheques() {
                </div>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px] grid sm:grid-cols-2 gap-6 items-center">
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px] grid sm:grid-cols-2 gap-6 items-center">
              <div className="h-[200px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -95,12 +95,12 @@ export function DescuentoCheques() {
                 </ResponsiveContainer>
              </div>
              <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
-                   <span className="text-gray-500 font-medium">Descuento Intereses</span>
+                <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                   <span className="text-slate-500 font-medium">Descuento Intereses</span>
                    <span className="font-bold text-rose-500">-{formatMoney(analisis.interes)}</span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
-                   <span className="text-gray-500 font-medium">Gastos / Comisiones</span>
+                <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                   <span className="text-slate-500 font-medium">Gastos / Comisiones</span>
                    <span className="font-bold text-rose-500">-{formatMoney(analisis.comisiones)}</span>
                 </div>
              </div>

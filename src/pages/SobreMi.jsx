@@ -6,7 +6,7 @@ import {
 
 export function SobreMi() {
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-[#0B1121] transition-colors duration-300 font-sans pb-20">
+    <div className="min-h-screen bg-slate-200/50 dark:bg-[#0B1121] transition-colors duration-300 font-sans pb-20">
       
       {/* 1. HEADER TIPO "PORTADA" (Estilo MonitorEco) */}
       {/* Mantenemos el header oscuro siempre (slate-900) para impacto visual en ambos modos */}
@@ -71,7 +71,7 @@ export function SobreMi() {
           <div className="md:col-span-8 space-y-8">
             
             {/* CARD: MI HISTORIA */}
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none transition-colors duration-300">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none transition-colors duration-300">
               <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-6 flex items-center gap-3">
                 <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300">
                   <User size={24} />
@@ -122,14 +122,14 @@ export function SobreMi() {
           <div className="md:col-span-4 space-y-6">
             
             {/* CARD: EDUCACIÓN + HABILIDADES */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm transition-colors duration-300">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-md transition-colors duration-300">
               <h3 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <GraduationCap size={20} className="text-blue-500" /> Formación & Nivel
               </h3>
-              
+
               {/* Bloque 1: Título Universitario */}
               <ul className="space-y-4 mb-6">
-                <li className="relative pl-4 border-l-2 border-gray-100 dark:border-slate-700">
+                <li className="relative pl-4 border-l-2 border-slate-100 dark:border-slate-700">
                   <div className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-blue-500"></div>
                   <h4 className="font-bold text-slate-800 dark:text-slate-200">Lic. en Economía</h4>
                   <p className="text-sm text-slate-500 dark:text-slate-400">Universidad Nacional de Salta (UNSa)</p>
@@ -138,7 +138,7 @@ export function SobreMi() {
               </ul>
 
               {/* SEPARADOR */}
-              <div className="border-t border-gray-100 dark:border-slate-800 my-6"></div>
+              <div className="border-t border-slate-100 dark:border-slate-800 my-6"></div>
 
               {/* Bloque 2: Las Barritas de Nivel */}
               <div className="space-y-6">
@@ -151,7 +151,7 @@ export function SobreMi() {
                     </span>
                     <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs">Avanzado</span>
                   </div>
-                  <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-500 w-[90%] rounded-full shadow-lg shadow-emerald-500/30"></div>
                   </div>
                 </div>
@@ -164,7 +164,7 @@ export function SobreMi() {
                     </span>
                     <span className="text-blue-500 dark:text-blue-400 font-bold text-xs">Intermedio</span>
                   </div>
-                  <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div className="h-full bg-blue-500 w-[75%] rounded-full shadow-lg shadow-blue-500/30"></div>
                   </div>
                 </div>
@@ -177,7 +177,7 @@ export function SobreMi() {
                     </span>
                     <span className="text-purple-500 dark:text-purple-400 font-bold text-xs">Básico</span>
                   </div>
-                  <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div className="h-full bg-purple-500 w-[60%] rounded-full shadow-lg shadow-purple-500/30"></div>
                   </div>
                 </div>
@@ -186,13 +186,13 @@ export function SobreMi() {
             </div>
             
             {/* CARD: TECH STACK (Etiquetas) */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm transition-colors duration-300">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-md transition-colors duration-300">
               <h3 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <Code size={20} className="text-emerald-500" /> Stack Técnico
               </h3>
               <div className="flex flex-wrap gap-2">
                 {['React.js', 'Tailwind CSS', 'Vite', 'Recharts', 'APIs REST', 'Git', 'R', 'RStudio'].map((tag) => (
-                  <span key={tag} className="px-3 py-1.5 bg-gray-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-lg border border-gray-200 dark:border-slate-700 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition-colors">
+                  <span key={tag} className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition-colors">
                     {tag}
                   </span>
                 ))}

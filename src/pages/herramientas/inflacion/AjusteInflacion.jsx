@@ -41,28 +41,28 @@ export function AjusteInflacion() {
       <div className="grid lg:grid-cols-12 gap-6">
         
         {/* INPUTS */}
-        <div className="lg:col-span-6 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+        <div className="lg:col-span-6 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Monto Histórico ($)</label>
-                <input 
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Monto Histórico ($)</label>
+                <input
                   type="number" value={monto} onChange={(e) => setMonto(e.target.value)} placeholder="Ej: 10000"
-                  className="w-full p-4 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-lg font-bold dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-lg font-bold dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Inflación Acumulada (%)</label>
-                <input 
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Inflación Acumulada (%)</label>
+                <input
                   type="number" value={inflacionAcumulada} onChange={(e) => setInflacionAcumulada(e.target.value)} placeholder="Ej: 211.4"
-                  className="w-full p-4 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-lg font-bold dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-lg font-bold dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
                 />
-                <p className="text-xs text-gray-500 mt-2">Ingresa el % total de inflación del período a analizar.</p>
+                <p className="text-xs text-slate-500 mt-2">Ingresa el % total de inflación del período a analizar.</p>
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button onClick={handleCalcular} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all">Calcular</button>
-                <button onClick={limpiar} className="px-4 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 rounded-xl"><RotateCcw size={20}/></button>
+                <button onClick={limpiar} className="px-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl"><RotateCcw size={20}/></button>
               </div>
            </div>
         </div>

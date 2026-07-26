@@ -58,31 +58,31 @@ export function PlazoFijoUVA() {
         
         {/* INPUTS */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-            
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+
             <div className="mb-6">
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Capital Inicial</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Capital Inicial</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                <input type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))} className="w-full pl-6 pr-3 py-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white focus:ring-2 focus:ring-violet-500 outline-none" />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400">$</span>
+                <input type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))} className="w-full pl-6 pr-3 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white focus:ring-2 focus:ring-violet-500 outline-none" />
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="flex justify-between text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                <label className="flex justify-between text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Inflación Mensual Promedio
                   <span className="text-rose-500 font-bold">{inflacionMensual}%</span>
                 </label>
-                <input type="range" min="1" max="20" step="0.5" value={inflacionMensual} onChange={(e) => setInflacionMensual(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-rose-500" />
+                <input type="range" min="1" max="20" step="0.5" value={inflacionMensual} onChange={(e) => setInflacionMensual(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-rose-500" />
               </div>
 
               <div>
-                <label className="flex justify-between text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                <label className="flex justify-between text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   TNA Tradicional
                   <span className="text-violet-500 font-bold">{tnaTradicional}%</span>
                 </label>
-                <input type="range" min="20" max="150" step="1" value={tnaTradicional} onChange={(e) => setTnaTradicional(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-violet-500" />
+                <input type="range" min="20" max="150" step="1" value={tnaTradicional} onChange={(e) => setTnaTradicional(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-violet-500" />
               </div>
             </div>
 
@@ -96,21 +96,21 @@ export function PlazoFijoUVA() {
         {/* RESULTADOS */}
         <div className="lg:col-span-8 flex flex-col gap-6">
            <div className="grid sm:grid-cols-2 gap-4">
-              <div className={`p-5 rounded-2xl border-2 transition-all ${proyeccion.ganador === 'Plazo Fijo UVA' ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-gray-200 dark:border-slate-800 opacity-60'}`}>
-                 <div className="text-sm text-gray-500 font-bold uppercase mb-1">Resultado UVA (6 meses)</div>
-                 <div className="text-3xl font-black text-gray-900 dark:text-white">{formatMoney(proyeccion.finalUVA)}</div>
+              <div className={`p-5 rounded-2xl border-2 transition-all ${proyeccion.ganador === 'Plazo Fijo UVA' ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-slate-300 dark:border-slate-800 opacity-60'}`}>
+                 <div className="text-sm text-slate-500 font-bold uppercase mb-1">Resultado UVA (6 meses)</div>
+                 <div className="text-3xl font-black text-slate-900 dark:text-white">{formatMoney(proyeccion.finalUVA)}</div>
                  <div className="text-xs text-emerald-600 font-bold mt-1">Ajustado por Inflación</div>
               </div>
-              
-              <div className={`p-5 rounded-2xl border-2 transition-all ${proyeccion.ganador === 'Plazo Fijo Tradicional' ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-gray-200 dark:border-slate-800 opacity-60'}`}>
-                 <div className="text-sm text-gray-500 font-bold uppercase mb-1">Resultado Tradicional</div>
-                 <div className="text-3xl font-black text-gray-900 dark:text-white">{formatMoney(proyeccion.finalTrad)}</div>
+
+              <div className={`p-5 rounded-2xl border-2 transition-all ${proyeccion.ganador === 'Plazo Fijo Tradicional' ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-slate-300 dark:border-slate-800 opacity-60'}`}>
+                 <div className="text-sm text-slate-500 font-bold uppercase mb-1">Resultado Tradicional</div>
+                 <div className="text-3xl font-black text-slate-900 dark:text-white">{formatMoney(proyeccion.finalTrad)}</div>
                  <div className="text-xs text-violet-600 font-bold mt-1">Tasa Fija Compuesta</div>
               </div>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-6">Carrera de Rendimientos (Proyección)</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Carrera de Rendimientos (Proyección)</h4>
              <div className="w-full h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={proyeccion.data}>

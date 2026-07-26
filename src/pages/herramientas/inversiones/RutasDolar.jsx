@@ -56,43 +56,43 @@ export function RutasDolar() {
        
        <div className="max-w-3xl mx-auto space-y-8">
           {/* Input Principal */}
-          <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm text-center">
-             <label className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 block">Quiero comprar</label>
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md text-center">
+             <label className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 block">Quiero comprar</label>
              <div className="flex justify-center items-center gap-2">
-                <span className="text-4xl font-black text-gray-300">US$</span>
-                <input type="number" value={montoUSD} onChange={e => setMontoUSD(Number(e.target.value))} className="w-48 text-5xl font-black text-center bg-transparent outline-none text-gray-900 dark:text-white border-b-2 border-gray-200 dark:border-slate-700 focus:border-emerald-500 transition-colors" />
+                <span className="text-4xl font-black text-slate-600 dark:text-slate-300">US$</span>
+                <input type="number" value={montoUSD} onChange={e => setMontoUSD(Number(e.target.value))} className="w-48 text-5xl font-black text-center bg-transparent outline-none text-slate-900 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 focus:border-emerald-500 transition-colors" />
              </div>
           </div>
 
           {/* Lista de Opciones (Ranking) */}
           <div className="space-y-4">
              {opciones.map((opcion, index) => (
-                <div key={opcion.id} className={`relative p-6 rounded-2xl border-2 transition-all flex items-center gap-4 ${index === 0 ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10 shadow-lg scale-[1.02]' : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900'}`}>
-                   
+                <div key={opcion.id} className={`relative p-6 rounded-2xl border-2 transition-all flex items-center gap-4 ${index === 0 ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10 shadow-lg scale-[1.02]' : 'border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900'}`}>
+
                    {index === 0 && (
                       <div className="absolute -top-3 left-6 bg-emerald-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded-full">
                          Mejor Precio
                       </div>
                    )}
 
-                   <div className={`p-4 rounded-xl ${index === 0 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-gray-100 dark:bg-slate-800 text-gray-400'}`}>
+                   <div className={`p-4 rounded-xl ${index === 0 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
                       <opcion.icon size={24} />
                    </div>
 
                    <div className="flex-1">
-                      <h4 className="font-bold text-gray-900 dark:text-white text-lg">{opcion.titulo}</h4>
-                      <p className="text-xs text-gray-500">{opcion.detalle}</p>
+                      <h4 className="font-bold text-slate-900 dark:text-white text-lg">{opcion.titulo}</h4>
+                      <p className="text-xs text-slate-500">{opcion.detalle}</p>
                    </div>
 
                    <div className="text-right">
-                      <p className="text-2xl font-black text-gray-900 dark:text-white">${new Intl.NumberFormat('es-AR').format(Math.round(opcion.total))}</p>
-                      <p className="text-xs font-bold text-gray-400">Tipo de cambio: ${opcion.precio}</p>
+                      <p className="text-2xl font-black text-slate-900 dark:text-white">${new Intl.NumberFormat('es-AR').format(Math.round(opcion.total))}</p>
+                      <p className="text-xs font-bold text-slate-600 dark:text-slate-400">Tipo de cambio: ${opcion.precio}</p>
                    </div>
                 </div>
              ))}
           </div>
 
-          <div className="text-center text-sm text-gray-400">
+          <div className="text-center text-sm text-slate-600 dark:text-slate-400">
              <p>* Las cotizaciones incluyen comisiones estimadas y pueden variar según tu operador.</p>
           </div>
        </div>

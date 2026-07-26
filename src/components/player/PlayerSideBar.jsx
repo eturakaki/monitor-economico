@@ -17,26 +17,26 @@ import { useCoursePlayer } from '../../context/CoursePlayerContext';
 const STYLES = {
   sidebar: {
     overlay: "fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300",
-    container: "flex flex-col bg-white dark:bg-[#0B1121] border-r border-gray-200 dark:border-gray-800 lg:relative lg:translate-x-0 lg:w-96 lg:h-full lg:z-0 fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] shadow-2xl transition-transform duration-300 ease-out",
+    container: "flex flex-col bg-white dark:bg-[#0B1121] border-r border-slate-200 dark:border-slate-800 lg:relative lg:translate-x-0 lg:w-96 lg:h-full lg:z-0 fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] shadow-2xl transition-transform duration-300 ease-out",
   },
   lesson: {
     // Layout Grid para alineación perfecta: [Checkbox] [Titulo]
-    base: "w-full flex items-start gap-4 p-4 text-sm transition-all border-l-[3px] text-left relative group outline-none focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 cursor-pointer",
-    
+    base: "w-full flex items-start gap-4 p-4 text-sm transition-all border-l-[3px] text-left relative group outline-none focus-visible:bg-slate-100 dark:focus-visible:bg-slate-800 cursor-pointer",
+
     // Estados
     active: "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-900/10",
-    inactive: "border-transparent hover:bg-gray-50 dark:hover:bg-gray-800/30",
-    
+    inactive: "border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/30",
+
     // Tipografía
-    textActive: "text-gray-900 dark:text-white font-semibold",
-    textCompleted: "text-gray-500 dark:text-gray-500 line-through decoration-gray-300 dark:decoration-gray-700",
-    textDefault: "text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white"
+    textActive: "text-slate-900 dark:text-white font-semibold",
+    textCompleted: "text-slate-500 dark:text-slate-500 line-through decoration-slate-300 dark:decoration-slate-700",
+    textDefault: "text-slate-700 dark:text-slate-300 font-medium group-hover:text-slate-900 dark:group-hover:text-white"
   },
   checkbox: {
     base: "w-5 h-5 mt-0.5 shrink-0 rounded flex items-center justify-center border transition-all duration-200",
     completed: "bg-emerald-600 border-emerald-600 text-white shadow-sm",
     active: "border-emerald-500 bg-white dark:bg-transparent text-emerald-600 ring-2 ring-emerald-500/20",
-    default: "border-gray-300 dark:border-gray-600 bg-transparent group-hover:border-gray-400"
+    default: "border-slate-300 dark:border-slate-600 bg-transparent group-hover:border-slate-400"
   }
 };
 
@@ -110,7 +110,7 @@ const LessonItem = React.memo(({ lesson, isActive, isCompleted, onClick }) => {
         </p>
         
         <div className="flex items-center gap-2">
-           <span className="text-[11px] text-gray-400 font-mono">
+           <span className="text-[11px] text-slate-600 dark:text-slate-400 font-mono">
              {lesson.duration}
            </span>
            {/* Badge "En curso" sutil */}
@@ -185,25 +185,25 @@ export const PlayerSidebar = ({ content, activeLessonId, isOpen, onClose }) => {
       <aside className={`${STYLES.sidebar.container} ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
         {/* HEADER: Progress */}
-        <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0f1629] sticky top-0 z-10 shadow-sm">
+        <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f1629] sticky top-0 z-10 shadow-sm">
           <div className="flex justify-between items-center mb-3">
-             <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <BarChart3 size={16} className="text-emerald-500" />
                 Contenido del curso
              </h3>
-             
+
              {/* Mobile Close */}
-             <button 
-                onClick={onClose} 
-                className="lg:hidden p-1 text-gray-400 hover:text-red-500 transition-colors"
+             <button
+                onClick={onClose}
+                className="lg:hidden p-1 text-slate-600 dark:text-slate-400 hover:text-red-500 transition-colors"
                 aria-label="Cerrar menú"
              >
                <X size={20} />
              </button>
           </div>
-          
+
           <div className="flex items-center gap-3 mb-1">
-             <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+             <div className="flex-1 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-emerald-500 rounded-full transition-all duration-700 ease-out" 
                   style={{ width: `${progressPercentage}%` }}
@@ -216,27 +216,27 @@ export const PlayerSidebar = ({ content, activeLessonId, isOpen, onClose }) => {
         </div>
 
         {/* LISTA DE MÓDULOS (Accordion) */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar pb-10 bg-gray-50/50 dark:bg-[#0B1121]">
+        <div className="flex-1 overflow-y-auto custom-scrollbar pb-10 bg-slate-50/50 dark:bg-[#0B1121]">
           {content.modules.map((module, index) => {
             const isModOpen = openModules.includes(module.id);
-            
+
             return (
-              <div key={module.id} className="border-b border-gray-200 dark:border-gray-800 last:border-0 bg-white dark:bg-[#0f1629]">
-                <button 
-                  onClick={() => handleToggleModule(module.id)} 
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left group"
+              <div key={module.id} className="border-b border-slate-200 dark:border-slate-800 last:border-0 bg-white dark:bg-[#0f1629]">
+                <button
+                  onClick={() => handleToggleModule(module.id)}
+                  className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group"
                   aria-expanded={isModOpen}
                 >
                   <div className="pr-2">
-                    <h4 className="font-bold text-[13px] text-gray-800 dark:text-gray-200 group-hover:text-black dark:group-hover:text-white transition-colors">
+                    <h4 className="font-bold text-[13px] text-slate-800 dark:text-slate-200 group-hover:text-black dark:group-hover:text-white transition-colors">
                       Sección {index + 1}: {module.title}
                     </h4>
-                    <span className="text-[11px] text-gray-400 mt-1 block">
+                    <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 block">
                       {module.lessons.length} clases
                     </span>
                   </div>
-                  <ChevronDown 
-                    className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${isModOpen ? 'rotate-180' : ''}`} 
+                  <ChevronDown
+                    className={`w-4 h-4 text-slate-600 dark:text-slate-400 transition-transform duration-300 ${isModOpen ? 'rotate-180' : ''}`}
                   />
                 </button>
 
@@ -244,7 +244,7 @@ export const PlayerSidebar = ({ content, activeLessonId, isOpen, onClose }) => {
                   className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${isModOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}
                 >
                    {/* Background sutil para diferenciar lecciones del header del módulo */}
-                   <div className="bg-gray-50 dark:bg-[#0B1121]/50">
+                   <div className="bg-slate-50 dark:bg-[#0B1121]/50">
                       {module.lessons.map((lesson) => (
                         <LessonItem 
                           key={lesson.id}

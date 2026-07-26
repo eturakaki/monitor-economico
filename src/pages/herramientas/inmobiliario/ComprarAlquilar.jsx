@@ -86,35 +86,35 @@ export function ComprarAlquilar() {
         
         {/* INPUTS */}
         <div className="lg:col-span-4 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-              
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Valor Propiedad (USD)</label>
-                 <input type="number" value={precioPropiedad} onChange={e => setPrecioPropiedad(Number(e.target.value))} className="w-full p-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Valor Propiedad (USD)</label>
+                 <input type="number" value={precioPropiedad} onChange={e => setPrecioPropiedad(Number(e.target.value))} className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Alquiler Mensual (USD)</label>
-                 <input type="number" value={alquilerMensual} onChange={e => setAlquilerMensual(Number(e.target.value))} className="w-full p-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Alquiler Mensual (USD)</label>
+                 <input type="number" value={alquilerMensual} onChange={e => setAlquilerMensual(Number(e.target.value))} className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
-              
-              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-4">
+
+              <div className="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-4">
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase flex justify-between">
+                    <label className="text-xs font-bold text-slate-500 uppercase flex justify-between">
                        Retorno Inversión Anual <span>{rendimientoInversion}%</span>
                     </label>
-                    <input type="range" min="0" max="15" step="0.5" value={rendimientoInversion} onChange={e => setRendimientoInversion(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-emerald-500" />
+                    <input type="range" min="0" max="15" step="0.5" value={rendimientoInversion} onChange={e => setRendimientoInversion(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-emerald-500" />
                  </div>
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase flex justify-between">
+                    <label className="text-xs font-bold text-slate-500 uppercase flex justify-between">
                        Apreciación Inmueble <span>{apreciacionInmueble}%</span>
                     </label>
-                    <input type="range" min="0" max="10" step="0.5" value={apreciacionInmueble} onChange={e => setApreciacionInmueble(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-cyan-500" />
+                    <input type="range" min="0" max="10" step="0.5" value={apreciacionInmueble} onChange={e => setApreciacionInmueble(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-cyan-500" />
                  </div>
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase flex justify-between">
+                    <label className="text-xs font-bold text-slate-500 uppercase flex justify-between">
                        Horizonte (Años) <span>{anios}</span>
                     </label>
-                    <input type="range" min="5" max="30" step="1" value={anios} onChange={e => setAnios(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-slate-500" />
+                    <input type="range" min="5" max="30" step="1" value={anios} onChange={e => setAnios(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-slate-500" />
                  </div>
               </div>
            </div>
@@ -127,17 +127,17 @@ export function ComprarAlquilar() {
                  {analisis.ganador.includes('Alquilar') ? <TrendingUp size={32}/> : <Building size={32}/>}
               </div>
               <div>
-                 <h3 className="text-xl font-black uppercase tracking-wide text-gray-900 dark:text-white">
+                 <h3 className="text-xl font-black uppercase tracking-wide text-slate-900 dark:text-white">
                     Te conviene: <span className={analisis.ganador.includes('Alquilar') ? 'text-emerald-600' : 'text-cyan-600'}>{analisis.ganador}</span>
                  </h3>
-                 <p className="text-gray-600 dark:text-slate-300 mt-1">
+                 <p className="text-slate-600 dark:text-slate-300 mt-1">
                     En {anios} años, tu patrimonio sería <strong>{formatUSD(analisis.diferencia)}</strong> mayor si eliges esta opción.
                  </p>
               </div>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[350px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Proyección de Patrimonio Neto (USD)</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[350px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Proyección de Patrimonio Neto (USD)</h4>
              <div className="w-full h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={analisis.data}>

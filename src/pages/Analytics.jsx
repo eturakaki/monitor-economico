@@ -38,7 +38,7 @@ const MetricCard = ({ title, value, change, isPositive, icon, description }) => 
   const Icon = icon; // Asignación explícita para que React lo renderice como componente
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
+    <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl p-6 shadow-md hover:shadow-lg transition-all">
       <div className="flex justify-between items-start mb-4">
         <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
           <Icon size={20} strokeWidth={1.5} />
@@ -53,14 +53,14 @@ const MetricCard = ({ title, value, change, isPositive, icon, description }) => 
       </div>
       <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">{title}</h3>
       <div className="text-2xl font-black text-slate-900 dark:text-white mb-2 font-mono tabular-nums">{value}</div>
-      <p className="text-xs text-slate-400 leading-relaxed">{description}</p>
+      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{description}</p>
     </div>
   );
 };
 
 // --- COMPONENTE: AI INSIGHTS ---
 const AiInsight = ({ isPremium }) => (
-  <div className="relative overflow-hidden rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-slate-900 dark:to-[#0f1526] p-6 shadow-sm">
+  <div className="relative overflow-hidden rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-slate-900 dark:to-[#0f1526] p-6 shadow-md">
     <div className={!isPremium ? 'blur-sm select-none opacity-50' : ''}>
         <div className="flex items-center gap-3 mb-4">
         <div className="bg-indigo-600 text-white p-2 rounded-lg shadow-lg shadow-indigo-500/20">
@@ -118,7 +118,7 @@ const AnalyticsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1121] p-4 lg:p-8 font-sans [--chart-text:#64748b] dark:[--chart-text:#94a3b8] [--chart-grid:#e2e8f0] dark:[--chart-grid:#334155]">
+    <div className="min-h-screen bg-slate-200 dark:bg-[#0B1121] p-4 lg:p-8 font-sans [--chart-text:#64748b] dark:[--chart-text:#94a3b8] [--chart-grid:#e2e8f0] dark:[--chart-grid:#334155]">
       
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -142,7 +142,7 @@ const AnalyticsPage = () => {
                                 ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white' 
                                 : isPremium && range === 'ALL'
                                     ? 'bg-indigo-600 text-white shadow-sm'
-                                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed'
+                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed'
                         }`}
                     >
                         {range} {(!isPremium && range !== '6M') && <Lock size={10} className="inline ml-0.5 mb-0.5" />}
@@ -172,7 +172,7 @@ const AnalyticsPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         
         {/* CHART PRINCIPAL */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm flex flex-col h-[450px]">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl p-6 shadow-md flex flex-col h-[450px]">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
               <TrendingUp size={18} className="text-emerald-600" />
@@ -214,7 +214,7 @@ const AnalyticsPage = () => {
         <div className="space-y-6 flex flex-col h-full">
           <AiInsight isPremium={isPremium} />
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm flex flex-col flex-grow min-h-[250px]">
+          <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl p-6 shadow-md flex flex-col flex-grow min-h-[250px]">
             <div className="mb-4">
               <h3 className="font-bold text-slate-800 dark:text-white mb-1 text-sm flex items-center gap-2">
                 <DollarSign size={18} className="text-blue-500" />

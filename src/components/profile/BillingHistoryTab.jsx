@@ -32,7 +32,7 @@ export const BillingHistoryTab = () => {
       <div className="flex justify-between items-end border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Receipt size={20} className="text-slate-400" />
+                <Receipt size={20} className="text-slate-600 dark:text-slate-400" />
                 Últimos Movimientos
             </h2>
             <p className="text-sm text-slate-500">Resumen rápido de tu actividad reciente.</p>
@@ -47,8 +47,8 @@ export const BillingHistoryTab = () => {
       </div>
 
       {recentOrders.length === 0 ? (
-        <div className="py-12 text-center bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-            <p className="text-slate-400 text-sm font-medium">No hay transacciones recientes.</p>
+        <div className="py-12 text-center bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
+            <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">No hay transacciones recientes.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -76,7 +76,7 @@ export const BillingHistoryTab = () => {
                 <div className="text-right">
                     <p className="text-sm font-black text-slate-900 dark:text-white">{formatPrice(order.total)}</p>
                     <span className={`text-[10px] font-bold uppercase ${
-                        order.status === 'approved' ? 'text-emerald-500' : 'text-slate-400'
+                        order.status === 'approved' ? 'text-emerald-500' : 'text-slate-600 dark:text-slate-400'
                     }`}>
                         {order.status}
                     </span>

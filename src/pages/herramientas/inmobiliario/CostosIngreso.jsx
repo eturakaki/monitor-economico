@@ -43,36 +43,36 @@ export function CostosIngreso() {
         
         {/* INPUTS */}
         <div className="lg:col-span-5 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-              
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Valor Alquiler Mensual</label>
-                 <input type="number" value={alquiler} onChange={e => setAlquiler(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Valor Alquiler Mensual</label>
+                 <input type="number" value={alquiler} onChange={e => setAlquiler(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
 
               {/* NUEVO INPUT: EXPENSAS */}
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Expensas Ordinarias</label>
-                 <input type="number" value={expensas} onChange={e => setExpensas(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Expensas Ordinarias</label>
+                 <input type="number" value={expensas} onChange={e => setExpensas(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-4">
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1">Meses Depósito</label>
-                    <input type="number" value={mesesDeposito} onChange={e => setMesesDeposito(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-1">Meses Depósito</label>
+                    <input type="number" value={mesesDeposito} onChange={e => setMesesDeposito(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1">Comisión (%)</label>
-                    <input type="number" value={comision} onChange={e => setComision(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-1">Comisión (%)</label>
+                    <input type="number" value={comision} onChange={e => setComision(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
               </div>
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Costo Garantía / Caución</label>
-                 <input type="number" value={garantia} onChange={e => setGarantia(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Costo Garantía / Caución</label>
+                 <input type="number" value={garantia} onChange={e => setGarantia(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Flete y Mudanza</label>
-                 <input type="number" value={mudanza} onChange={e => setMudanza(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Flete y Mudanza</label>
+                 <input type="number" value={mudanza} onChange={e => setMudanza(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
            </div>
         </div>
@@ -86,8 +86,8 @@ export function CostosIngreso() {
                <p className="text-xs text-slate-400">Equivale a aprox. {(analisis.total / alquiler).toFixed(1)} alquileres</p>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4 text-center">Estructura de Costos</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4 text-center">Estructura de Costos</h4>
              <div className="w-full h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>

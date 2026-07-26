@@ -207,7 +207,7 @@ const CourseCard = ({ course, index, onDownload }) => {
 
   return (
     <article 
-      className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-black/50 transition-all duration-300 hover:-translate-y-1 relative animate-in fade-in slide-in-from-bottom-4 fill-mode-backwards"
+      className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-800 overflow-hidden hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-black/50 transition-all duration-300 hover:-translate-y-1 relative animate-in fade-in slide-in-from-bottom-4 fill-mode-backwards"
       style={{ animationDelay }} 
     >
       {/* -- Cover Image -- */}
@@ -315,7 +315,7 @@ const EmptyState = () => (
   <div className="min-h-[70vh] flex flex-col items-center justify-center p-4 animate-in fade-in zoom-in duration-500">
     <div className="relative group mb-8">
       <div className="absolute inset-0 bg-emerald-500/30 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-      <div className="relative bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 ring-1 ring-slate-900/5">
+      <div className="relative bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 ring-1 ring-slate-900/5">
         <GraduationCap size={48} className="text-emerald-600 dark:text-emerald-400" strokeWidth={1.5} />
       </div>
     </div>
@@ -338,8 +338,8 @@ const EmptyState = () => (
 );
 
 const StatsCard = ({ label, value, icon }) => (
-  <div className="flex flex-col justify-center items-center px-5 py-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm min-w-[100px]">
-    <div className="flex items-center gap-2 text-slate-400 mb-1">
+  <div className="flex flex-col justify-center items-center px-5 py-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-w-[100px]">
+    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
       {icon}
       <span className="text-[10px] font-bold uppercase tracking-wider">{label}</span>
     </div>

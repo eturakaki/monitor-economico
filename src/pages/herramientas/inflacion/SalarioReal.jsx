@@ -50,33 +50,33 @@ export function SalarioReal() {
         
         {/* INPUTS */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-            
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+
             <div className="mb-6">
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Sueldo Neto Actual</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Sueldo Neto Actual</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                <input 
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400">$</span>
+                <input
                   type="number" value={salario} onChange={(e) => setSalario(Number(e.target.value))}
-                  className="w-full pl-6 pr-3 py-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-rose-500 outline-none"
+                  className="w-full pl-6 pr-3 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-rose-500 outline-none"
                 />
               </div>
             </div>
 
             <div className="mb-6">
               <div className="flex justify-between mb-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Inflación Mensual Esperada</label>
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Inflación Mensual Esperada</label>
                 <span className="px-2 py-0.5 bg-rose-100 text-rose-700 text-xs font-bold rounded">{inflacionMensual}%</span>
               </div>
-              <input type="range" min="1" max="20" step="0.1" value={inflacionMensual} onChange={(e) => setInflacionMensual(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-rose-500" />
+              <input type="range" min="1" max="20" step="0.1" value={inflacionMensual} onChange={(e) => setInflacionMensual(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-rose-500" />
             </div>
 
             <div className="mb-2">
               <div className="flex justify-between mb-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Meses a Proyectar</label>
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Meses a Proyectar</label>
                 <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-xs font-bold rounded">{meses} meses</span>
               </div>
-              <input type="range" min="1" max="12" step="1" value={meses} onChange={(e) => setMeses(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-slate-500" />
+              <input type="range" min="1" max="12" step="1" value={meses} onChange={(e) => setMeses(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-slate-500" />
             </div>
 
           </div>
@@ -96,9 +96,9 @@ export function SalarioReal() {
 
         {/* VISUALIZACIÓN */}
         <div className="lg:col-span-8 flex flex-col h-full min-h-[400px]">
-          <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm flex flex-col">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Erosión Monetaria</h3>
-            <p className="text-sm text-gray-500 mb-6">Comparativa Nominal vs. Real</p>
+          <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md flex flex-col">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Erosión Monetaria</h3>
+            <p className="text-sm text-slate-500 mb-6">Comparativa Nominal vs. Real</p>
             
             <div className="flex-1 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -127,7 +127,7 @@ export function SalarioReal() {
             </div>
             
             <div className="mt-4 flex items-center justify-between text-sm font-medium">
-                <span className="text-gray-500">Pérdida acumulada:</span>
+                <span className="text-slate-500">Pérdida acumulada:</span>
                 <span className="text-rose-500 font-bold">-{porcentajePerdida.toFixed(1)}%</span>
             </div>
           </div>

@@ -25,23 +25,23 @@ export function RentabilidadInmueble() {
     >
       <div className="grid lg:grid-cols-12 gap-8">
          {/* INPUTS */}
-         <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+         <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md space-y-6">
             <div>
-               <label className="text-xs font-bold text-gray-500 uppercase mb-1">Valor Propiedad (USD)</label>
-               <input type="number" value={valorPropiedad} onChange={e => setValorPropiedad(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+               <label className="text-xs font-bold text-slate-500 uppercase mb-1">Valor Propiedad (USD)</label>
+               <input type="number" value={valorPropiedad} onChange={e => setValorPropiedad(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
             </div>
             <div>
-               <label className="text-xs font-bold text-gray-500 uppercase mb-1">Alquiler Mensual (USD)</label>
-               <input type="number" value={alquilerMensual} onChange={e => setAlquilerMensual(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+               <label className="text-xs font-bold text-slate-500 uppercase mb-1">Alquiler Mensual (USD)</label>
+               <input type="number" value={alquilerMensual} onChange={e => setAlquilerMensual(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
             </div>
             <div className="grid grid-cols-2 gap-4">
                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase mb-1">Gastos Mensuales (USD)</label>
-                  <input type="number" value={gastosMensuales} onChange={e => setGastosMensuales(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-1">Gastos Mensuales (USD)</label>
+                  <input type="number" value={gastosMensuales} onChange={e => setGastosMensuales(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                </div>
                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase mb-1">Meses Vacíos / Año</label>
-                  <input type="number" value={vacancia} onChange={e => setVacancia(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-1">Meses Vacíos / Año</label>
+                  <input type="number" value={vacancia} onChange={e => setVacancia(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                </div>
             </div>
          </div>
@@ -49,10 +49,10 @@ export function RentabilidadInmueble() {
          {/* RESULTADOS */}
          <div className="lg:col-span-7 space-y-6">
             <div className="grid sm:grid-cols-2 gap-4">
-               <div className="bg-gray-100 dark:bg-slate-800 p-6 rounded-2xl text-center">
-                  <p className="text-xs font-bold uppercase text-gray-500">Rentabilidad Bruta</p>
-                  <p className="text-4xl font-black text-gray-700 dark:text-gray-300">{roiBruto.toFixed(2)}%</p>
-                  <p className="text-xs text-gray-400">Anual</p>
+               <div className="bg-slate-100 dark:bg-slate-800 p-6 rounded-2xl text-center">
+                  <p className="text-xs font-bold uppercase text-slate-500">Rentabilidad Bruta</p>
+                  <p className="text-4xl font-black text-slate-700 dark:text-slate-300">{roiBruto.toFixed(2)}%</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">Anual</p>
                </div>
                <div className="bg-emerald-500 p-6 rounded-2xl text-center text-white relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 blur-xl rounded-full"></div>
@@ -62,14 +62,14 @@ export function RentabilidadInmueble() {
                </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 flex items-start gap-4">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 flex items-start gap-4">
                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg">
                   <TrendingUp size={24} />
                </div>
                <div>
-                  <h4 className="font-bold text-gray-900 dark:text-white">Tiempo de Recupero</h4>
-                  <p className="text-sm text-gray-500 dark:text-slate-400">
-                     Con este flujo de fondos neto, tardarías <span className="font-bold text-gray-900 dark:text-white">{recuperoAnios.toFixed(1)} años</span> en recuperar el valor de la propiedad (sin contar apreciación).
+                  <h4 className="font-bold text-slate-900 dark:text-white">Tiempo de Recupero</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                     Con este flujo de fondos neto, tardarías <span className="font-bold text-slate-900 dark:text-white">{recuperoAnios.toFixed(1)} años</span> en recuperar el valor de la propiedad (sin contar apreciación).
                   </p>
                </div>
             </div>

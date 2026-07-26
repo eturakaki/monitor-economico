@@ -21,7 +21,7 @@ export default function Libreria() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1121] transition-colors duration-300">
+    <div className="min-h-screen bg-slate-200 dark:bg-[#0B1121] transition-colors duration-300">
       
       {/* =================================================================================
           1. HERO SECTION PREMIUM (Estilo Librería)
@@ -52,7 +52,7 @@ export default function Libreria() {
                 </div>
 
                 {/* Stats de Confianza (Trust Bar) - Adaptado a Libros */}
-                <div className="flex gap-6 md:gap-10 p-6 bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 backdrop-blur-md shadow-sm">
+                <div className="flex gap-6 md:gap-10 p-6 bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-slate-300 dark:border-slate-700 backdrop-blur-md shadow-md">
                     <div className="text-center">
                         <div className="flex justify-center text-amber-600 dark:text-amber-500 mb-1"><BookOpen size={24} /></div>
                         <p className="text-2xl font-black text-slate-900 dark:text-white">150+</p>
@@ -76,7 +76,7 @@ export default function Libreria() {
              
              {/* A. BUSCADOR */}
              <div className="relative w-full md:w-80 lg:w-96 shrink-0 group">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors duration-300" size={18} />
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400 group-focus-within:text-emerald-500 transition-colors duration-300" size={18} />
                  <input 
                     type="text" 
                     placeholder="Buscar por título..." 
@@ -127,7 +127,7 @@ export default function Libreria() {
 
         {/* Estado Vacío Mejorado */}
         {filteredBooks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 opacity-80 animate-in fade-in zoom-in bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+            <div className="flex flex-col items-center justify-center py-24 opacity-80 animate-in fade-in zoom-in bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-800">
                 <div className="bg-slate-100 dark:bg-slate-800 p-6 rounded-full mb-6">
                     <Library size={64} className="text-slate-400 dark:text-slate-500" />
                 </div>

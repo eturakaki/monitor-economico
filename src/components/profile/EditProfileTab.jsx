@@ -58,7 +58,7 @@ export const EditProfileTab = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm animate-in fade-in duration-500">
+    <form onSubmit={handleSubmit(onSubmit)} className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-300 dark:border-slate-800 shadow-md animate-in fade-in duration-500">
       
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
         <div>
@@ -82,7 +82,7 @@ export const EditProfileTab = () => {
         <div className="space-y-2">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Nombre Completo</label>
           <div className="relative">
-            <User className="absolute left-3 top-3 text-slate-400" size={18} />
+            <User className="absolute left-3 top-3 text-slate-600 dark:text-slate-400" size={18} />
             <input 
               {...register('name')}
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white" 
@@ -96,7 +96,7 @@ export const EditProfileTab = () => {
         <div className="space-y-2">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Usuario</label>
           <div className="relative">
-            <span className="absolute left-4 top-3 text-slate-400 font-bold">@</span>
+            <span className="absolute left-4 top-3 text-slate-600 dark:text-slate-400 font-bold">@</span>
             <input 
               {...register('username')}
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white"
@@ -109,7 +109,7 @@ export const EditProfileTab = () => {
         <div className="space-y-2">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Profesión / Rol</label>
           <div className="relative">
-            <Briefcase className="absolute left-3 top-3 text-slate-400" size={18} />
+            <Briefcase className="absolute left-3 top-3 text-slate-600 dark:text-slate-400" size={18} />
             <input 
               {...register('jobTitle')}
               placeholder="Ej. Trader Intradía"
@@ -122,7 +122,7 @@ export const EditProfileTab = () => {
         <div className="space-y-2">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Ubicación</label>
           <div className="relative">
-            <MapPin className="absolute left-3 top-3 text-slate-400" size={18} />
+            <MapPin className="absolute left-3 top-3 text-slate-600 dark:text-slate-400" size={18} />
             <input 
               {...register('location')}
               placeholder="Ej. Madrid, ES"
@@ -135,7 +135,7 @@ export const EditProfileTab = () => {
         <div className="md:col-span-2 space-y-2">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Sitio Web (Opcional)</label>
           <div className="relative">
-            <Globe className="absolute left-3 top-3 text-slate-400" size={18} />
+            <Globe className="absolute left-3 top-3 text-slate-600 dark:text-slate-400" size={18} />
             <input 
               {...register('website')}
               placeholder="https://..."
@@ -155,7 +155,7 @@ export const EditProfileTab = () => {
             className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none dark:text-white"
           />
           <div className="flex justify-end">
-            <span className="text-[10px] text-slate-400">Máx 160 caracteres</span>
+            <span className="text-[10px] text-slate-600 dark:text-slate-400">Máx 160 caracteres</span>
           </div>
           {errors.bio && <p className="text-red-500 text-xs font-bold">{errors.bio.message}</p>}
         </div>

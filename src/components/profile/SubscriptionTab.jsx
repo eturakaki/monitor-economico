@@ -149,7 +149,7 @@ export const SubscriptionTab = () => {
             <li key={idx} className={`flex gap-2 text-sm ${!feature.included ? 'opacity-50' : ''}`}>
               <CheckCircle2 
                 size={16} 
-                className={`flex-shrink-0 ${feature.included ? (plan.recommended ? 'text-purple-500' : 'text-emerald-500') : 'text-slate-300'}`} 
+                className={`flex-shrink-0 ${feature.included ? (plan.recommended ? 'text-purple-500' : 'text-emerald-500') : 'text-slate-600 dark:text-slate-300'}`}
               />
               <span className={`${feature.highlightColor || 'text-slate-600 dark:text-slate-400'} ${feature.isHeader ? 'font-semibold' : ''}`}>
                 {feature.text}

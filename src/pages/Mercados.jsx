@@ -84,7 +84,7 @@ export function Mercados() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1121] pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-200 dark:bg-[#0B1121] pb-20 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
         {/* NAVEGACIÓN */}
@@ -101,11 +101,11 @@ export function Mercados() {
                 <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/20">
                   <LayoutGrid size={28} className="text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                   Explorador de Mercados
                 </h1>
               </div>
-              <p className="text-gray-500 dark:text-slate-400 text-lg max-w-xl">
+              <p className="text-slate-500 dark:text-slate-400 text-lg max-w-xl">
                 Cotizaciones en tiempo real organizadas por sector.
               </p>
             </div>
@@ -113,17 +113,17 @@ export function Mercados() {
             {/* SEARCH BAR */}
             <div className="w-full lg:w-96 relative group">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                <Search className="h-5 w-5 text-slate-600 dark:text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
               </div>
               <input
                 type="text"
                 placeholder="Buscar activo (ej: Blue, Merval...)"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-slate-700 rounded-xl leading-5 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all shadow-sm"
+                className="block w-full pl-10 pr-10 py-3 border border-slate-200 dark:border-slate-700 rounded-xl leading-5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-600 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all shadow-sm"
               />
               {searchTerm && (
-                <button onClick={() => setSearchTerm('')} className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <button onClick={() => setSearchTerm('')} className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                   <X className="h-4 w-4" />
                 </button>
               )}
@@ -132,7 +132,7 @@ export function Mercados() {
 
           {/* CHIPS DE FILTRO */}
           <div className="mt-8 flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar mask-gradient">
-            <Filter className="w-4 h-4 text-gray-400 shrink-0 mr-1" />
+            <Filter className="w-4 h-4 text-slate-600 dark:text-slate-400 shrink-0 mr-1" />
             
             <CategoryChip 
               label="Todos" 
@@ -169,9 +169,9 @@ export function Mercados() {
       Esto mantiene el título visible mientras scrolleas los items de esa categoría.
       Agregamos: sticky, top-0, z-10, backdrop-blur y background.
   */}
-  <div className="sticky top-0 z-10 py-4 mb-6 border-b border-gray-200 dark:border-slate-800 bg-slate-50/95 dark:bg-[#0B1121]/95 backdrop-blur-sm flex items-center justify-between">
-    
-    <div className="flex items-center gap-2 text-lg font-bold text-gray-800 dark:text-white uppercase tracking-wider">
+  <div className="sticky top-0 z-10 py-4 mb-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/95 dark:bg-[#0B1121]/95 backdrop-blur-sm flex items-center justify-between">
+
+    <div className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-white uppercase tracking-wider">
       <SectorIcon size={20} className="text-indigo-500" />
       {meta.titulo}
     </div>
@@ -195,9 +195,9 @@ export function Mercados() {
             })
           ) : (
             // EMPTY STATE
-            <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
+            <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-3xl">
               <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-full mb-4">
-                <Activity className="w-8 h-8 text-slate-400" />
+                <Activity className="w-8 h-8 text-slate-600 dark:text-slate-400" />
               </div>
               <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">Sin resultados</h3>
               <p className="text-slate-500 dark:text-slate-500 max-w-md mx-auto mb-6">
@@ -223,7 +223,7 @@ const CategoryChip = ({ label, icon: Icon, isActive, onClick }) => (
       border
       ${isActive 
         ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-500/20' 
-        : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-400'
+        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-400'
       }
     `}
   >
