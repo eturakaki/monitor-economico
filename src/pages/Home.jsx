@@ -214,13 +214,13 @@ export function Home() {
                     <button className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl 
                         bg-white/50 dark:bg-slate-900/50 
                         backdrop-blur-sm
-                        border-2 border-slate-200 dark:border-slate-800 
+                        border-2 border-slate-300 dark:border-slate-800
                         text-slate-700 dark:text-slate-300 font-bold text-sm 
                         hover:border-slate-400 dark:hover:border-slate-600 
                         hover:bg-white dark:hover:bg-slate-800
                         transition-all duration-200 min-w-[200px]">
                       
-                      <Activity size={18} className="text-slate-400" />
+                      <Activity size={18} className="text-slate-600 dark:text-slate-400" />
                       Explorar Mercados
                       
                     </button>
@@ -229,7 +229,7 @@ export function Home() {
           
           {/* Social Proof / Trust Badge (Opcional pero muy Pro) */}
           {!user && (
-            <p className="mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-in fade-in delay-500">
+            <p className="mt-6 text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest animate-in fade-in delay-500">
                 Sin tarjeta de crédito requerida • Datos Oficiales
             </p>
           )}
@@ -455,7 +455,7 @@ export function Home() {
                                 relative flex flex-col p-6 rounded-2xl border transition-all duration-300 group
                                 ${isCurrentPlan 
                                     ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500/50 ring-1 ring-emerald-500/50' 
-                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xl hover:-translate-y-1'
+                                    : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xl hover:-translate-y-1'
                                 }
                             `}
                         >
@@ -531,7 +531,7 @@ export function Home() {
                         <h4 className="font-bold text-slate-900 dark:text-white text-base">Glosario Económico</h4>
                         <p className="text-sm text-slate-600 dark:text-slate-500 mt-0.5">Diccionario de términos.</p>
                     </div>
-                    <ChevronRight size={16} className="ml-auto text-slate-400 group-hover:text-blue-600 transition-colors" />
+                    <ChevronRight size={16} className="ml-auto text-slate-600 dark:text-slate-400 group-hover:text-blue-600 transition-colors" />
                 </Link>
 
                 <Link to="/exportar" className="group flex items-center gap-4 p-5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-[#0B1121] shadow-sm hover:border-amber-500 hover:shadow-xl transition-all">
@@ -542,7 +542,7 @@ export function Home() {
                         <h4 className="font-bold text-slate-900 dark:text-white text-base">Centro de Descargas</h4>
                         <p className="text-sm text-slate-600 dark:text-slate-500 mt-0.5">Series históricas CSV.</p>
                     </div>
-                    <ChevronRight size={16} className="ml-auto text-slate-400 group-hover:text-amber-600 transition-colors" />
+                    <ChevronRight size={16} className="ml-auto text-slate-600 dark:text-slate-400 group-hover:text-amber-600 transition-colors" />
                 </Link>
             </div>
          </div>

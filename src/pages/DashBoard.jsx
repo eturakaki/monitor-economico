@@ -102,7 +102,7 @@ const BentoItem = ({ children, className, title, icon: Icon, isEditing, color, l
   return (
     <Wrapper {...wrapperProps} className={`
       relative flex flex-col h-full w-full
-      bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 
+      bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-800
       shadow-sm transition-all duration-300 overflow-hidden
       ${className} 
       ${isEditing ? 'border-dashed border-emerald-500 bg-emerald-50/10' : 'hover:shadow-md hover:border-emerald-500/30'}
@@ -115,8 +115,8 @@ const BentoItem = ({ children, className, title, icon: Icon, isEditing, color, l
         </div>
         {!isEditing && (
            link 
-            ? <ArrowUpRight size={16} className="text-slate-300 group-hover:text-emerald-500 transition-colors" />
-            : <MoreHorizontal size={16} className="text-slate-300" />
+            ? <ArrowUpRight size={16} className="text-slate-600 dark:text-slate-300 group-hover:text-emerald-500 transition-colors" />
+            : <MoreHorizontal size={16} className="text-slate-600 dark:text-slate-300" />
         )}
       </div>
       <div className="flex-1 min-h-0 relative z-0 p-5 pt-2 flex flex-col justify-center">
@@ -359,8 +359,8 @@ export default function Dashboard() {
                 </button>
 
                 {isCollectionMenuOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-2 z-50 animate-in fade-in zoom-in-95">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 py-2">Mis Colecciones</div>
+                  <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-300 dark:border-slate-700 p-2 z-50 animate-in fade-in zoom-in-95">
+                      <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-3 py-2">Mis Colecciones</div>
                       {collections.map(col => (
                         <div key={col.id} className="flex items-center justify-between group rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 p-1">
                            <button onClick={() => { setActiveCollectionId(col.id); setIsCollectionMenuOpen(false); }} className={`flex-1 text-left px-2 py-2 text-sm font-bold flex items-center gap-2 ${activeCollectionId === col.id ? 'text-emerald-600' : 'text-slate-700 dark:text-slate-200'}`}>
@@ -382,7 +382,7 @@ export default function Dashboard() {
              </div>
           </div>
           
-          <button onClick={() => setIsEditing(!isEditing)} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm ${isEditing ? 'bg-emerald-600 text-white ring-2 ring-emerald-600 ring-offset-2 dark:ring-offset-[#0B1121]' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50'}`}>
+          <button onClick={() => setIsEditing(!isEditing)} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm ${isEditing ? 'bg-emerald-600 text-white ring-2 ring-emerald-600 ring-offset-2 dark:ring-offset-[#0B1121]' : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50'}`}>
             {isEditing ? <Save size={18} /> : <Layout size={18} />} {isEditing ? 'Finalizar Edición' : 'Editar Colección'}
           </button>
         </div>
@@ -393,7 +393,7 @@ export default function Dashboard() {
              {/* Header del Menú */}
              <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
                 <div className="flex items-center gap-3 flex-1">
-                   <Search className="text-slate-400" size={20} />
+                   <Search className="text-slate-600 dark:text-slate-400" size={20} />
                    <input type="text" placeholder="Buscar widget..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-transparent border-none focus:ring-0 text-slate-900 dark:text-white w-full text-sm font-medium outline-none" autoFocus />
                 </div>
                 {/* BOTÓN ELIMINAR COLECCIÓN (VISIBLE AHORA) */}
@@ -415,9 +415,9 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-slate-100/50 dark:bg-black/20">
                     {/* Render de botones de selección */}
-                    {openSection === 'macro' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredMacro.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}><span className="text-[10px] font-bold opacity-70 uppercase">{item.categoria}</span><span className="font-bold text-xs truncate w-full">{item.titulo}</span></button>))}</div>)}
-                    {openSection === 'market' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredMarket.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}><span className="text-[10px] font-bold opacity-70 uppercase">{item.tipo}</span><span className="font-bold text-xs truncate w-full">{item.title}</span></button>))}</div>)}
-                    {openSection === 'tools' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredTools.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-purple-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}><div className="flex justify-between mb-1"><item.icon size={16} /><span className="text-[9px] font-bold opacity-70 uppercase">{item.cat}</span></div><span className="font-bold text-xs truncate w-full">{item.title}</span></button>))}</div>)}
+                    {openSection === 'macro' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredMacro.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}><span className="text-[10px] font-bold opacity-70 uppercase">{item.categoria}</span><span className="font-bold text-xs truncate w-full">{item.titulo}</span></button>))}</div>)}
+                    {openSection === 'market' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredMarket.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}><span className="text-[10px] font-bold opacity-70 uppercase">{item.tipo}</span><span className="font-bold text-xs truncate w-full">{item.title}</span></button>))}</div>)}
+                    {openSection === 'tools' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredTools.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-purple-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}><div className="flex justify-between mb-1"><item.icon size={16} /><span className="text-[9px] font-bold opacity-70 uppercase">{item.cat}</span></div><span className="font-bold text-xs truncate w-full">{item.title}</span></button>))}</div>)}
                 </div>
             </div>
           </div>
@@ -492,7 +492,7 @@ export default function Dashboard() {
                           {data.type === 'tool' ? (
                             <div className="flex flex-col items-center justify-center text-center h-full gap-2 group-hover:-translate-y-1 transition-transform">
                                 <div className={`p-4 rounded-2xl bg-${data.color}-50 dark:bg-${data.color}-900/20 text-${data.color}-600 dark:text-${data.color}-400 group-hover:scale-110 transition-transform duration-300`}><data.icon size={32} strokeWidth={1.5} /></div>
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 group-hover:text-emerald-600 transition-colors">Iniciar App</span>
+                                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mt-2 group-hover:text-emerald-600 transition-colors">Iniciar App</span>
                             </div>
                           ) : (
                             <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar h-full text-sm mask-linear-fade">
@@ -507,7 +507,7 @@ export default function Dashboard() {
               })}
               
               {activeWidgets.length === 0 && (
-                 <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-3xl flex flex-col items-center justify-center text-slate-400">
+                 <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-3xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400">
                     <Layers size={48} className="mb-4 opacity-50" />
                     <p>Colección vacía. ¡Agrega tus primeros widgets!</p>
                     <button onClick={() => setIsEditing(true)} className="text-emerald-500 font-bold hover:underline mt-2">Personalizar Ahora</button>
