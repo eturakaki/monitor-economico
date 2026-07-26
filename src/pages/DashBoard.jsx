@@ -103,7 +103,7 @@ const BentoItem = ({ children, className, title, icon: Icon, isEditing, color, l
     <Wrapper {...wrapperProps} className={`
       relative flex flex-col h-full w-full
       bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-800
-      shadow-sm transition-all duration-300 overflow-hidden
+      shadow-md transition-all duration-300 overflow-hidden
       ${className} 
       ${isEditing ? 'border-dashed border-emerald-500 bg-emerald-50/10' : 'hover:shadow-md hover:border-emerald-500/30'}
       ${link && !isEditing ? 'cursor-pointer group' : ''}
@@ -320,7 +320,7 @@ export default function Dashboard() {
   const filteredMarket = MARKET_DB.filter(m => m.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1121] transition-colors duration-300 pb-24">
+    <div className="min-h-screen bg-slate-200 dark:bg-[#0B1121] transition-colors duration-300 pb-24">
       
       {/* Ticker Animation */}
       <style>{`
@@ -382,7 +382,7 @@ export default function Dashboard() {
              </div>
           </div>
           
-          <button onClick={() => setIsEditing(!isEditing)} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm ${isEditing ? 'bg-emerald-600 text-white ring-2 ring-emerald-600 ring-offset-2 dark:ring-offset-[#0B1121]' : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50'}`}>
+          <button onClick={() => setIsEditing(!isEditing)} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md ${isEditing ? 'bg-emerald-600 text-white ring-2 ring-emerald-600 ring-offset-2 dark:ring-offset-[#0B1121]' : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50'}`}>
             {isEditing ? <Save size={18} /> : <Layout size={18} />} {isEditing ? 'Finalizar Edición' : 'Editar Colección'}
           </button>
         </div>
@@ -415,9 +415,9 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-slate-100/50 dark:bg-black/20">
                     {/* Render de botones de selección */}
-                    {openSection === 'macro' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredMacro.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}><span className="text-[10px] font-bold opacity-70 uppercase">{item.categoria}</span><span className="font-bold text-xs truncate w-full">{item.titulo}</span></button>))}</div>)}
-                    {openSection === 'market' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredMarket.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}><span className="text-[10px] font-bold opacity-70 uppercase">{item.tipo}</span><span className="font-bold text-xs truncate w-full">{item.title}</span></button>))}</div>)}
-                    {openSection === 'tools' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredTools.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-purple-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}><div className="flex justify-between mb-1"><item.icon size={16} /><span className="text-[9px] font-bold opacity-70 uppercase">{item.cat}</span></div><span className="font-bold text-xs truncate w-full">{item.title}</span></button>))}</div>)}
+                    {openSection === 'macro' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredMacro.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 shadow-md hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}><span className="text-[10px] font-bold opacity-70 uppercase">{item.categoria}</span><span className="font-bold text-xs truncate w-full">{item.titulo}</span></button>))}</div>)}
+                    {openSection === 'market' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredMarket.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 shadow-md hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}><span className="text-[10px] font-bold opacity-70 uppercase">{item.tipo}</span><span className="font-bold text-xs truncate w-full">{item.title}</span></button>))}</div>)}
+                    {openSection === 'tools' && (<div className="grid grid-cols-2 md:grid-cols-3 gap-3">{filteredTools.map(item => (<button key={item.id} onClick={() => toggleWidget(item.id)} className={`p-3 rounded-xl border text-left flex flex-col gap-1 shadow-md hover:shadow-md ${activeWidgets.includes(item.id) ? 'bg-purple-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}><div className="flex justify-between mb-1"><item.icon size={16} /><span className="text-[9px] font-bold opacity-70 uppercase">{item.cat}</span></div><span className="font-bold text-xs truncate w-full">{item.title}</span></button>))}</div>)}
                 </div>
             </div>
           </div>

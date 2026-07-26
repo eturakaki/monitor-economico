@@ -11,7 +11,7 @@ export const ToolLayout = ({
 }) => {
   return (
     // CONTENEDOR PRINCIPAL
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-200 dark:bg-slate-950 pb-20 transition-colors duration-300">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
         {/* --- NAVEGACIÓN (Regresar al Hub) --- */}
@@ -24,7 +24,7 @@ export const ToolLayout = ({
         </Link>
 
         {/* --- ENCABEZADO DE LA HERRAMIENTA --- */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-slate-800 mb-8">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-md border border-gray-200 dark:border-slate-800 mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
             
             {/* Icono Dinámico */}
