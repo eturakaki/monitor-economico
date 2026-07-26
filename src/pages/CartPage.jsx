@@ -168,7 +168,7 @@ export default function CartPage() {
 
                                     <button 
                                         onClick={() => removeFromCart(item.id)}
-                                        className="text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg group/trash"
+                                        className="text-slate-600 dark:text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg group/trash"
                                     >
                                         <Trash2 size={14} className="group-hover/trash:scale-110 transition-transform"/> 
                                         ELIMINAR

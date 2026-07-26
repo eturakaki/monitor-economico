@@ -122,7 +122,7 @@ export function MonitorGrid({ limit, category }) {
                         transition-all duration-300 cursor-pointer h-full min-h-[180px]
                     "
                  >
-                    <div className="p-4 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:text-indigo-500 group-hover:scale-110 transition-all duration-300 mb-3">
+                    <div className="p-4 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:text-indigo-500 group-hover:scale-110 transition-all duration-300 mb-3">
                         <PlusCircle size={32} strokeWidth={1.5} />
                     </div>
                     
@@ -130,7 +130,7 @@ export function MonitorGrid({ limit, category }) {
                         Ver {hiddenCount} indicadores más
                     </span>
                     
-                    <span className="text-xs text-slate-400 mt-1 font-medium">
+                    <span className="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">
                         Haga clic para ver el panel completo
                     </span>
                  </Link>

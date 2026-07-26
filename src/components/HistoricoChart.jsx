@@ -28,7 +28,7 @@ const CustomTooltip = ({ active, payload, label, esPorcentaje }) => {
       <div className="flex items-center gap-2">
         <div className="w-1 h-8 rounded-full" style={{ backgroundColor: color }}></div>
         <div>
-          <p className="text-[10px] text-slate-400 font-medium">Cierre</p>
+          <p className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">Cierre</p>
           <p className="text-slate-900 dark:text-slate-50 text-xl font-black font-mono tracking-tight tabular-nums">
             {formatter.format(valor)}{esPorcentaje ? '%' : ''}
           </p>
@@ -81,7 +81,7 @@ export function HistoricoChart({ datos, color = "#10b981", esPorcentaje = false 
   // --- Renderizado de Estado Vacío ---
   if (!datos || datos.length === 0) {
     return (
-      <div className="h-[350px] flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-slate-400">
+      <div className="h-[350px] flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
         <span className="text-3xl mb-2">📉</span>
         <p className="font-medium text-sm">Sin datos históricos</p>
       </div>
