@@ -52,25 +52,25 @@ export function CategorizadorMonotributo() {
         
         {/* INPUTS */}
         <div className="lg:col-span-4 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-              <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Facturación Acumulada (Últimos 12 meses)</label>
-              <input 
-                type="number" 
-                value={facturacionAnual} 
-                onChange={e => setFacturacionAnual(Number(e.target.value))} 
-                className="w-full p-4 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl text-2xl font-black dark:text-white focus:ring-2 focus:ring-orange-500 outline-none" 
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+              <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Facturación Acumulada (Últimos 12 meses)</label>
+              <input
+                type="number"
+                value={facturacionAnual}
+                onChange={e => setFacturacionAnual(Number(e.target.value))}
+                className="w-full p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-2xl font-black dark:text-white focus:ring-2 focus:ring-orange-500 outline-none"
               />
-              <p className="text-xs text-gray-400 mt-2">Ingresa la suma de tus facturas "C" del último año móvil.</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">Ingresa la suma de tus facturas "C" del último año móvil.</p>
            </div>
 
            <div className={`p-6 rounded-2xl border-2 flex items-center gap-4 ${analisis.excluider ? 'bg-rose-50 border-rose-500' : 'bg-orange-50 border-orange-500'}`}>
               <div className="text-center">
-                 <p className="text-xs font-bold uppercase text-gray-500">Tu Categoría</p>
+                 <p className="text-xs font-bold uppercase text-slate-500">Tu Categoría</p>
                  <p className={`text-6xl font-black ${analisis.excluider ? 'text-rose-600' : 'text-orange-600'}`}>{analisis.categoria.letra}</p>
               </div>
-              <div className="border-l pl-4 border-gray-300">
-                 <p className="text-sm font-bold text-gray-800 dark:text-gray-900">Cuota Mensual:</p>
-                 <p className="text-xl font-black text-gray-900">{formatMoney(analisis.categoria.cuota)}</p>
+              <div className="border-l pl-4 border-slate-300">
+                 <p className="text-sm font-bold text-slate-800 dark:text-slate-900">Cuota Mensual:</p>
+                 <p className="text-xl font-black text-slate-900">{formatMoney(analisis.categoria.cuota)}</p>
               </div>
            </div>
         </div>
@@ -79,33 +79,33 @@ export function CategorizadorMonotributo() {
         <div className="lg:col-span-8 flex flex-col gap-6">
            
            {/* Barra de Progreso */}
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
               <div className="flex justify-between items-end mb-2">
-                 <h3 className="text-sm font-bold text-gray-700 dark:text-white uppercase">Nivel de Facturación (Cat. {analisis.categoria.letra})</h3>
+                 <h3 className="text-sm font-bold text-slate-700 dark:text-white uppercase">Nivel de Facturación (Cat. {analisis.categoria.letra})</h3>
                  <span className={`text-sm font-bold ${analisis.porcentajeUso > 90 ? 'text-rose-500' : 'text-emerald-500'}`}>
                     {analisis.porcentajeUso.toFixed(1)}% del límite
                  </span>
               </div>
-              
-              <div className="w-full h-4 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                 <div 
-                    className={`h-full transition-all duration-500 ${analisis.porcentajeUso > 90 ? 'bg-rose-500' : 'bg-orange-500'}`} 
+
+              <div className="w-full h-4 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                 <div
+                    className={`h-full transition-all duration-500 ${analisis.porcentajeUso > 90 ? 'bg-rose-500' : 'bg-orange-500'}`}
                     style={{width: `${Math.min(analisis.porcentajeUso, 100)}%`}}
                  ></div>
               </div>
 
-              <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+              <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
                  {analisis.excluider ? (
                     <><AlertTriangle size={16} className="text-rose-500"/> Te pasaste del tope máximo. Deberías pasar a Responsable Inscripto.</>
                  ) : (
-                    <><CheckCircle2 size={16} className="text-emerald-500"/> Puedes facturar <span className="font-bold text-gray-900 dark:text-white">{formatMoney(analisis.espacioRestante)}</span> más antes de subir de categoría.</>
+                    <><CheckCircle2 size={16} className="text-emerald-500"/> Puedes facturar <span className="font-bold text-slate-900 dark:text-white">{formatMoney(analisis.espacioRestante)}</span> más antes de subir de categoría.</>
                  )}
               </div>
            </div>
 
            {/* Gráfico de Escalas */}
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px]">
-              <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-6">Mapa de Escalas Monotributo</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Mapa de Escalas Monotributo</h4>
               <div className="w-full h-[250px]">
                  <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={escalas} margin={{top: 20, right: 30, left: 20, bottom: 5}}>

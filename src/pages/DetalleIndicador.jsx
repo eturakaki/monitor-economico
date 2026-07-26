@@ -117,7 +117,7 @@ export function DetalleIndicador() {
                 </div>
 
                 {/* PRICING DATA: Tabular Nums Mandatory */}
-                <div className="text-left md:text-right bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
+                <div className="text-left md:text-right bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
                     <div className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter tabular-nums mb-2">
                         {valor}
                     </div>
@@ -141,7 +141,7 @@ export function DetalleIndicador() {
         <div className="grid lg:grid-cols-3 gap-8">
             {/* GRÁFICO PRINCIPAL */}
             <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md overflow-hidden">
                     <div className="flex items-center justify-between px-6 py-4 border-b border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                         <div className="flex items-center gap-2">
                              <Activity size={18} className="text-slate-500" />
@@ -189,7 +189,7 @@ export function DetalleIndicador() {
 
             {/* BARRA LATERAL: Estadísticas */}
             <div className="space-y-6">
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm p-6">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md p-6">
                     <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2 mb-6 uppercase tracking-wider">
                         <FileText size={18} className="text-slate-500" />
                         Estadísticas Clave
@@ -212,14 +212,14 @@ export function DetalleIndicador() {
 
                 {/* SUMMARY CARDS */}
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
                         <p className="text-[10px] text-slate-500 font-black uppercase mb-2 tracking-widest">Tendencia</p>
                         <div className={`flex items-center gap-2 font-black text-sm ${theme.color}`}>
                             {variacion > 0 ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
                             {variacion > 0 ? 'ALCISTA' : 'BAJISTA'}
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
                         <p className="text-[10px] text-slate-500 font-black uppercase mb-2 tracking-widest">Riesgo</p>
                         <div className="flex items-center gap-2 font-black text-sm text-slate-900 dark:text-slate-200">
                             <Activity size={18} className="text-orange-500" />

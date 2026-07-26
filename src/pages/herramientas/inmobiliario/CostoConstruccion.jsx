@@ -32,23 +32,23 @@ export function CostoConstruccion() {
     >
       <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 items-center">
          
-         <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+         <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md space-y-6">
             <div>
-               <label className="text-xs font-bold text-gray-500 uppercase mb-1">Superficie a Construir (m²)</label>
+               <label className="text-xs font-bold text-slate-500 uppercase mb-1">Superficie a Construir (m²)</label>
                <div className="relative">
-                  <input type="number" value={metros} onChange={e => setMetros(Number(e.target.value))} className="w-full pl-4 p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
-                  <Ruler className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <input type="number" value={metros} onChange={e => setMetros(Number(e.target.value))} className="w-full pl-4 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
+                  <Ruler className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400" size={20} />
                </div>
             </div>
 
             <div>
-               <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Calidad de Terminaciones</label>
+               <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Calidad de Terminaciones</label>
                <div className="grid grid-cols-3 gap-2">
                   {Object.keys(preciosReferencia).map(k => (
-                     <button 
-                        key={k} 
+                     <button
+                        key={k}
                         onClick={() => cambiarCalidad(k)}
-                        className={`py-2 rounded-lg text-xs font-bold uppercase transition-all ${calidad === k ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-gray-100 dark:bg-slate-800 text-gray-500'}`}
+                        className={`py-2 rounded-lg text-xs font-bold uppercase transition-all ${calidad === k ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}
                      >
                         {k}
                      </button>
@@ -57,8 +57,8 @@ export function CostoConstruccion() {
             </div>
 
             <div>
-               <label className="text-xs font-bold text-gray-500 uppercase mb-1">Costo m² (USD)</label>
-               <input type="number" value={costoM2} onChange={e => setCostoM2(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
+               <label className="text-xs font-bold text-slate-500 uppercase mb-1">Costo m² (USD)</label>
+               <input type="number" value={costoM2} onChange={e => setCostoM2(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
             </div>
          </div>
 

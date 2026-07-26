@@ -51,13 +51,13 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B1121] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+    <div className="relative min-h-screen flex items-center justify-center bg-slate-200 dark:bg-[#0B1121] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       
       {/* Botón Volver */}
       <div className="absolute top-6 left-6 sm:top-10 sm:left-10 z-10">
         <Link 
           to="/" 
-          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-sm font-bold text-slate-600 dark:text-slate-400 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
+          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-md text-sm font-bold text-slate-600 dark:text-slate-400 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
         >
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
           <span className="hidden sm:inline">Volver al Inicio</span>
@@ -79,7 +79,7 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 py-8 px-4 shadow-xl sm:rounded-xl sm:px-10 border border-slate-200 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-900 py-8 px-4 shadow-xl sm:rounded-xl sm:px-10 border border-slate-300 dark:border-slate-800">
           <form className="space-y-6" onSubmit={handleSubmit}>
             
             {/* Input Email */}
@@ -89,7 +89,7 @@ export default function Login() {
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-400" />
+                  <Mail className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                 </div>
                 <input
                   type="email"
@@ -117,7 +117,7 @@ export default function Login() {
               </div>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400" />
+                  <Lock className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                 </div>
                 <input
                   type="password"

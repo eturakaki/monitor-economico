@@ -114,7 +114,7 @@ export function DescargaPremium() {
     <div className="w-full max-w-5xl mx-auto my-8 font-sans px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
       
       {/* TARJETA PRINCIPAL */}
-      <div className={`bg-white dark:bg-slate-900 rounded-3xl shadow-xl overflow-hidden border transition-all duration-300 ${isPro ? 'border-emerald-500/20' : 'border-slate-200 dark:border-slate-800'}`}>
+      <div className={`bg-white dark:bg-slate-900 rounded-3xl shadow-xl overflow-hidden border transition-all duration-300 ${isPro ? 'border-emerald-500/20' : 'border-slate-300 dark:border-slate-800'}`}>
         
         {/* === HEADER === */}
         <div className={`p-8 text-white flex flex-col md:flex-row justify-between items-center gap-6 transition-colors duration-500 ${getHeaderStyles()}`}>
@@ -251,7 +251,7 @@ export function DescargaPremium() {
 
             {/* COLUMNA DERECHA: RESUMEN */}
              <div className="md:col-span-4 flex flex-col h-full">
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 flex flex-col justify-between h-full shadow-inner">
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-300 dark:border-slate-700 flex flex-col justify-between h-full shadow-inner">
                     <div className="space-y-5">
                       <h3 className="text-slate-900 dark:text-white font-bold text-lg flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-4">
                         <Check size={20} className="text-emerald-500" /> Resumen de Orden

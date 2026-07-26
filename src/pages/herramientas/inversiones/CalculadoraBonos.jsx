@@ -65,29 +65,29 @@ export function CalculadoraBonos() {
         
         {/* INPUTS */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-             
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+
              <div className="mb-6">
-                <label className="text-xs font-bold text-gray-500 uppercase mb-1">Ticker / Nombre</label>
-                <input type="text" value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-500" />
+                <label className="text-xs font-bold text-slate-500 uppercase mb-1">Ticker / Nombre</label>
+                <input type="text" value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-500" />
              </div>
 
              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                   <label className="text-xs font-bold text-gray-500 uppercase mb-1">Precio ($)</label>
-                   <input type="number" value={precioMercado} onChange={e => setPrecioMercado(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
-                   <p className="text-[10px] text-gray-400 mt-1">Cada 100 nominales</p>
+                   <label className="text-xs font-bold text-slate-500 uppercase mb-1">Precio ($)</label>
+                   <input type="number" value={precioMercado} onChange={e => setPrecioMercado(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
+                   <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-1">Cada 100 nominales</p>
                 </div>
                 <div>
-                   <label className="text-xs font-bold text-gray-500 uppercase mb-1">Dólar MEP</label>
-                   <input type="number" value={dolarMEP} onChange={e => setDolarMEP(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
+                   <label className="text-xs font-bold text-slate-500 uppercase mb-1">Dólar MEP</label>
+                   <input type="number" value={dolarMEP} onChange={e => setDolarMEP(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
                 </div>
              </div>
 
              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase mb-1">Valor Técnico (VT) USD</label>
-                <input type="number" value={valorTecnico} onChange={e => setValorTecnico(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
-                <p className="text-[10px] text-gray-400 mt-1">VT por cada 100 nominales (Capital + Intereses corridos)</p>
+                <label className="text-xs font-bold text-slate-500 uppercase mb-1">Valor Técnico (VT) USD</label>
+                <input type="number" value={valorTecnico} onChange={e => setValorTecnico(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl font-bold dark:text-white" />
+                <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-1">VT por cada 100 nominales (Capital + Intereses corridos)</p>
              </div>
           </div>
         </div>

@@ -13,21 +13,21 @@ export function ProyectorTarifas() {
     <ToolLayout title="Proyector de Tarifas" description="Estima el impacto de los próximos aumentos anunciados en tus facturas de servicios públicos." icon={Zap} color="amber">
       <div className="grid md:grid-cols-2 gap-8 items-center">
         
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm space-y-8">
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md space-y-8">
            <div>
-              <label className="block text-sm font-bold text-gray-500 uppercase mb-2">Valor Última Factura</label>
+              <label className="block text-sm font-bold text-slate-500 uppercase mb-2">Valor Última Factura</label>
               <div className="relative">
-                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
-                 <input type="number" value={facturaActual} onChange={e => setFacturaActual(Number(e.target.value))} className="w-full pl-8 p-4 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-xl font-bold dark:text-white focus:ring-2 focus:ring-amber-500 outline-none" />
+                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400 font-bold">$</span>
+                 <input type="number" value={facturaActual} onChange={e => setFacturaActual(Number(e.target.value))} className="w-full pl-8 p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xl font-bold dark:text-white focus:ring-2 focus:ring-amber-500 outline-none" />
               </div>
            </div>
 
            <div>
               <div className="flex justify-between mb-2">
-                 <label className="text-sm font-bold text-gray-500 uppercase">Aumento Anunciado</label>
+                 <label className="text-sm font-bold text-slate-500 uppercase">Aumento Anunciado</label>
                  <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded">{aumentoEsperado}%</span>
               </div>
-              <input type="range" min="0" max="300" step="5" value={aumentoEsperado} onChange={e => setAumentoEsperado(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-amber-500" />
+              <input type="range" min="0" max="300" step="5" value={aumentoEsperado} onChange={e => setAumentoEsperado(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-amber-500" />
            </div>
         </div>
 
@@ -50,7 +50,7 @@ export function ProyectorTarifas() {
               <span className="text-xl font-black text-amber-600 dark:text-amber-400">+${new Intl.NumberFormat('es-AR').format(diferencia)}</span>
            </div>
            
-           <div className="flex items-start gap-3 p-4 text-sm text-gray-500">
+           <div className="flex items-start gap-3 p-4 text-sm text-slate-500">
               <Lightbulb size={18} className="mt-0.5 shrink-0" />
               <p>Este cálculo es estimativo y no contempla cambios en tu categoría de consumo ni quita de subsidios escalonada.</p>
            </div>

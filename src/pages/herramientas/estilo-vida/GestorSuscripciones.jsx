@@ -53,29 +53,29 @@ export function GestorSuscripciones() {
     >
        <div className="grid lg:grid-cols-12 gap-8">
           
-          <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-             <div className="mb-6 flex gap-4 items-center p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
-                <label className="text-xs font-bold text-gray-500 uppercase">Dólar Tarjeta:</label>
-                <input type="number" value={dolarTarjeta} onChange={e => setDolarTarjeta(Number(e.target.value))} className="bg-transparent font-bold border-b border-gray-300 dark:border-slate-600 w-20 outline-none dark:text-white" />
+          <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+             <div className="mb-6 flex gap-4 items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                <label className="text-xs font-bold text-slate-500 uppercase">Dólar Tarjeta:</label>
+                <input type="number" value={dolarTarjeta} onChange={e => setDolarTarjeta(Number(e.target.value))} className="bg-transparent font-bold border-b border-slate-300 dark:border-slate-600 w-20 outline-none dark:text-white" />
              </div>
 
              <div className="space-y-2 mb-6">
                 {items.map(item => (
-                   <div key={item.id} className="flex justify-between items-center p-3 bg-white dark:bg-slate-950 border border-gray-100 dark:border-slate-800 rounded-lg">
+                   <div key={item.id} className="flex justify-between items-center p-3 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-lg">
                       <div className="flex items-center gap-3">
                          <div className="w-8 h-8 rounded bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 font-bold text-xs">
                             {item.nombre.charAt(0)}
                          </div>
                          <div>
                             <p className="font-bold text-sm dark:text-white">{item.nombre}</p>
-                            <p className="text-xs text-gray-500">{item.moneda} {item.precio}</p>
+                            <p className="text-xs text-slate-500">{item.moneda} {item.precio}</p>
                          </div>
                       </div>
                       <div className="flex items-center gap-4">
-                         <span className="font-bold text-sm text-gray-700 dark:text-gray-300">
+                         <span className="font-bold text-sm text-slate-700 dark:text-slate-300">
                             {formatMoney(item.moneda === 'USD' ? item.precio * dolarTarjeta : item.precio * (1 + TAX_DIGITAL))}
                          </span>
-                         <button onClick={() => eliminarItem(item.id)} className="text-gray-300 hover:text-rose-500"><Trash2 size={16}/></button>
+                         <button onClick={() => eliminarItem(item.id)} className="text-slate-600 dark:text-slate-300 hover:text-rose-500"><Trash2 size={16}/></button>
                       </div>
                    </div>
                 ))}
@@ -84,13 +84,13 @@ export function GestorSuscripciones() {
              {/* Formulario Add */}
              <div className="grid grid-cols-12 gap-2">
                 <div className="col-span-5">
-                   <input type="text" placeholder="Servicio (ej: HBO)" value={newItem.nombre} onChange={e => setNewItem({...newItem, nombre: e.target.value})} className="w-full p-2 text-sm bg-gray-50 dark:bg-slate-800 rounded-lg border-none" />
+                   <input type="text" placeholder="Servicio (ej: HBO)" value={newItem.nombre} onChange={e => setNewItem({...newItem, nombre: e.target.value})} className="w-full p-2 text-sm bg-slate-50 dark:bg-slate-800 rounded-lg border-none" />
                 </div>
                 <div className="col-span-3">
-                   <input type="number" placeholder="Precio" value={newItem.precio} onChange={e => setNewItem({...newItem, precio: e.target.value})} className="w-full p-2 text-sm bg-gray-50 dark:bg-slate-800 rounded-lg border-none" />
+                   <input type="number" placeholder="Precio" value={newItem.precio} onChange={e => setNewItem({...newItem, precio: e.target.value})} className="w-full p-2 text-sm bg-slate-50 dark:bg-slate-800 rounded-lg border-none" />
                 </div>
                 <div className="col-span-2">
-                   <select value={newItem.moneda} onChange={e => setNewItem({...newItem, moneda: e.target.value})} className="w-full p-2 text-sm bg-gray-50 dark:bg-slate-800 rounded-lg border-none dark:text-white">
+                   <select value={newItem.moneda} onChange={e => setNewItem({...newItem, moneda: e.target.value})} className="w-full p-2 text-sm bg-slate-50 dark:bg-slate-800 rounded-lg border-none dark:text-white">
                       <option value="USD">USD</option>
                       <option value="ARS">ARS</option>
                    </select>
@@ -108,10 +108,10 @@ export function GestorSuscripciones() {
                 <p className="text-sm text-rose-100 opacity-80">Incluye ~60% Impuestos</p>
              </div>
              
-             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 text-center">
-                <p className="text-gray-500 font-bold uppercase text-xs mb-2">Proyección Anual</p>
-                <p className="text-3xl font-black text-gray-900 dark:text-white">{formatMoney(totalAnual)}</p>
-                <p className="text-xs text-gray-400 mt-2">¿Vale la pena ese gasto?</p>
+             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 text-center">
+                <p className="text-slate-500 font-bold uppercase text-xs mb-2">Proyección Anual</p>
+                <p className="text-3xl font-black text-slate-900 dark:text-white">{formatMoney(totalAnual)}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">¿Vale la pena ese gasto?</p>
              </div>
           </div>
 

@@ -182,7 +182,7 @@ const FormInput = ({
           placeholder={placeholder}
           className={`
             w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 
-            border-2 text-slate-900 dark:text-white placeholder-slate-400 
+            border-2 text-slate-900 dark:text-white placeholder-slate-600 dark:placeholder-slate-400
             outline-none transition-all duration-200
             ${hasError 
               ? 'border-red-500 bg-red-50/50 dark:bg-red-900/10 focus:ring-red-200' 
@@ -192,7 +192,7 @@ const FormInput = ({
         />
         {/* Espacio para íconos (como el ojo de password) */}
         {rightIcon && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400">
             {rightIcon}
           </div>
         )}
@@ -261,7 +261,7 @@ export const Register = () => {
   const strengthInfo = getStrengthStyles();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0B1121] transition-colors duration-300 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-200 dark:bg-[#0B1121] transition-colors duration-300 px-4 py-8 sm:px-6 lg:px-8">
       
       {/* HEADER DE NAVEGACIÓN */}
       <div className="w-full max-w-[440px] mb-8 flex justify-between items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -269,7 +269,7 @@ export const Register = () => {
           to="/" 
           className="group inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors"
         >
-          <div className="p-1.5 rounded-lg bg-white dark:bg-slate-800 shadow-sm group-hover:shadow-md transition-all border border-slate-200 dark:border-slate-700">
+          <div className="p-1.5 rounded-lg bg-white dark:bg-slate-800 shadow-md group-hover:shadow-lg transition-all border border-slate-300 dark:border-slate-700">
             <ArrowLeft size={16} />
           </div>
           <span className="tracking-wide">Volver</span>
@@ -419,7 +419,7 @@ export const Register = () => {
 
       {/* Footer Legal (Toque Premium) */}
       <footer className="mt-8 text-center opacity-60 hover:opacity-100 transition-opacity">
-        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">
+        <p className="text-[10px] uppercase tracking-widest text-slate-600 dark:text-slate-400 font-semibold">
           © 2026 MonitorEco Financial Intelligence
         </p>
       </footer>

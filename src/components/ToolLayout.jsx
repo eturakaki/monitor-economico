@@ -17,14 +17,14 @@ export const ToolLayout = ({
         {/* --- NAVEGACIÓN (Regresar al Hub) --- */}
         <Link 
           to="/herramientas" 
-          className="inline-flex items-center text-gray-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 font-medium mb-6 transition-colors group"
+          className="inline-flex items-center text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 font-medium mb-6 transition-colors group"
         >
           <ArrowLeft size={20} className="mr-2 transition-transform group-hover:-translate-x-1" />
           Volver a Herramientas
         </Link>
 
         {/* --- ENCABEZADO DE LA HERRAMIENTA --- */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-md border border-gray-200 dark:border-slate-800 mb-8">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-md border border-slate-300 dark:border-slate-800 mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
             
             {/* Icono Dinámico */}
@@ -34,10 +34,10 @@ export const ToolLayout = ({
             
             {/* Textos */}
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">
                 {title}
               </h1>
-              <p className="text-gray-500 dark:text-slate-400 text-lg leading-relaxed max-w-2xl">
+              <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed max-w-2xl">
                 {description}
               </p>
             </div>

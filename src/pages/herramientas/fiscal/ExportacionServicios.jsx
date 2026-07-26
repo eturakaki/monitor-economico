@@ -44,26 +44,26 @@ export function ExportacionServicios() {
         
         {/* INPUTS */}
         <div className="lg:col-span-5 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Honorarios (USD)</label>
-                 <input type="number" value={honorariosUsd} onChange={e => setHonorariosUsd(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Honorarios (USD)</label>
+                 <input type="number" value={honorariosUsd} onChange={e => setHonorariosUsd(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-4">
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1">Dólar Oficial</label>
-                    <input type="number" value={dolarOficial} onChange={e => setDolarOficial(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-1">Dólar Oficial</label>
+                    <input type="number" value={dolarOficial} onChange={e => setDolarOficial(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1">Dólar CCL</label>
-                    <input type="number" value={dolarCCL} onChange={e => setDolarCCL(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-1">Dólar CCL</label>
+                    <input type="number" value={dolarCCL} onChange={e => setDolarCCL(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
               </div>
 
               <div>
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Comisión Plataforma (%)</label>
-                 <input type="range" min="0" max="5" step="0.1" value={comisionPlat} onChange={e => setComisionPlat(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-indigo-500" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Comisión Plataforma (%)</label>
+                 <input type="range" min="0" max="5" step="0.1" value={comisionPlat} onChange={e => setComisionPlat(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-indigo-500" />
                  <p className="text-right text-xs font-bold text-indigo-500">{comisionPlat}%</p>
               </div>
            </div>
@@ -81,24 +81,24 @@ export function ExportacionServicios() {
            </div>
 
            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800">
-                 <p className="text-xs font-bold text-gray-500 uppercase">Composición Blend</p>
+              <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-300 dark:border-slate-800">
+                 <p className="text-xs font-bold text-slate-500 uppercase">Composición Blend</p>
                  <div className="flex items-center gap-2 mt-2">
-                    <div className="h-2 flex-1 bg-gray-200 rounded-full overflow-hidden flex">
+                    <div className="h-2 flex-1 bg-slate-200 rounded-full overflow-hidden flex">
                        <div className="w-[80%] bg-blue-500"></div>
                        <div className="w-[20%] bg-emerald-500"></div>
                     </div>
                  </div>
-                 <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                 <div className="flex justify-between text-[10px] text-slate-600 dark:text-slate-400 mt-1">
                     <span>80% Oficial</span>
                     <span>20% CCL</span>
                  </div>
               </div>
 
-              <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800">
-                 <p className="text-xs font-bold text-gray-500 uppercase">Costo de la Brecha</p>
+              <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-300 dark:border-slate-800">
+                 <p className="text-xs font-bold text-slate-500 uppercase">Costo de la Brecha</p>
                  <p className="text-xl font-bold text-rose-500">-{formatMoney(analisis.perdidaBrecha)}</p>
-                 <p className="text-[10px] text-gray-400">vs. cobrar todo en CCL/Blue</p>
+                 <p className="text-[10px] text-slate-600 dark:text-slate-400">vs. cobrar todo en CCL/Blue</p>
               </div>
            </div>
         </div>

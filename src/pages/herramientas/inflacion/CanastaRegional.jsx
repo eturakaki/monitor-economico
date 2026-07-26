@@ -16,24 +16,24 @@ export function CanastaRegional() {
 
   return (
     <ToolLayout title="Canasta Básica Regional" description="Compara el costo de vida teórico entre dos regiones para entender el arbitraje geográfico." icon={Map} color="cyan">
-       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden">
-          
-          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200 dark:divide-slate-800">
+       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md overflow-hidden">
+
+          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
              {/* REGION A */}
              <div className="p-8 space-y-4">
-                <input type="text" value={regionA} onChange={e => setRegionA(e.target.value)} className="font-bold text-gray-500 uppercase tracking-widest bg-transparent outline-none w-full" />
+                <input type="text" value={regionA} onChange={e => setRegionA(e.target.value)} className="font-bold text-slate-500 uppercase tracking-widest bg-transparent outline-none w-full" />
                 <div>
-                   <label className="text-xs text-gray-400 block mb-1">Costo Canasta Total</label>
-                   <input type="number" value={valorA} onChange={e => setValorA(Number(e.target.value))} className="text-3xl font-black text-gray-900 dark:text-white bg-transparent outline-none w-full placeholder-gray-300" />
+                   <label className="text-xs text-slate-600 dark:text-slate-400 block mb-1">Costo Canasta Total</label>
+                   <input type="number" value={valorA} onChange={e => setValorA(Number(e.target.value))} className="text-3xl font-black text-slate-900 dark:text-white bg-transparent outline-none w-full placeholder-slate-300" />
                 </div>
              </div>
 
              {/* REGION B */}
-             <div className="p-8 space-y-4 bg-gray-50/50 dark:bg-slate-950/50">
-                <input type="text" value={regionB} onChange={e => setRegionB(e.target.value)} className="font-bold text-gray-500 uppercase tracking-widest bg-transparent outline-none w-full text-right md:text-left" />
+             <div className="p-8 space-y-4 bg-slate-50/50 dark:bg-slate-950/50">
+                <input type="text" value={regionB} onChange={e => setRegionB(e.target.value)} className="font-bold text-slate-500 uppercase tracking-widest bg-transparent outline-none w-full text-right md:text-left" />
                 <div className="text-right md:text-left">
-                   <label className="text-xs text-gray-400 block mb-1">Costo Canasta Total</label>
-                   <input type="number" value={valorB} onChange={e => setValorB(Number(e.target.value))} className="text-3xl font-black text-gray-900 dark:text-white bg-transparent outline-none w-full text-right md:text-left placeholder-gray-300" />
+                   <label className="text-xs text-slate-600 dark:text-slate-400 block mb-1">Costo Canasta Total</label>
+                   <input type="number" value={valorB} onChange={e => setValorB(Number(e.target.value))} className="text-3xl font-black text-slate-900 dark:text-white bg-transparent outline-none w-full text-right md:text-left placeholder-slate-300" />
                 </div>
              </div>
           </div>

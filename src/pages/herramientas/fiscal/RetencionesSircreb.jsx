@@ -20,19 +20,19 @@ export function RetencionesSircreb() {
     >
       <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 items-center">
          
-         <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+         <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md space-y-6">
             <div>
-               <label className="text-xs font-bold text-gray-500 uppercase mb-1">Monto Acreditado</label>
-               <input type="number" value={monto} onChange={e => setMonto(Number(e.target.value))} className="w-full p-4 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl text-2xl font-black dark:text-white outline-none focus:ring-2 focus:ring-red-500" />
+               <label className="text-xs font-bold text-slate-500 uppercase mb-1">Monto Acreditado</label>
+               <input type="number" value={monto} onChange={e => setMonto(Number(e.target.value))} className="w-full p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-2xl font-black dark:text-white outline-none focus:ring-2 focus:ring-red-500" />
             </div>
 
             <div>
                <div className="flex justify-between mb-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase">Alícuota de Riesgo (%)</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Alícuota de Riesgo (%)</label>
                   <span className="text-xs font-bold text-red-500">{alicuota}%</span>
                </div>
-               <input type="range" min="0" max="5" step="0.1" value={alicuota} onChange={e => setAlicuota(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-red-500" />
-               <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+               <input type="range" min="0" max="5" step="0.1" value={alicuota} onChange={e => setAlicuota(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-red-500" />
+               <div className="flex justify-between text-[10px] text-slate-600 dark:text-slate-400 mt-1">
                   <span>Bajo Riesgo (0.5%)</span>
                   <span>Alto Riesgo (5.0%)</span>
                </div>
@@ -46,9 +46,9 @@ export function RetencionesSircreb() {
                <p className="text-4xl font-black text-red-600 dark:text-red-400">{formatMoney(retencion)}</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 text-center">
-               <p className="text-gray-500 font-bold uppercase text-xs mb-1">Te acreditan finalmente</p>
-               <p className="text-2xl font-black text-gray-900 dark:text-white">{formatMoney(neto)}</p>
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 text-center">
+               <p className="text-slate-500 font-bold uppercase text-xs mb-1">Te acreditan finalmente</p>
+               <p className="text-2xl font-black text-slate-900 dark:text-white">{formatMoney(neto)}</p>
             </div>
          </div>
 

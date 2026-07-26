@@ -76,23 +76,23 @@ export function SimuladorMontecarlo() {
         
         {/* --- INPUTS --- */}
         <div className="lg:col-span-4 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Capital Inicial (USD)</label>
-                 <input type="number" value={capitalInicial} onChange={e => setCapitalInicial(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Capital Inicial (USD)</label>
+                 <input type="number" value={capitalInicial} onChange={e => setCapitalInicial(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Horizonte (Años)</label>
-                 <input type="range" min="5" max="30" step="1" value={anios} onChange={e => setAnios(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-purple-600" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Horizonte (Años)</label>
+                 <input type="range" min="5" max="30" step="1" value={anios} onChange={e => setAnios(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-purple-600" />
                  <p className="text-right text-xs font-bold text-purple-600">{anios} Años</p>
               </div>
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Retorno Esperado (Media)</label>
-                 <input type="number" value={retornoEsperado} onChange={e => setRetornoEsperado(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Retorno Esperado (Media)</label>
+                 <input type="number" value={retornoEsperado} onChange={e => setRetornoEsperado(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
               </div>
               <div className="mb-6">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Volatilidad (Riesgo)</label>
-                 <input type="range" min="1" max="50" step="1" value={volatilidad} onChange={e => setVolatilidad(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-rose-500" />
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Volatilidad (Riesgo)</label>
+                 <input type="range" min="1" max="50" step="1" value={volatilidad} onChange={e => setVolatilidad(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-rose-500" />
                  <p className="text-right text-xs font-bold text-rose-500">{volatilidad}% Desviación Std.</p>
               </div>
 
@@ -112,22 +112,22 @@ export function SimuladorMontecarlo() {
            <div className="grid grid-cols-3 gap-4">
               <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
                  <p className="text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400">Mejor Caso</p>
-                 <p className="text-lg font-black text-gray-900 dark:text-white truncate">{formatUSD(simulacion.mejorEscenario)}</p>
+                 <p className="text-lg font-black text-slate-900 dark:text-white truncate">{formatUSD(simulacion.mejorEscenario)}</p>
               </div>
               <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800/30">
                  <p className="text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400">Promedio</p>
-                 <p className="text-lg font-black text-gray-900 dark:text-white truncate">{formatUSD(simulacion.promedio)}</p>
+                 <p className="text-lg font-black text-slate-900 dark:text-white truncate">{formatUSD(simulacion.promedio)}</p>
               </div>
               <div className="p-4 bg-rose-50 dark:bg-rose-900/10 rounded-xl border border-rose-100 dark:border-rose-800/30">
                  <p className="text-[10px] font-bold uppercase text-rose-600 dark:text-rose-400">Peor Caso</p>
-                 <p className="text-lg font-black text-gray-900 dark:text-white truncate">{formatUSD(simulacion.peorEscenario)}</p>
+                 <p className="text-lg font-black text-slate-900 dark:text-white truncate">{formatUSD(simulacion.peorEscenario)}</p>
               </div>
            </div>
 
            {/* Gráfico Multilinea */}
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[350px]">
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[350px]">
              <div className="flex justify-between items-center mb-4">
-                <h4 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                    <TrendingUp size={16} className="text-purple-500"/> {simulacion.cantidadSimulaciones} Escenarios Posibles
                 </h4>
              </div>

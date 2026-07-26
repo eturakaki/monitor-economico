@@ -157,7 +157,7 @@ function App() {
             <Route
               path="/planes"
               element={
-                <div className="bg-gray-50 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300">
+                <div className="bg-slate-200 min-h-screen pt-4 dark:bg-[#0B1121] transition-colors duration-300">
                   <Planes />
                 </div>
               }
@@ -176,7 +176,7 @@ function App() {
               <Route
                 path="/exportar"
                 element={
-                  <div className="bg-slate-50 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
+                  <div className="bg-slate-200 min-h-screen dark:bg-[#0B1121] transition-colors duration-300">
                     <DescargaPremium />
                   </div>
                 }

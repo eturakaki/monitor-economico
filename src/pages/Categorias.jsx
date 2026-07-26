@@ -124,7 +124,7 @@ export const Categorias = () => {
                {/* Search Input */}
                <div className="relative group w-full md:w-64">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search size={14} className="text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <Search size={14} className="text-slate-600 dark:text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                   </div>
                   {/* CAMBIO 3: Inputs con bg-white en Light Mode para máximo contraste y border-slate-300 */}
                   <input
@@ -141,7 +141,7 @@ export const Categorias = () => {
                     `}
                   />
                   {searchTerm && (
-                    <button onClick={() => setSearchTerm('')} className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-rose-500 cursor-pointer">
+                    <button onClick={() => setSearchTerm('')} className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-600 dark:text-slate-400 hover:text-rose-500 cursor-pointer">
                       <X size={14} />
                     </button>
                   )}
@@ -192,14 +192,14 @@ export const Categorias = () => {
                                 onClick={() => handleSort('titulo', 'asc')}
                                 className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-left transition-colors"
                             >
-                                <ArrowDownAZ size={14} className="text-slate-400" /> Alfabético (A-Z)
+                                <ArrowDownAZ size={14} className="text-slate-600 dark:text-slate-400" /> Alfabético (A-Z)
                             </button>
                             
                              <button 
                                 onClick={() => handleSort('default', 'asc')}
                                 className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-left transition-colors"
                             >
-                                <Database size={14} className="text-slate-400" /> Por Defecto
+                                <Database size={14} className="text-slate-600 dark:text-slate-400" /> Por Defecto
                             </button>
                         </div>
                     </div>

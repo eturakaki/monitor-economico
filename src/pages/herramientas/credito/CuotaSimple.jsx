@@ -72,7 +72,7 @@ export function CuotaSimple() {
         
         {/* --- PANEL DE INPUTS --- */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
 
             {/* Precios */}
             <div className="grid grid-cols-2 gap-4 mb-4">
@@ -174,7 +174,7 @@ export function CuotaSimple() {
           </div>
 
           {/* Gráfico Comparativo */}
-          <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm min-h-[300px]">
+          <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Comparativa en Valor Presente (Dinero de Hoy)</h4>
             <div className="w-full h-[250px]">
               <ResponsiveContainer width="100%" height="100%">

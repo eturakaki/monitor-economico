@@ -55,23 +55,23 @@ export function CalculadoraDolarTarjeta() {
         
         {/* INPUTS */}
         <div className="lg:col-span-5 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
               <div className="mb-6">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Consumo Mensual (USD)</label>
-                 <input type="number" value={consumoUSD} onChange={e => setConsumoUSD(Number(e.target.value))} className="w-full p-4 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl font-black text-2xl dark:text-white focus:ring-2 focus:ring-cyan-500 outline-none" />
-                 <p className="text-xs text-gray-400 mt-2">
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Consumo Mensual (USD)</label>
+                 <input type="number" value={consumoUSD} onChange={e => setConsumoUSD(Number(e.target.value))} className="w-full p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl font-black text-2xl dark:text-white focus:ring-2 focus:ring-cyan-500 outline-none" />
+                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">
                     Límite Qatar: USD {LIMITE_QATAR}. {analisis.esQatar ? <span className="text-rose-500 font-bold">Te pasaste.</span> : <span className="text-emerald-500 font-bold">Estás cubierto.</span>}
                  </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1">Dólar Oficial</label>
-                    <input type="number" value={cotizacionOficial} onChange={e => setCotizacionOficial(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-1">Dólar Oficial</label>
+                    <input type="number" value={cotizacionOficial} onChange={e => setCotizacionOficial(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1">Dólar Blue</label>
-                    <input type="number" value={cotizacionBlue} onChange={e => setCotizacionBlue(Number(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-1">Dólar Blue</label>
+                    <input type="number" value={cotizacionBlue} onChange={e => setCotizacionBlue(Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
               </div>
            </div>
@@ -79,8 +79,8 @@ export function CalculadoraDolarTarjeta() {
            <div className={`p-4 rounded-xl border-2 flex items-center gap-3 ${analisis.convieneTarjeta ? 'bg-emerald-50 border-emerald-500' : 'bg-slate-100 border-slate-300'}`}>
               {analisis.convieneTarjeta ? <CheckCircle2 className="text-emerald-600"/> : <AlertTriangle className="text-slate-500"/>}
               <div>
-                 <p className="font-bold text-sm text-gray-900">{analisis.convieneTarjeta ? 'Paga con Tarjeta' : 'Paga con Billetes (Blue)'}</p>
-                 <p className="text-xs text-gray-500">Te ahorras {formatMoney(Math.abs(analisis.diferencia))}</p>
+                 <p className="font-bold text-sm text-slate-900">{analisis.convieneTarjeta ? 'Paga con Tarjeta' : 'Paga con Billetes (Blue)'}</p>
+                 <p className="text-xs text-slate-500">Te ahorras {formatMoney(Math.abs(analisis.diferencia))}</p>
               </div>
            </div>
         </div>
@@ -94,8 +94,8 @@ export function CalculadoraDolarTarjeta() {
                <p className="text-xs text-cyan-200">Tipo de Cambio Implícito: ${ (analisis.totalTarjeta / consumoUSD).toFixed(2) }</p>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4 text-center">Impuestos Incluidos</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4 text-center">Impuestos Incluidos</h4>
              <div className="w-full h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>

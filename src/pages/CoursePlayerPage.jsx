@@ -34,11 +34,11 @@ const TabButton = ({ label, isActive, onClick, icon: Icon }) => (
     className={`
       flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-all
       ${isActive 
-        ? 'border-emerald-500 text-gray-900 dark:text-white' 
-        : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}
+        ? 'border-emerald-500 text-slate-900 dark:text-white'
+        : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'}
     `}
   >
-    {Icon && <Icon size={16} className={isActive ? 'text-emerald-500' : 'text-gray-400'} />}
+    {Icon && <Icon size={16} className={isActive ? 'text-emerald-500' : 'text-slate-600 dark:text-slate-400'} />}
     {label}
   </button>
 );
@@ -120,7 +120,7 @@ const CoursePlayerLayout = () => {
             <div className="flex items-center justify-center h-screen bg-white dark:bg-[#0B1121]">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
-                    <p className="text-sm text-gray-500 animate-pulse">Cargando contenido...</p>
+                    <p className="text-sm text-slate-500 animate-pulse">Cargando contenido...</p>
                 </div>
             </div>
         );
@@ -131,10 +131,10 @@ const CoursePlayerLayout = () => {
             <div className="flex items-center justify-center h-screen bg-white dark:bg-[#0B1121]">
                 <div className="text-center p-8 max-w-md">
                     <h2 className="text-xl font-bold text-red-500 mb-2">Error al cargar el curso</h2>
-                    <p className="text-gray-500 mb-6">{error || "No se pudo encontrar el contenido solicitado."}</p>
-                    <button 
+                    <p className="text-slate-500 mb-6">{error || "No se pudo encontrar el contenido solicitado."}</p>
+                    <button
                         onClick={() => navigate('/dashboard')}
-                        className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                        className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
                     >
                         Volver al Dashboard
                     </button>
@@ -161,28 +161,28 @@ const CoursePlayerLayout = () => {
         <div className="flex flex-col h-screen bg-white dark:bg-[#0B1121] overflow-hidden">
             
             {/* A. HEADER MÓVIL / TITLE BAR */}
-            <header className="h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0f1629] flex items-center px-4 shrink-0 z-20 justify-between">
+            <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f1629] flex items-center px-4 shrink-0 z-20 justify-between">
                 <div className="flex items-center gap-4 overflow-hidden">
-                    <button 
-                        onClick={toggleSidebar} 
-                        className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md lg:hidden transition-colors"
+                    <button
+                        onClick={toggleSidebar}
+                        className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 rounded-md lg:hidden transition-colors"
                     >
                         <Menu size={20} />
                     </button>
-                    
+
                     <div className="flex flex-col min-w-0">
-                        <h1 className="text-sm md:text-base font-bold text-gray-900 dark:text-white truncate">
+                        <h1 className="text-sm md:text-base font-bold text-slate-900 dark:text-white truncate">
                             {activeLesson?.title || "Selecciona una lección"}
                         </h1>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
                             {course.title}
                         </span>
                     </div>
                 </div>
 
-                <button 
+                <button
                     onClick={() => navigate('/dashboard')}
-                    className="hidden sm:flex text-xs font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 transition-all"
+                    className="hidden sm:flex text-xs font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 transition-all"
                 >
                     Salir
                 </button>
@@ -228,7 +228,7 @@ const CoursePlayerLayout = () => {
                                         }}
                                     />
                                 ) : (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
                                         <PlayCircle size={48} className="opacity-50 mb-2" />
                                         <p>Selecciona una lección para comenzar</p>
                                     </div>
@@ -238,7 +238,7 @@ const CoursePlayerLayout = () => {
                     </div>
 
                     {/* 2. BARRA DE NAVEGACIÓN */}
-                    <div className="bg-white dark:bg-[#0f1629] border-b border-gray-200 dark:border-gray-800 p-4 flex flex-wrap items-center justify-between gap-4">
+                    <div className="bg-white dark:bg-[#0f1629] border-b border-slate-200 dark:border-slate-800 p-4 flex flex-wrap items-center justify-between gap-4">
                         
                         <div className="flex items-center gap-2">
                              {activeLesson && isLessonCompleted(activeLesson.id) ? (
@@ -246,7 +246,7 @@ const CoursePlayerLayout = () => {
                                     <CheckCircle size={14} /> Completada
                                 </span>
                              ) : (
-                                <span className="text-xs text-gray-500 font-medium px-2">
+                                <span className="text-xs text-slate-500 font-medium px-2">
                                     No vista
                                 </span>
                              )}
@@ -256,14 +256,14 @@ const CoursePlayerLayout = () => {
                             <button
                                 onClick={handlePrev}
                                 disabled={!previousLesson}
-                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-700 dark:text-gray-300"
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-slate-700 dark:text-slate-300"
                             >
                                 <ChevronLeft size={16} /> Anterior
                             </button>
                             <button
                                 onClick={handleNext}
                                 disabled={!nextLesson}
-                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-black dark:bg-emerald-600 dark:hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-slate-900 text-white hover:bg-black dark:bg-emerald-600 dark:hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
                             >
                                 Siguiente <ChevronRight size={16} />
                             </button>
@@ -272,7 +272,7 @@ const CoursePlayerLayout = () => {
 
                     {/* 3. TABS Y DETALLES */}
                     <div className="max-w-5xl mx-auto w-full px-4 lg:px-8 py-8">
-                        <div className="flex border-b border-gray-200 dark:border-gray-800 mb-6 overflow-x-auto">
+                        <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6 overflow-x-auto">
                             <TabButton 
                                 label="Descripción" 
                                 icon={Info}
@@ -296,20 +296,20 @@ const CoursePlayerLayout = () => {
                         <div className="animate-in fade-in duration-300 min-h-[200px] pb-10">
                             {activeTab === 'overview' && (
                                 <div className="prose dark:prose-invert max-w-none">
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Sobre esta clase</h3>
-                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Sobre esta clase</h3>
+                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                                         {activeLesson?.description || "Sin descripción disponible para esta lección."}
                                     </p>
                                 </div>
                             )}
                             {activeTab === 'resources' && (
-                                <div className="text-center py-8 text-gray-500 border border-dashed border-gray-200 rounded-lg">
+                                <div className="text-center py-8 text-slate-500 border border-dashed border-slate-300 rounded-lg">
                                     <Download className="mx-auto w-8 h-8 mb-2 opacity-50" />
                                     <p>No hay recursos descargables para esta lección.</p>
                                 </div>
                             )}
                             {activeTab === 'notes' && (
-                                <div className="text-center py-8 text-gray-500 border border-dashed border-gray-200 rounded-lg">
+                                <div className="text-center py-8 text-slate-500 border border-dashed border-slate-300 rounded-lg">
                                     <FileText className="mx-auto w-8 h-8 mb-2 opacity-50" />
                                     <p>Tus notas aparecerán aquí.</p>
                                 </div>

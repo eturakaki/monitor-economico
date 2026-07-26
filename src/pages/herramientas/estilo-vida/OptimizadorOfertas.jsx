@@ -50,41 +50,41 @@ export function OptimizadorOfertas() {
         
         {/* PANEL DE CONTROL */}
         <div className="lg:col-span-4 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
               <div className="mb-6">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Precio de Lista (x Unidad)</label>
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Precio de Lista (x Unidad)</label>
                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
-                    <input 
-                      type="number" 
-                      value={precioLista} 
-                      onChange={e => setPrecioLista(Number(e.target.value))} 
-                      className="w-full pl-8 p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl text-xl font-black dark:text-white outline-none focus:ring-2 focus:ring-orange-500" 
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400 font-bold">$</span>
+                    <input
+                      type="number"
+                      value={precioLista}
+                      onChange={e => setPrecioLista(Number(e.target.value))}
+                      className="w-full pl-8 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xl font-black dark:text-white outline-none focus:ring-2 focus:ring-orange-500"
                     />
                  </div>
               </div>
 
               <div className="space-y-4">
-                 <div className={`p-4 rounded-xl border-2 transition-colors ${ganador === 'A' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10' : 'border-gray-200 dark:border-slate-800'}`}>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-2 flex justify-between items-center">
+                 <div className={`p-4 rounded-xl border-2 transition-colors ${ganador === 'A' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10' : 'border-slate-300 dark:border-slate-800'}`}>
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-2 flex justify-between items-center">
                        Opción A {ganador === 'A' && <Trophy size={16} className="text-emerald-500"/>}
                     </label>
-                    <select value={promoA} onChange={e => setPromoA(e.target.value)} className="w-full p-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-bold dark:text-white outline-none">
+                    <select value={promoA} onChange={e => setPromoA(e.target.value)} className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold dark:text-white outline-none">
                        {TIPOS_PROMO.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
                     </select>
                  </div>
 
                  <div className="flex justify-center -my-3 relative z-10">
-                    <div className="bg-gray-100 dark:bg-slate-800 p-2 rounded-full text-gray-400 border border-gray-200 dark:border-slate-700">
+                    <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-full text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                        <ArrowRightLeft size={16} />
                     </div>
                  </div>
 
-                 <div className={`p-4 rounded-xl border-2 transition-colors ${ganador === 'B' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10' : 'border-gray-200 dark:border-slate-800'}`}>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-2 flex justify-between items-center">
+                 <div className={`p-4 rounded-xl border-2 transition-colors ${ganador === 'B' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10' : 'border-slate-300 dark:border-slate-800'}`}>
+                    <label className="text-xs font-bold text-slate-500 uppercase mb-2 flex justify-between items-center">
                        Opción B {ganador === 'B' && <Trophy size={16} className="text-emerald-500"/>}
                     </label>
-                    <select value={promoB} onChange={e => setPromoB(e.target.value)} className="w-full p-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-bold dark:text-white outline-none">
+                    <select value={promoB} onChange={e => setPromoB(e.target.value)} className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold dark:text-white outline-none">
                        {TIPOS_PROMO.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
                     </select>
                  </div>
@@ -114,7 +114,7 @@ export function OptimizadorOfertas() {
 
 function PromoCard({ titulo, datos, esGanador, formatMoney }) {
    return (
-      <div className={`relative p-6 rounded-2xl border-2 transition-all flex flex-col justify-between ${esGanador ? 'border-emerald-500 bg-white dark:bg-slate-900 shadow-xl shadow-emerald-500/10 scale-[1.02]' : 'border-transparent bg-gray-50 dark:bg-slate-900/40 opacity-70 hover:opacity-100'}`}>
+      <div className={`relative p-6 rounded-2xl border-2 transition-all flex flex-col justify-between ${esGanador ? 'border-emerald-500 bg-white dark:bg-slate-900 shadow-xl shadow-emerald-500/10 scale-[1.02]' : 'border-transparent bg-slate-50 dark:bg-slate-900/40 opacity-70 hover:opacity-100'}`}>
          
          {esGanador && (
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
@@ -125,34 +125,34 @@ function PromoCard({ titulo, datos, esGanador, formatMoney }) {
          <div>
             {/* AQUI MOSTRAMOS EL TÍTULO QUE ANTES FALTABA */}
             <div className="mb-4 flex justify-between items-center">
-                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">{titulo}</span>
+                <span className="text-xs font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">{titulo}</span>
             </div>
 
             <div className="flex justify-between items-start mb-6">
-               <div className={`p-3 rounded-xl ${esGanador ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : 'bg-gray-200 text-gray-500 dark:bg-slate-800'}`}>
+               <div className={`p-3 rounded-xl ${esGanador ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : 'bg-slate-200 text-slate-500 dark:bg-slate-800'}`}>
                   <ShoppingBag size={24} />
                </div>
-               <span className="text-xs font-bold bg-gray-200 dark:bg-slate-800 px-3 py-1 rounded-full text-gray-600 dark:text-gray-300">
+               <span className="text-xs font-bold bg-slate-200 dark:bg-slate-800 px-3 py-1 rounded-full text-slate-600 dark:text-slate-300">
                   Llevas {datos.unidades} u.
                </span>
             </div>
 
-            <p className="text-xs font-bold text-gray-500 uppercase mb-1">Precio Real x Unidad</p>
-            <p className={`text-4xl font-black mb-2 ${esGanador ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>
+            <p className="text-xs font-bold text-slate-500 uppercase mb-1">Precio Real x Unidad</p>
+            <p className={`text-4xl font-black mb-2 ${esGanador ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}`}>
                {formatMoney(datos.precioUnitarioFinal)}
             </p>
-            
+
             <div className="flex items-center gap-2">
-               <span className={`text-sm font-bold px-2 py-0.5 rounded ${esGanador ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-gray-200 text-gray-600 dark:bg-slate-800 dark:text-gray-400'}`}>
+               <span className={`text-sm font-bold px-2 py-0.5 rounded ${esGanador ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>
                   -{datos.descuentoReal.toFixed(1)}% OFF
                </span>
-               <span className="text-xs text-gray-400">Real</span>
+               <span className="text-xs text-slate-600 dark:text-slate-400">Real</span>
             </div>
          </div>
 
-         <div className="mt-8 pt-4 border-t border-gray-200 dark:border-slate-800 flex justify-between items-center">
-            <span className="text-xs font-bold text-gray-500 uppercase">Total Ticket</span>
-            <span className="font-black text-gray-900 dark:text-white text-lg">{formatMoney(datos.totalTicket)}</span>
+         <div className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+            <span className="text-xs font-bold text-slate-500 uppercase">Total Ticket</span>
+            <span className="font-black text-slate-900 dark:text-white text-lg">{formatMoney(datos.totalTicket)}</span>
          </div>
       </div>
    );

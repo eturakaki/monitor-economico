@@ -50,27 +50,27 @@ export function CalculadoraCourier() {
         
         {/* INPUTS */}
         <div className="lg:col-span-5 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
               <div className="mb-4">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Valor Producto (FOB)</label>
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Valor Producto (FOB)</label>
                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">USD</span>
-                    <input type="number" value={valorProducto} onChange={e => setValorProducto(Number(e.target.value))} className="w-full pl-12 p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
-                 </div>
-              </div>
-              
-              <div className="mb-6">
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1">Costo de Envío (Shipping)</label>
-                 <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">USD</span>
-                    <input type="number" value={costoEnvio} onChange={e => setCostoEnvio(Number(e.target.value))} className="w-full pl-12 p-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400 font-bold">USD</span>
+                    <input type="number" value={valorProducto} onChange={e => setValorProducto(Number(e.target.value))} className="w-full pl-12 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                  </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
+              <div className="mb-6">
+                 <label className="text-xs font-bold text-slate-500 uppercase mb-1">Costo de Envío (Shipping)</label>
+                 <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400 font-bold">USD</span>
+                    <input type="number" value={costoEnvio} onChange={e => setCostoEnvio(Number(e.target.value))} className="w-full pl-12 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                 </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                  <div>
-                    <p className="font-bold text-sm text-gray-800 dark:text-white">Aplicar Franquicia</p>
-                    <p className="text-xs text-gray-500">Descuenta USD 50 de la base</p>
+                    <p className="font-bold text-sm text-slate-800 dark:text-white">Aplicar Franquicia</p>
+                    <p className="text-xs text-slate-500">Descuenta USD 50 de la base</p>
                  </div>
                  <input type="checkbox" checked={usarFranquicia} onChange={e => setUsarFranquicia(e.target.checked)} className="w-5 h-5 accent-blue-600 rounded" />
               </div>
@@ -105,8 +105,8 @@ export function CalculadoraCourier() {
                </div>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4 text-center">Composición del Costo</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4 text-center">Composición del Costo</h4>
              <div className="w-full h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>

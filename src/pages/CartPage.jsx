@@ -119,7 +119,7 @@ export default function CartPage() {
         
         {/* === COLUMNA IZQUIERDA: LISTADO (ITEMS) === */}
         <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 overflow-hidden shadow-md">
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
                 {cart.map((item) => (
                     <div key={item.id} className="p-5 sm:p-6 group hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
@@ -194,7 +194,7 @@ export default function CartPage() {
         <div className="lg:col-span-4">
           <div className="sticky top-24 space-y-6">
             
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl shadow-slate-200/50 dark:shadow-black/40">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 p-6 shadow-xl shadow-slate-200/50 dark:shadow-black/40">
               <h2 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
                 <CreditCard size={16} className="text-emerald-500" />
                 Resumen de Cuenta
@@ -206,7 +206,7 @@ export default function CartPage() {
                     <form onSubmit={handleApplyCoupon} className="flex gap-2">
                         <div className="relative flex-1">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Ticket size={14} className="text-slate-400"/>
+                                <Ticket size={14} className="text-slate-600 dark:text-slate-400"/>
                             </div>
                             <input 
                                 type="text" 
@@ -252,7 +252,7 @@ export default function CartPage() {
 
                 <div className="flex justify-between text-slate-500 dark:text-slate-500 text-sm">
                   <span className="flex items-center gap-1">Impuestos <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1 rounded">IVA INC</span></span>
-                  <span className="font-mono tabular-nums text-slate-400">$ 0,00</span>
+                  <span className="font-mono tabular-nums text-slate-600 dark:text-slate-400">$ 0,00</span>
                 </div>
                 
                 <div className="h-px bg-slate-100 dark:bg-slate-800 my-4"></div>
@@ -263,7 +263,7 @@ export default function CartPage() {
                       <span className="block font-black text-3xl text-slate-900 dark:text-white font-mono tabular-nums tracking-tight">
                         {formatPrice(total)}
                       </span>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Pesos Argentinos</span>
+                      <span className="text-[10px] text-slate-600 dark:text-slate-400 uppercase tracking-wider font-bold">Pesos Argentinos</span>
                   </div>
                 </div>
               </div>
@@ -282,7 +282,7 @@ export default function CartPage() {
 
               {/* 4. TRUST BADGES (Footer del Card) */}
               <div className="mt-6 flex flex-col items-center gap-3">
-                 <div className="flex items-center gap-2 text-slate-400 opacity-60 grayscale">
+                 <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 opacity-60 grayscale">
                     {/* Mock de Tarjetas (Visual Only) */}
                     <div className="h-6 w-10 bg-slate-200 rounded"></div>
                     <div className="h-6 w-10 bg-slate-200 rounded"></div>

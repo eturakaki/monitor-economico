@@ -6,8 +6,8 @@ export function NotFound() {
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center animate-in fade-in duration-500">
       
       {/* Ícono Ilustrativo Circular (Igual a tu imagen de referencia) */}
-      <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-8 border border-gray-100 shadow-inner">
-        <SearchX size={48} className="text-gray-300" strokeWidth={1.5} />
+      <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-8 border border-slate-100 shadow-inner">
+        <SearchX size={48} className="text-slate-600 dark:text-slate-300" strokeWidth={1.5} />
       </div>
 
       {/* Mensaje Principal */}

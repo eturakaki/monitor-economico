@@ -56,32 +56,32 @@ export function ArbitrajeCedears() {
         
         {/* INPUTS */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-             
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+
              <div className="mb-4">
-               <label className="text-xs font-bold text-gray-500 uppercase mb-1">Ticker</label>
-               <input type="text" value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} className="w-full p-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+               <label className="text-xs font-bold text-slate-500 uppercase mb-1">Ticker</label>
+               <input type="text" value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
              </div>
 
              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                   <label className="text-xs font-bold text-gray-500 uppercase mb-1">Precio Local ($)</label>
-                   <input type="number" value={precioLocal} onChange={e => setPrecioLocal(Number(e.target.value))} className="w-full p-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                   <label className="text-xs font-bold text-slate-500 uppercase mb-1">Precio Local ($)</label>
+                   <input type="number" value={precioLocal} onChange={e => setPrecioLocal(Number(e.target.value))} className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                 </div>
                 <div>
-                   <label className="text-xs font-bold text-gray-500 uppercase mb-1">Precio USA (US$)</label>
-                   <input type="number" value={precioUSA} onChange={e => setPrecioUSA(Number(e.target.value))} className="w-full p-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                   <label className="text-xs font-bold text-slate-500 uppercase mb-1">Precio USA (US$)</label>
+                   <input type="number" value={precioUSA} onChange={e => setPrecioUSA(Number(e.target.value))} className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                 </div>
              </div>
 
              <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                   <label className="text-xs font-bold text-gray-500 uppercase mb-1">Ratio (X:1)</label>
-                   <input type="number" value={ratio} onChange={e => setRatio(Number(e.target.value))} className="w-full p-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                   <label className="text-xs font-bold text-slate-500 uppercase mb-1">Ratio (X:1)</label>
+                   <input type="number" value={ratio} onChange={e => setRatio(Number(e.target.value))} className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                 </div>
                 <div>
-                   <label className="text-xs font-bold text-gray-500 uppercase mb-1">CCL Referencia</label>
-                   <input type="number" value={cclMercado} onChange={e => setCclMercado(Number(e.target.value))} className="w-full p-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
+                   <label className="text-xs font-bold text-slate-500 uppercase mb-1">CCL Referencia</label>
+                   <input type="number" value={cclMercado} onChange={e => setCclMercado(Number(e.target.value))} className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg font-bold dark:text-white" />
                 </div>
              </div>
           </div>
@@ -94,20 +94,20 @@ export function ArbitrajeCedears() {
                  <h3 className={`text-xl font-black uppercase ${analisis.oportunidad ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
                     {analisis.oportunidad ? '¡OPORTUNIDAD DE COMPRA!' : 'CEDEAR CARO (SOBREVALUADO)'}
                  </h3>
-                 <p className="text-gray-600 dark:text-slate-300 mt-1">
+                 <p className="text-slate-600 dark:text-slate-300 mt-1">
                     El dólar implícito de {ticker} está un <span className="font-bold">{Math.abs(analisis.desarbitraje).toFixed(2)}%</span> {analisis.oportunidad ? 'debajo' : 'encima'} del mercado.
                  </p>
               </div>
               <div className="text-right">
-                 <p className="text-xs font-bold text-gray-500 uppercase">CCL Implícito</p>
+                 <p className="text-xs font-bold text-slate-500 uppercase">CCL Implícito</p>
                  <p className={`text-4xl font-black ${analisis.oportunidad ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {formatCurrency(analisis.cclImplícito)}
                  </p>
               </div>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-6">Comparativa de Tipos de Cambio</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Comparativa de Tipos de Cambio</h4>
              <div className="w-full h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={analisis.chartData} layout="vertical" margin={{left: 20}}>

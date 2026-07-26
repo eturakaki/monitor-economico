@@ -163,7 +163,7 @@ export default function CheckoutPage() {
     const showPhysicalSuccess = purchasedSnapshot.some(i => !['plan', 'subscription', 'course', 'curso'].includes(i.type || i.category));
 
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-900 animate-in zoom-in duration-300">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-200 dark:bg-slate-900 animate-in zoom-in duration-300">
         <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl text-center max-w-md w-full border border-slate-100 dark:border-slate-700">
           
           <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -226,7 +226,7 @@ export default function CheckoutPage() {
           <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             
             {/* 1. DATOS DE FACTURACIÓN */}
-            <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
                 <User size={20} className="text-emerald-500"/> Información de Facturación
               </h3>
@@ -241,7 +241,7 @@ export default function CheckoutPage() {
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email</label>
                   <div className="relative">
-                    <Mail size={16} className="absolute left-3 top-3 text-slate-400" />
+                    <Mail size={16} className="absolute left-3 top-3 text-slate-600 dark:text-slate-400" />
                     <input {...register('email')} type="email" className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-lg text-sm outline-none transition-all ${errors.email ? 'border-red-500' : 'border-slate-200 dark:border-slate-700 focus:ring-emerald-500'}`} placeholder="Para enviarte el recibo" />
                   </div>
                   {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
@@ -269,7 +269,7 @@ export default function CheckoutPage() {
 
             {/* 2. DATOS DE ENVÍO */}
             {requiresShipping && (
-              <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm animate-in slide-in-from-top-4 duration-500">
+              <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md animate-in slide-in-from-top-4 duration-500">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <Truck size={20} className="text-emerald-500"/> Datos de Envío
@@ -280,7 +280,7 @@ export default function CheckoutPage() {
                       type="checkbox" 
                       checked={useSameAddress} 
                       onChange={(e) => setUseSameAddress(e.target.checked)}
-                      className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 border-gray-300"
+                      className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 border-slate-300"
                     />
                     <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Usar dirección de facturación</span>
                   </label>
@@ -307,7 +307,7 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Notas (Opcional)</label>
-                         <input {...register('shippingNotes')} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-emerald-500 placeholder:text-slate-400" placeholder="Ej: Dejar en portería" />
+                         <input {...register('shippingNotes')} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-emerald-500 placeholder:text-slate-600 dark:placeholder:text-slate-400" placeholder="Ej: Dejar en portería" />
                     </div>
                   </div>
                 )}
@@ -329,7 +329,7 @@ export default function CheckoutPage() {
                 o Stripe Elements: el número de tarjeta viaja directo del navegador del
                 usuario al procesador, sin pasar por nuestro código ni nuestro servidor.
                 Detalle y justificación en docs/SEGURIDAD.md. */}
-            <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
+            <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
                 <CreditCard size={120} />
               </div>
@@ -342,7 +342,7 @@ export default function CheckoutPage() {
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Número de Tarjeta</label>
                   <div className="relative">
-                     <CreditCard size={16} className="absolute left-3 top-3 text-slate-400" />
+                     <CreditCard size={16} className="absolute left-3 top-3 text-slate-600 dark:text-slate-400" />
                      <input 
                        {...register('cardNumber')} 
                        maxLength={19} 
@@ -367,7 +367,7 @@ export default function CheckoutPage() {
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">CVC</label>
                     <div className="relative">
-                       <Lock size={14} className="absolute left-3 top-3 text-slate-400" />
+                       <Lock size={14} className="absolute left-3 top-3 text-slate-600 dark:text-slate-400" />
                        <input 
                          {...register('cvc')} 
                          placeholder="123" 

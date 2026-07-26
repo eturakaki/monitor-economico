@@ -95,7 +95,7 @@ export function ProductCard({ product }) {
   return (
     <div 
       onClick={() => navigate(`/producto/${id}`)}
-      className="group relative flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-black/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+      className="group relative flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-black/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
     >
       
       {/* --- ZONA IMAGEN --- */}
@@ -164,7 +164,7 @@ export function ProductCard({ product }) {
         {/* Footer */}
         <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex flex-col">
-                <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">
+                <span className="text-[10px] uppercase text-slate-600 dark:text-slate-400 font-bold tracking-wider">
                     {isUnlocked ? 'Estado' : 'Precio'}
                 </span>
                 <span className="text-xl font-black text-slate-900 dark:text-white font-mono tracking-tight">

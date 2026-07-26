@@ -42,37 +42,37 @@ export function DecodificadorCFT() {
         
         {/* INPUTS */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-             
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+
              <div className="mb-6">
-                <label className="text-sm font-bold text-gray-700 dark:text-slate-300 block mb-2">TNA Publicitada (%)</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 block mb-2">TNA Publicitada (%)</label>
                 <div className="relative">
-                   <input type="number" value={tna} onChange={e => setTna(Number(e.target.value))} className="w-full p-4 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl text-3xl font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500" />
-                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</span>
+                   <input type="number" value={tna} onChange={e => setTna(Number(e.target.value))} className="w-full p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-3xl font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500" />
+                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400 font-bold">%</span>
                 </div>
              </div>
 
              <div className="space-y-4">
                 <div>
                    <div className="flex justify-between mb-1">
-                      <label className="text-xs font-bold text-gray-500 uppercase">IVA s/ Intereses</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase">IVA s/ Intereses</label>
                       <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{iva}%</span>
                    </div>
-                   <input type="range" min="0" max="21" step="10.5" value={iva} onChange={e => setIva(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-slate-500" />
+                   <input type="range" min="0" max="21" step="10.5" value={iva} onChange={e => setIva(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-slate-500" />
                 </div>
                 <div>
                    <div className="flex justify-between mb-1">
-                      <label className="text-xs font-bold text-gray-500 uppercase">Seguros y Otros</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Seguros y Otros</label>
                       <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{seguro}%</span>
                    </div>
-                   <input type="range" min="0" max="10" step="0.1" value={seguro} onChange={e => setSeguro(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-slate-500" />
+                   <input type="range" min="0" max="10" step="0.1" value={seguro} onChange={e => setSeguro(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-slate-500" />
                 </div>
                 <div>
                    <div className="flex justify-between mb-1">
-                      <label className="text-xs font-bold text-gray-500 uppercase">Gastos Admin.</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Gastos Admin.</label>
                       <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{gastos}%</span>
                    </div>
-                   <input type="range" min="0" max="10" step="0.1" value={gastos} onChange={e => setGastos(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-slate-500" />
+                   <input type="range" min="0" max="10" step="0.1" value={gastos} onChange={e => setGastos(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-slate-500" />
                 </div>
              </div>
           </div>
@@ -100,8 +100,8 @@ export function DecodificadorCFT() {
               </div>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-6">Desglose de Costo Real</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Desglose de Costo Real</h4>
              <div className="w-full h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={analisis.chartData} barSize={60}>

@@ -65,35 +65,35 @@ export function CalculadoraGanancias() {
         
         {/* INPUTS */}
         <div className="lg:col-span-5 space-y-6">
-           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-              <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Sueldo Bruto Mensual</label>
-              <input 
-                type="number" 
-                value={bruto} 
-                onChange={e => setBruto(Number(e.target.value))} 
-                className="w-full p-4 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl text-2xl font-black dark:text-white focus:ring-2 focus:ring-red-500 outline-none" 
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md">
+              <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Sueldo Bruto Mensual</label>
+              <input
+                type="number"
+                value={bruto}
+                onChange={e => setBruto(Number(e.target.value))}
+                className="w-full p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-2xl font-black dark:text-white focus:ring-2 focus:ring-red-500 outline-none"
               />
-              
+
               <div className="mt-6 space-y-4">
-                 <p className="text-xs font-bold text-gray-500 uppercase">Deducciones Familiares</p>
-                 
-                 <label className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-950 rounded-xl border border-gray-200 dark:border-slate-700 cursor-pointer hover:border-red-400 transition-colors">
+                 <p className="text-xs font-bold text-slate-500 uppercase">Deducciones Familiares</p>
+
+                 <label className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-red-400 transition-colors">
                     <div className="flex items-center gap-3">
-                       <UserMinus className="text-gray-400" size={20}/>
-                       <span className="font-bold text-sm text-gray-700 dark:text-white">Cónyuge a cargo</span>
+                       <UserMinus className="text-slate-600 dark:text-slate-400" size={20}/>
+                       <span className="font-bold text-sm text-slate-700 dark:text-white">Cónyuge a cargo</span>
                     </div>
                     <input type="checkbox" checked={conyuge} onChange={e => setConyuge(e.target.checked)} className="w-5 h-5 accent-red-500 rounded" />
                  </label>
 
-                 <div className="p-3 bg-gray-50 dark:bg-slate-950 rounded-xl border border-gray-200 dark:border-slate-700">
+                 <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-700">
                     <div className="flex justify-between items-center mb-2">
                        <div className="flex items-center gap-3">
-                          <Users className="text-gray-400" size={20}/>
-                          <span className="font-bold text-sm text-gray-700 dark:text-white">Hijos menores (18 años)</span>
+                          <Users className="text-slate-600 dark:text-slate-400" size={20}/>
+                          <span className="font-bold text-sm text-slate-700 dark:text-white">Hijos menores (18 años)</span>
                        </div>
                        <span className="font-bold text-red-500">{hijos}</span>
                     </div>
-                    <input type="range" min="0" max="5" step="1" value={hijos} onChange={e => setHijos(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg accent-red-500" />
+                    <input type="range" min="0" max="5" step="1" value={hijos} onChange={e => setHijos(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg accent-red-500" />
                  </div>
               </div>
            </div>
@@ -119,8 +119,8 @@ export function CalculadoraGanancias() {
               </div>
            </div>
 
-           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm min-h-[300px]">
-             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4 text-center">¿A dónde va tu sueldo bruto?</h4>
+           <div className="flex-1 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-md min-h-[300px]">
+             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4 text-center">¿A dónde va tu sueldo bruto?</h4>
              <div className="w-full h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>

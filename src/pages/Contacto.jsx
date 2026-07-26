@@ -37,7 +37,7 @@ export const Contacto = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0B1121] transition-colors duration-300 font-sans pb-20">
+    <div className="min-h-screen bg-slate-200 dark:bg-[#0B1121] transition-colors duration-300 font-sans pb-20">
       
       {/* --- 1. HEADER (Dark Mode Force - Intacto porque tiene buen contraste) --- */}
       <div className="bg-slate-900 pt-20 pb-32 px-4 border-b border-white/5 relative overflow-hidden">
@@ -69,7 +69,7 @@ export const Contacto = () => {
           <div className="lg:col-span-5 space-y-6">
             
             {/* Card 1: Email */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none hover:border-emerald-500/30 transition-all duration-300 group">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none hover:border-emerald-500/30 transition-all duration-300 group">
               <div className="flex items-start gap-5">
                 <div className="p-3.5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50 group-hover:scale-110 transition-transform duration-300">
                   <Mail size={24} strokeWidth={1.5} />
@@ -88,7 +88,7 @@ export const Contacto = () => {
             </div>
 
             {/* Card 2: Ubicación */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none hover:border-purple-500/30 transition-all duration-300 group">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none hover:border-purple-500/30 transition-all duration-300 group">
               <div className="flex items-start gap-5">
                 <div className="p-3.5 bg-purple-50 dark:bg-purple-900/20 rounded-2xl text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/50 group-hover:scale-110 transition-transform duration-300">
                   <MapPin size={24} strokeWidth={1.5} />
@@ -121,7 +121,7 @@ export const Contacto = () => {
 
           {/* --- COLUMNA DERECHA: FORMULARIO (8/12) --- */}
           <div className="lg:col-span-7">
-            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-200 dark:border-slate-800 p-8 md:p-10 relative overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-300 dark:border-slate-800 p-8 md:p-10 relative overflow-hidden">
               
               {/* Formulario */}
               <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
