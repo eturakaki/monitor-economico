@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 from urllib.parse import quote_plus
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -21,7 +22,12 @@ class Settings(BaseSettings):
     postgres_host: str = "localhost"
     postgres_port: int = 5432
 
-    environment: str = "development"
+    # Sin valor por defecto, igual que postgres_user: con un default, un
+    # deploy que se olvide de setear esta variable asume "development" en
+    # silencio y termina escribiendo tokens de verificacion en los logs de
+    # produccion — el guardarrail falla abierto por omision. Sin default,
+    # la app directamente no arranca, que es ruidoso e inmediato.
+    environment: Literal["development", "staging", "production"]
     frontend_origin: str = "http://localhost:5173"
     session_cookie_name: str = "monitor_session"
     session_lifetime_days: int = 30

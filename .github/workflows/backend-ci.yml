@@ -44,6 +44,7 @@ jobs:
       POSTGRES_USER: monitor_ci
       POSTGRES_DB: monitor
       POSTGRES_PASSWORD: contrasena_descartable_de_ci
+      ENVIRONMENT: development
 
     steps:
       - name: Checkout

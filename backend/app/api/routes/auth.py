@@ -104,10 +104,12 @@ def register(
     verification_token = auth_service.create_auth_token(
         db, user, purpose="email_verification"
     )
-    # Comparacion positiva a proposito: environment es un string libre, sin
-    # validacion. Con "!= production" un .env que diga "prod" o "Production"
-    # deja el guardarrail inservible sin que nadie se entere. Con "==
-    # development", cualquier valor inesperado cae del lado seguro (no logea).
+    # "== development", no "!= production": environment ya es un Literal
+    # validado y sin default (ver config.py), asi que no hace falta
+    # blindarse contra un typo como "prod"/"Production". Pero staging
+    # TAMPOCO debe logear estos links: puede tener direcciones de correo
+    # reales. Habilitarlo ahi es una decision deliberada (cambiar esta
+    # condicion a proposito), no un olvido de la lista de valores permitidos.
     if settings.environment == "development":
         # Este log contiene un token valido: nunca debe existir en produccion.
         # Reemplazar por el envio real de mail en la Fase 4.
@@ -327,6 +329,8 @@ def _procesar_recuperacion_en_background(
 
         token = auth_service.create_auth_token(db, user, purpose="password_reset")
 
+        # Solo development, ni siquiera staging (puede tener mails reales):
+        # ver el comentario largo en register() sobre esta comparacion.
         if settings.environment == "development":
             # Este log contiene un token valido: nunca debe existir en produccion.
             reset_link = f"{settings.public_base_url}/auth/reset?token={token}"
@@ -482,6 +486,8 @@ def verify_resend(
     ip, user_agent = get_client_info(request)
     token = auth_service.create_auth_token(db, user, purpose="email_verification")
 
+    # Solo development, ni siquiera staging (puede tener mails reales):
+    # ver el comentario largo en register() sobre esta comparacion.
     if settings.environment == "development":
         verify_link = f"{settings.public_base_url}/auth/verify?token={token}"
         logger.warning(
