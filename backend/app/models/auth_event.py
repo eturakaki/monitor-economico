@@ -19,7 +19,7 @@ class AuthEvent(Base):
         CheckConstraint(
             "event_type IN ('login_success', 'login_failed', 'logout', 'register', "
             "'password_changed', 'password_reset_requested', 'email_verified', "
-            "'session_revoked')",
+            "'session_revoked', 'admin_created_via_cli')",
             name="ck_auth_events_type",
         ),
     )
