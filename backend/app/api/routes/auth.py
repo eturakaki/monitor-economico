@@ -1,10 +1,11 @@
 import html
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import (
     APIRouter,
+    BackgroundTasks,
     Depends,
     Form,
     HTTPException,
@@ -14,17 +15,23 @@ from fastapi import (
     status,
 )
 from fastapi.responses import HTMLResponse
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.cookies import clear_session_cookie, set_session_cookie
 from app.api.deps import get_client_info, get_current_user
 from app.core.config import settings
-from app.core.security import hash_password, verify_password
+from app.core.security import (
+    MAX_PASSWORD_LENGTH,
+    MIN_PASSWORD_LENGTH,
+    hash_password,
+    verify_password,
+)
 from app.core.limiter import limiter
-from app.db.session import get_db
+from app.db.session import SessionLocal, get_db
+from app.models.auth_token import AuthToken
 from app.models.user import User
-from app.schemas.auth import LoginIn, MessageOut, RegisterIn
+from app.schemas.auth import LoginIn, MessageOut, RecoveryIn, RegisterIn
 from app.schemas.user import UserOut
 from app.services import auth as auth_service
 
@@ -51,6 +58,8 @@ def _pagina_html(titulo: str, cuerpo: str) -> str:
   button {{ background: #10b981; color: #052e1f; border: none; border-radius: 0.5rem;
             padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; }}
   button:hover {{ background: #34d399; }}
+  input[type="password"] {{ display: block; width: 100%; box-sizing: border-box;
+            margin: 0.5rem 0; padding: 0.6rem; border-radius: 0.4rem; border: none; }}
 </style>
 </head>
 <body>
@@ -271,3 +280,218 @@ def verify_confirm(
     # placeholder inyectado en vez de usarlo.
     clear_session_cookie(resp)
     return resp
+
+
+_RECOVERY_TOKENS_POR_HORA = 3
+
+
+def _procesar_recuperacion_en_background(
+    email: str, ip: str | None, user_agent: str | None
+) -> None:
+    """Busca el usuario, emite el token de reset y deja el log del link.
+
+    Corre DESPUES de que el cliente ya recibio el 202: el tiempo de
+    respuesta es identico exista o no la cuenta porque esta funcion
+    nunca se ejecuta antes de responder, no porque se la haya
+    cronometrado para que tarde lo mismo. Abre su propia Session en vez
+    de reusar la del request: la de get_db es del ciclo de vida de la
+    request, no del de esta tarea diferida.
+    """
+    db = SessionLocal()
+    try:
+        user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+        if user is None:
+            return
+
+        # Rate limit por cuenta, no por IP: el de slowapi es por origen y
+        # no frena a quien inunda la casilla de una persona rotando IPs.
+        # Esto corre despues de responder, asi que no cambia el tiempo
+        # de respuesta ni revela si la cuenta existe.
+        una_hora_atras = datetime.now(timezone.utc) - timedelta(hours=1)
+        pedidos_recientes = db.execute(
+            select(func.count())
+            .select_from(AuthToken)
+            .where(
+                AuthToken.user_id == user.id,
+                AuthToken.purpose == "password_reset",
+                AuthToken.created_at >= una_hora_atras,
+            )
+        ).scalar_one()
+        if pedidos_recientes >= _RECOVERY_TOKENS_POR_HORA:
+            logger.warning(
+                "Rate limit por cuenta: %s ya pidio %d tokens de password_reset "
+                "en la ultima hora, no se emite uno nuevo",
+                email, pedidos_recientes,
+            )
+            return
+
+        token = auth_service.create_auth_token(db, user, purpose="password_reset")
+
+        if settings.environment == "development":
+            # Este log contiene un token valido: nunca debe existir en produccion.
+            reset_link = f"{settings.public_base_url}/auth/reset?token={token}"
+            logger.warning(
+                "SOLO DESARROLLO - link de reset para %s: %s", user.email, reset_link
+            )
+
+        auth_service.log_event(
+            db, "password_reset_requested", user_id=user.id, email_attempted=email,
+            ip=ip, user_agent=user_agent,
+        )
+        db.commit()
+    except Exception:
+        # Si algo explota aca, el usuario ya recibio "listo, revisa tu
+        # correo" y no le va a llegar nada. Sin este log, nadie se entera.
+        logger.exception("Fallo al procesar la recuperacion de password para %s", email)
+    finally:
+        db.close()
+
+
+@router.post(
+    "/recovery", response_model=MessageOut, status_code=status.HTTP_202_ACCEPTED
+)
+@limiter.limit("3/15minutes")
+def recovery(
+    datos: RecoveryIn,
+    request: Request,
+    background_tasks: BackgroundTasks,
+) -> MessageOut:
+    """Inicia la recuperacion de contraseña.
+
+    A proposito NO toca la base en el cuerpo sincronico del endpoint:
+    exista o no la cuenta, el codigo que corre antes de responder es el
+    mismo, asi que el tiempo de respuesta es identico por construccion,
+    no por compensacion (mismo agujero de timing que se tapo en el
+    login con el hash ficticio).
+    """
+    ip, user_agent = get_client_info(request)
+    background_tasks.add_task(
+        _procesar_recuperacion_en_background, datos.email, ip, user_agent
+    )
+    return MessageOut(
+        detail="Si existe una cuenta con ese email, vas a recibir instrucciones."
+    )
+
+
+@router.get("/reset", response_class=HTMLResponse)
+def reset_form(token: str = Query(...)) -> HTMLResponse:
+    """Muestra el formulario para elegir una contraseña nueva.
+
+    Calcado de verify_form: no toca la base ni valida el token contra
+    ella, para que la respuesta sea identica exista o no el token.
+    """
+    if not _TOKEN_PATTERN.match(token):
+        cuerpo = "<h1>Enlace invalido</h1><p>Este link de recuperacion no es valido.</p>"
+        return HTMLResponse(
+            _pagina_html("Enlace invalido", cuerpo),
+            status_code=400,
+            headers=_VERIFY_HEADERS,
+        )
+
+    token_seguro = html.escape(token)
+    cuerpo = f"""
+        <h1>Elegi una contraseña nueva</h1>
+        <form method="post" action="/auth/reset">
+          <input type="hidden" name="token" value="{token_seguro}">
+          <input type="password" name="password_nueva" placeholder="Contraseña nueva" required>
+          <input type="password" name="password_repetida" placeholder="Repetir contraseña" required>
+          <button type="submit">Cambiar contraseña</button>
+        </form>
+    """
+    return HTMLResponse(
+        _pagina_html("Elegi una contraseña nueva", cuerpo),
+        status_code=200,
+        headers=_VERIFY_HEADERS,
+    )
+
+
+@router.post("/reset", response_class=HTMLResponse)
+@limiter.limit("5/15minutes")
+def reset_confirm(
+    request: Request,
+    token: str = Form(...),
+    password_nueva: str = Form(...),
+    password_repetida: str = Form(...),
+    db: Session = Depends(get_db),
+) -> HTMLResponse:
+    if password_nueva != password_repetida:
+        cuerpo = "<h1>No pudimos cambiar tu contraseña</h1><p>Las contraseñas no coinciden.</p>"
+        return HTMLResponse(
+            _pagina_html("No pudimos cambiar tu contraseña", cuerpo), status_code=400
+        )
+
+    if not (MIN_PASSWORD_LENGTH <= len(password_nueva) <= MAX_PASSWORD_LENGTH):
+        cuerpo = (
+            "<h1>No pudimos cambiar tu contraseña</h1>"
+            f"<p>Tiene que tener entre {MIN_PASSWORD_LENGTH} y {MAX_PASSWORD_LENGTH} "
+            "caracteres.</p>"
+        )
+        return HTMLResponse(
+            _pagina_html("No pudimos cambiar tu contraseña", cuerpo), status_code=400
+        )
+
+    ip, user_agent = get_client_info(request)
+    user = auth_service.consume_auth_token(db, token, purpose="password_reset")
+
+    if user is None:
+        cuerpo = (
+            "<h1>No pudimos cambiar tu contraseña</h1>"
+            "<p>El link puede haber vencido o ya haberse usado. Pedi uno nuevo.</p>"
+        )
+        return HTMLResponse(
+            _pagina_html("No pudimos cambiar tu contraseña", cuerpo), status_code=400
+        )
+
+    user.hashed_password = hash_password(password_nueva)
+    if user.email_verified_at is None:
+        # Para completar el reset hay que leer ese correo: es la misma
+        # prueba que pide la verificacion, y cierra el pre-hijacking por
+        # una segunda via.
+        user.email_verified_at = datetime.now(timezone.utc)
+    auth_service.revoke_all_sessions(db, user.id)
+    auth_service.log_event(
+        db, "password_changed", user_id=user.id, email_attempted=user.email,
+        ip=ip, user_agent=user_agent,
+    )
+    db.commit()
+
+    cuerpo = (
+        "<h1>Contraseña actualizada</h1>"
+        "<p>Ya podes iniciar sesion con tu contraseña nueva.</p>"
+    )
+    resp = HTMLResponse(_pagina_html("Contraseña actualizada", cuerpo), status_code=200)
+    # Mismo motivo que en verify_confirm: clear_session_cookie tiene que
+    # aplicarse sobre el objeto que efectivamente se devuelve.
+    clear_session_cookie(resp)
+    return resp
+
+
+@router.post("/verify/resend", response_model=MessageOut)
+@limiter.limit("5/15minutes")
+def verify_resend(
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> MessageOut:
+    if user.email_verified_at is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tu email ya esta verificado",
+        )
+
+    ip, user_agent = get_client_info(request)
+    token = auth_service.create_auth_token(db, user, purpose="email_verification")
+
+    if settings.environment == "development":
+        verify_link = f"{settings.public_base_url}/auth/verify?token={token}"
+        logger.warning(
+            "SOLO DESARROLLO - link de verificacion para %s: %s", user.email, verify_link
+        )
+
+    auth_service.log_event(
+        db, "email_verification_resent", user_id=user.id, email_attempted=user.email,
+        ip=ip, user_agent=user_agent,
+    )
+    db.commit()
+
+    return MessageOut(detail="Te enviamos un nuevo link de verificacion")
