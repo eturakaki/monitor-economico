@@ -21,6 +21,14 @@ class Settings(BaseSettings):
     postgres_host: str = "localhost"
     postgres_port: int = 5432
 
+    environment: str = "development"
+    frontend_origin: str = "http://localhost:5173"
+    session_cookie_name: str = "monitor_session"
+    session_lifetime_days: int = 30
+    verification_token_hours: int = 24
+    reset_token_minutes: int = 60
+    email_verification_required: bool = False
+
     @property
     def database_url(self) -> str:
         return (
