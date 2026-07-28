@@ -2,16 +2,16 @@
 
 Documento de traspaso. Pegá esto (o su contenido) al arrancar un chat nuevo para no reconstruir contexto.
 
-**Repo:** https://github.com/eturakaki/monitor-economico (público)
+**Repo:** https://github.com/eturakaki/monitor-economico
 **Local:** `~/proyectos/monitor-economico` **dentro de WSL 2 / Ubuntu 24.04**
 **Equipo:** Iñaki (economía + programación) y Sofía (psicología, no programa)
-**Última actualización:** 28 de julio de 2026
+**Última actualización:** 28 de julio de 2026, tras cerrar la Fase 3
 
 ---
 
 ## Qué es
 
-SPA de React 19 + Vite 7 + Tailwind 3, más un backend en construcción (FastAPI + PostgreSQL). Plataforma financiera argentina con tres partes:
+SPA de React 19 + Vite 7 + Tailwind 3, más un backend FastAPI + PostgreSQL en construcción. Plataforma financiera argentina con tres partes:
 
 - **44 calculadoras** en 7 módulos (inflación, inversiones, crédito, inmobiliario, fiscal, estilo de vida, corporativo)
 - **Academia**: cursos con reproductor de video, progreso, e-commerce (carrito, checkout, planes)
@@ -35,9 +35,11 @@ El frontend sigue funcionando con datos simulados en `localStorage`. Los servici
 | 6 | `.claude/settings.json` con reglas de permisos | mergeado |
 | 7 | Hardening del checkout: sin logs de tarjeta, aviso PCI-DSS, CI en GitHub Actions | mergeado |
 | 8 | Piloto de tema claro (5 archivos): contraste WCAG, profundidad, sombras | mergeado |
-| 9 | Expansión del tema claro a todo el proyecto (77 archivos) | **mergeado — PR #9** |
+| 9 | Expansión del tema claro a todo el proyecto (77 archivos) | mergeado — PR #9 |
 
-**Infraestructura activa:** `main` protegida (solo por PR), CI que corre lint + build + audit en cada PR, `CLAUDE.md` que Claude Code lee solo, permisos en `.claude/settings.json`.
+**Infraestructura activa:** `main` protegida (solo por PR), CI que corre lint + build + audit del frontend en cada PR, `CLAUDE.md` que Claude Code lee solo, permisos en `.claude/settings.json`.
+
+⚠️ **Descubierto el 28/7:** la protección de `main` exige PR pero **no** exige checks verdes. El PR #11 se mergeó con el CI todavía en `pending`. Si querés que sea una barrera real, hay que activar *Require status checks to pass before merging* en Settings → Branches.
 
 ---
 
@@ -60,40 +62,110 @@ Entorno de desarrollo montado dentro de WSL 2:
 | gh (GitHub CLI) | 2.45.0, autenticado como `eturakaki` |
 | Claude Code (en Ubuntu) | 2.1.220, instalación nativa en `~/.local/bin/claude` |
 
-**El repo se movió a `~/proyectos/monitor-economico`** (disco Linux nativo). Alias `mon` en `.bashrc` para llegar rápido.
+**El repo vive en `~/proyectos/monitor-economico`** (disco Linux nativo). Alias `mon` en `.bashrc`.
 
-La copia vieja en `C:\Users\kakif\Documents\monitor-economico` está verificada como limpia (sincronizada con `main`, sin stash, sin trabajo perdido) pero **no se pudo renombrar**: algún proceso la mantiene tomada. Pendiente menor.
-
-Pendiente menor: rotar la contraseña del usuario de Ubuntu (`passwd`) — quedó expuesta en un chat.
+Pendientes menores: rotar la contraseña del usuario de Ubuntu (`passwd`); la carpeta vieja en `C:\Users\kakif\Documents\monitor-economico` sigue bloqueada por algún proceso.
 
 ### FASE 2 — La Heladera ✅ (PR #10)
 
-Todo dentro de `backend/`:
+- **`docker-compose.yml`** con PostgreSQL 17.10 + TimescaleDB 2.28.3, imagen **fijada** a `timescale/timescaledb:2.28.3-pg17` (no `latest-*`), volumen `monitor_pgdata`, healthcheck con `pg_isready`, puerto 5432.
+- **Credenciales fuera de Git**: `.env` con contraseña de `openssl rand -base64 24`, verificado con `git check-ignore` y `git add -n`. `.env.example` versionado.
+- **Proyecto Python con uv**: SQLAlchemy 2.0.51, Alembic 1.18.5, psycopg 3.3.4, pydantic-settings 2.14.2. `uv.lock` versionado.
+- **`app/core/config.py`**: `Settings` de pydantic-settings, variables críticas sin valor por defecto, `database_url` como propiedad calculada con `quote_plus` sobre la contraseña.
+- **`app/models/user.py`**: `User` con id de texto (`usr_...`), índice único en email, y dos `CheckConstraint` sobre `plan` y `role`.
+- **Alembic** con `target_metadata = Base.metadata`. Primera migración `b02deb347e61`.
+- **`backend/README.md`** con puesta en marcha y la advertencia sobre `docker compose down -v`.
 
-- **`docker-compose.yml`** con PostgreSQL 17.10 + TimescaleDB 2.28.3, imagen **fijada** a `timescale/timescaledb:2.28.3-pg17` (no `latest-*`), volumen nombrado `monitor_pgdata`, healthcheck con `pg_isready`, puerto 5432 publicado.
-- **Credenciales fuera de Git**: `.env` con contraseña generada por `openssl rand -base64 24`, ignorado por la regla `.env` del `.gitignore` raíz (verificado con `git check-ignore` y con `git add -n`). `.env.example` versionado.
-- **`.gitignore` propio en `backend/`** para `.venv/`, `__pycache__/`, `*.py[cod]`, cachés de pytest y ruff.
-- **Proyecto Python con uv**: SQLAlchemy 2.0.51, Alembic 1.18.5, psycopg 3.3.4 (binary), pydantic-settings 2.14.2. `uv.lock` versionado.
-- **`app/core/config.py`**: `Settings` de pydantic-settings, variables críticas sin valor por defecto, y `database_url` como propiedad calculada con `quote_plus` sobre la contraseña (necesario porque base64 produce `+`, `/` y `=`, que rompen el parseo de la URL).
-- **`app/models/user.py`**: modelo `User` con id de texto (`usr_...`), índice único en email, `hashed_password`, y dos `CheckConstraint` sobre `plan` y `role`.
-- **Alembic configurado** en `alembic/env.py` con `target_metadata = Base.metadata` y `create_engine(settings.database_url)`. Primera migración `b02deb347e61_crea_tabla_users.py` generada, aplicada y verificada.
-- **`backend/README.md`** con requisitos, puesta en marcha, comandos habituales y la advertencia sobre `docker compose down -v`. Escrito por Claude Code y corregido tras revisión.
+**Verificaciones:** persistencia del volumen comprobada tres veces (recreación forzada, `wsl --shutdown`, reinicio de la máquina); CHECK comprobado con un INSERT inválido rechazado.
 
-**Verificaciones hechas:** persistencia del volumen comprobada tres veces (recreación forzada del contenedor, `wsl --shutdown`, y reinicio de la máquina — la fila sobrevivió a las tres); restricción CHECK comprobada con un INSERT inválido rechazado; `\dt` muestra `users` y `alembic_version`.
+### FASE 3 — El Portero ✅ (PR #11, squash a `main`)
 
-**Sustituciones respecto del roadmap:** no se instaló DBeaver. La verificación de alcance externo se hace con `Test-NetConnection -Port 5432` desde PowerShell. Un cliente gráfico se puede sumar cuando haga falta.
+**28 archivos, 2.234 líneas. El login ya no acepta cualquier email sin contraseña.**
+
+#### Dependencias añadidas
+
+| Paquete | Versión |
+|---|---|
+| fastapi | 0.140.13 — extra `standard-no-fastapi-cloud-cli` |
+| uvicorn | 0.51.0 |
+| starlette | 1.3.1 |
+| pwdlib[argon2] | 0.3.0 (argon2-cffi 25.1.0) |
+| slowapi | 0.1.10 (limits 5.8.0) |
+| pytest | 9.1.1 |
+| httpx | 0.28.1 |
+
+⚠️ Se usó `standard-no-fastapi-cloud-cli` **a propósito**: el extra `standard` arrastra `fastapi-cloud-cli` y `sentry-sdk`, herramientas de despliegue comercial con acceso de red que no necesitamos.
+
+#### Tablas nuevas (migración `b16b27fb51ba`)
+
+- **`sessions`** — sesión activa. Guarda el **SHA-256 del token**, nunca el token en claro. `expires_at`, `revoked_at`, `last_seen_at`, `ip`, `user_agent`. FK a `users` con `ON DELETE CASCADE`.
+- **`auth_tokens`** — tokens de un solo uso. `purpose IN ('email_verification','password_reset')`. También hasheado.
+- **`auth_events`** — bitácora de autenticación. FK con **`ON DELETE SET NULL`** para sobrevivir al borrado de la cuenta.
+- **`users`** — cuatro columnas nuevas: `email_verified_at`, `updated_at`, `accepted_terms_at`, `terms_version`. Más el CHECK `ck_users_email_lowercase`.
+
+#### Estructura de archivos
+
+```
+backend/app/
+  core/security.py      hash_password, verify_password, generate_token, hash_token
+  core/limiter.py       instancia compartida de slowapi
+  core/config.py        + environment, frontend_origin, session_cookie_name,
+                          session_lifetime_days, verification_token_hours,
+                          reset_token_minutes, email_verification_required, terms_version
+  db/session.py         engine, SessionLocal, get_db
+  models/               user, user_session (clase UserSession), auth_token, auth_event
+  schemas/              base (CamelModel), user (UserOut), auth (RegisterIn, LoginIn, ...)
+  services/auth.py      lógica pura de sesiones y tokens, sin FastAPI
+  api/deps.py           get_current_user, get_optional_user, require_verified_email,
+                          require_plan(*planes), require_admin
+  api/cookies.py        set_session_cookie, clear_session_cookie
+  api/routes/auth.py    register, login, logout, me
+  main.py               app, CORS, limiter, /health
+backend/tests/
+  conftest.py           base monitor_test aislada, savepoints, limiter apagado
+  test_auth.py          14 tests
+```
+
+#### Endpoints vivos
+
+| Método | Ruta | Comportamiento |
+|---|---|---|
+| POST | `/auth/register` | 201, crea usuario en plan `starter` y lo loguea. 409 si el email ya existe. |
+| POST | `/auth/login` | 200 + cookie. Rate limit 5 intentos / 15 min por IP. |
+| POST | `/auth/logout` | 200. Nunca falla, haya sesión o no. |
+| GET | `/auth/me` | 200 con el contrato exacto, o 401. |
+| GET | `/health` | 200 |
+
+#### Decisiones de diseño (no revisar sin motivo)
+
+1. **Sesión con token opaco en base, no JWT.** Permite revocar al instante: logout, cambio de contraseña o baja de plan tienen efecto inmediato. Con un JWT stateless habría que esperar el vencimiento.
+2. **El token se guarda hasheado (SHA-256), nunca en claro.** Un backup filtrado o una SQL injection no permiten suplantar a nadie. SHA-256 y no Argon2 porque el token ya tiene 256 bits de entropía aleatoria: no admite ataque de diccionario, y un hash lento sólo agregaría latencia en cada request.
+3. **Argon2id vía `pwdlib`.** `passlib` está sin mantenimiento desde 2020 y se rompe en Python moderno, aunque siga apareciendo en todos los tutoriales. Parámetros resultantes: `m=65536, t=3, p=4` (default de argon2-cffi, más caro que el mínimo de OWASP). Medido en **40 ms con 24 núcleos**.
+4. **Cookie `httpOnly` + `Secure` + `SameSite=Lax`**, 30 días con renovación deslizante y freno de una hora para no escribir en la base en cada request.
+5. **CORS con el origen exacto del frontend.** El comodín es incompatible con `allow_credentials` por especificación del navegador, no por preferencia.
+6. **Contraseñas: mínimo 12, máximo 128, sin reglas de composición.** Postura actual de OWASP y NIST: exigir mayúscula+número+símbolo produce `Password1!`.
+7. **`terms_version` la fija el servidor**, no el cliente. La Ley 25.326 exige poder acreditar el consentimiento, y un valor que manda el navegador no prueba nada.
+8. **Defensa contra timing attack en el login:** si el email no existe, se verifica igual contra un hash ficticio. Sin eso, la diferencia entre 1 ms y 40 ms revela quién tiene cuenta.
+9. **Mismo mensaje de error** para email inexistente y contraseña incorrecta. Hay un test que compara los dos textos entre sí.
+10. **Política de acceso: "portón por acción, no por login".** Las 44 calculadoras son libres y sirven de carnada. Comprar, acceder a cursos, generar informes de IA y todo lo pago exige sesión **y** email verificado. El flag `EMAIL_VERIFICATION_REQUIRED` (hoy `false`) mueve el portón afuera del login entero cuando exista proveedor de mail.
+
+#### Verificación hecha
+
+- **14 tests** contra una base `monitor_test` que se crea y se destruye sola, con las migraciones de Alembic aplicadas desde cero (no `create_all`): cada corrida valida además que la cadena de migraciones aplica limpio, que es lo que va a pasar el día del deploy.
+- **Prueba de mutación:** rompiendo `verify_password` para que acepte cualquier contraseña, caen exactamente los 3 tests que dependen de ella. Los tests no son decorativos.
+- Prueba manual completa vía Swagger: registro, cookie con las banderas correctas, `/auth/me`, logout, 401 posterior, login fallido y login correcto.
 
 ---
 
 ## Lo primero que hay que hacer
 
-**Revisar y mergear el PR #10** (`feat/backend-fase-2-database`).
+**Terminar lo que quedó afuera de la Fase 3.** Un PR, cinco cosas, en este orden:
 
-```
-https://github.com/eturakaki/monitor-economico/pull/10
-```
-
-Antes de mergear: `gh pr checks 10` debe estar en verde.
+1. **`pytest` en el CI de GitHub Actions.** Los 14 tests hoy sólo corren si vos los corrés a mano. Es lo más urgente: un test que no corre solo es un test que en tres meses nadie recuerda correr.
+2. **`GET /auth/verify`** — consume el token de verificación, marca `email_verified_at` y **revoca todas las sesiones previas** (cierra el pre-hijacking).
+3. **`POST /auth/recovery`** (siempre 202, sin revelar si el email existe) + **`POST /auth/reset`** + reenvío de verificación. La maquinaria ya está: `create_auth_token` y `consume_auth_token`. En desarrollo, el link se imprime en el log del servidor; en la Fase 4 se reemplaza el `print` por el envío real.
+4. **Comando de CLI para crear el primer administrador**, que pida la contraseña por consola. Nada en Git, nada en el `.env`. Hoy **no existe ninguna forma de crear un admin**.
+5. Test del caso positivo de `require_plan` con un usuario `unlimited` (hoy sólo está el negativo y el bypass de admin).
 
 ---
 
@@ -105,49 +177,41 @@ Antes de mergear: `gh pr checks 10` debe estar en verde.
 | Claude Code (en WSL) | Escribir archivos dentro del repo, correr lint y tests, cambios repetitivos |
 | Iñaki | Los comandos que enseñan, y aprobar lo que Claude Code propone |
 
-**Lo mecánico se delega, lo conceptual no.** Las instrucciones a Claude Code llevan siempre tres partes: qué leer, qué escribir, qué no tocar.
+**Lo mecánico se delega, lo conceptual no.** Las instrucciones a Claude Code llevan siempre tres partes: **qué leer, qué escribir, qué no tocar.** Y cuando hay una librería de por medio, una cuarta: *verificá su API real antes de escribir, no la escribas de memoria.* Esa cuarta parte evitó un bug grave en la Fase 3 (el orden de los argumentos de `pwdlib.verify`).
 
-**Cuentas:** hay dos cuentas pagas de Claude. Conviene usar una para el chat y otra para Claude Code, así los límites de uso no compiten.
+**Cuentas:** hay dos cuentas pagas de Claude. Conviene usar una para el chat y otra para Claude Code, así los límites no compiten.
 
-**Verificado en la práctica:** en su primer encargo, Claude Code escribió un comando que se veía correcto y no funcionaba (`psql -U $POSTGRES_USER`, variable que bash expande vacía porque vive en el `.env`). El resto del archivo estaba bien. Conclusión operativa: **leer el diff y verificar contra el archivo, nunca contra el reporte del agente.**
+**Qué modelo usar en Claude Code:** Sonnet alcanza para encargos prescriptivos —donde el chat ya decidió y sólo hay que transcribir bien. En la Fase 3 acertó los seis encargos, y en uno se le ocurrió por su cuenta verificar el patrón de savepoints contra la base antes de escribirlo. Conviene guardar Opus para trabajo abierto: una revisión de seguridad de un módulo entero, por ejemplo.
 
 ---
 
-## Después: FASE 3 — El Portero
+## Lecciones operativas acumuladas
 
-**Es la fase crítica y el único bloqueante real para tener usuarios de verdad.**
+1. **Verificar contra el archivo, nunca contra el reporte del agente.** (Fase 2: `psql -U $POSTGRES_USER` con la variable vacía porque vive en el `.env`, no en la shell.)
+2. **Los planes escritos envejecen.** El roadmap pedía Node 20 LTS, que llegó a EOL en abril de 2026. Y pedía `passlib`, que está muerto desde 2020.
+3. **`git diff` no muestra archivos sin trackear.** Un `git status --short` con `??` puede ocultar archivos enteros de la revisión. Pasó con los tres modelos nuevos de la Fase 3.
+4. **Alembic `--autogenerate` no detecta CHECK constraints sobre tablas que ya existen.** Los de tablas nuevas sí salen. Hay que agregarlos a mano y **revisar siempre la migración antes de aplicarla**.
+5. **"14 passed" no prueba nada por sí solo.** Un test que no afirma nada también pasa. La prueba de mutación —romper algo a propósito y ver si los tests se dan cuenta— es lo que valida la suite.
+6. **Verificar la versión de la librería antes de diagnosticar, no sólo antes de recomendar.** En FastAPI 0.140, `include_router` ya no aplana las rutas dentro de `app.routes`: mete un objeto `_IncludedRouter` que las contiene. Contar `app.routes` esperando la forma vieja produjo cuatro rondas de diagnóstico sobre un bug que no existía. La forma correcta de preguntar qué endpoints expone la app es `app.openapi()['paths']`.
+7. **Si paralelizás agentes, pedí siempre la verificación exhaustiva antes de commitear.** (Expansión del tema claro: 6 agentes, ~800k tokens, se saltearon 5 casos y un archivo entero.)
 
-Estado actual: el login del frontend acepta cualquier email sin contraseña, y `admin@monitoreco.com` entra con rol de administrador. Hoy cualquier persona puede entrar como admin.
+---
 
-Alcance de la fase:
+## Fases siguientes
 
-- FastAPI + Uvicorn sobre el `.venv` que ya existe
-- Modelos: completar `User` (relaciones), y sumar `Subscription`, `Order`, `Course`, `Lesson`, `Progress`
-- Hash de contraseñas con **Argon2** (o bcrypt). Nunca texto plano, nunca MD5 o SHA1.
-- Sesión en cookie **httpOnly + Secure + SameSite=Lax**, no en `localStorage`. El frontend ya tiene `withCredentials: true` en axios.
-- Endpoints: `POST /auth/register`, `/auth/login`, `/auth/logout`, `GET /auth/me`, `POST /auth/recovery`
-- Dependencia de autorización que valide plan y rol en **cada** endpoint protegido
-- Rate limiting en `/auth/login`
-- CORS con el origen exacto del frontend — no `*`, que es incompatible con `withCredentials`
-
-**Tests mínimos, no opcionales:**
-
-1. Login correcto → 200 y cookie seteada
-2. Contraseña incorrecta → 401
-3. Endpoint protegido sin sesión → 401
-4. Endpoint de plan `unlimited` con usuario `starter` → 403
-
-**Sello:** `localhost:8000/docs` muestra Swagger, un usuario se registra, inicia sesión, y `GET /auth/me` devuelve el objeto con la forma exacta del contrato. Los cuatro tests pasan.
-
-### Fases siguientes
-
-4. **Pagos** (MercadoPago; acceso otorgado solo por webhook confirmado, nunca porque el frontend diga "ya pagué")
+4. **Pagos** (MercadoPago; acceso otorgado sólo por webhook confirmado, nunca porque el frontend diga "ya pagué"). Trae también el proveedor de mail, que desbloquea la verificación real.
 5. **Ingesta de datos** (empezar con una sola serie; priorizar APIs oficiales del BCRA/INDEC sobre scraping)
 6. **IA / análisis** (cachear el resultado, verificar los números contra la base, disclaimer visible)
 7. **Conexión con el frontend** (`VITE_USE_MOCKS=false`)
 8. **Deploy** (HTTPS, backups probados, headers de seguridad, Sentry)
 
 **Nota de alcance:** con las fases 1 a 4 más un deploy ya hay producto vendible. Las 44 calculadoras funcionan sin backend.
+
+### Bloqueante suave: el dominio
+
+**Todavía no hay dominio comprado.** Sin dominio no hay proveedor de mail: Resend sólo permite enviar desde `onboarding@resend.dev` **y sólo a la dirección de registro de la cuenta**, como sandbox anti-abuso. Para escribirle a un usuario real hay que verificar un dominio propio con registros SPF y DKIM.
+
+Eso bloquea: verificación de email real, recuperación de contraseña real, y comprobantes de pago de la Fase 4. Un `.com` cuesta 12-15 USD al año; un `.com.ar` requiere CUIT.
 
 ### Recursos anotados para más adelante
 
@@ -157,9 +221,19 @@ Alcance de la fase:
 
 ---
 
+## Marco legal argentino
+
+No es asesoramiento legal; hace falta un abogado antes de producción. Pero estas dos normas ya tienen consecuencias en el código.
+
+**Datos personales.** Rige la **Ley 25.326**, de 2000. Hay al menos tres proyectos de reforma en el Congreso (Carro, Doñate, y el 1751-D-2026 de Yeza) inspirados en el borrador de la AAIP y alineados con el GDPR, **ninguno sancionado**. Obligaciones vigentes: consentimiento informado del titular, derechos de acceso, rectificación y supresión, e inscripción de la base ante la AAIP. Por eso existen las columnas `accepted_terms_at` y `terms_version`.
+
+**Botón de arrepentimiento.** La **Resolución 424/2020** de la Secretaría de Comercio Interior obliga a todo sitio que venda online en Argentina a tener un link visible **en la home** que permita revocar la compra dentro de **10 días corridos**, sin costo, **sin exigir registro previo ni ningún trámite**, y a devolver un código de identificación **dentro de las 24 horas**. Es materia de la Fase 4, pero el requisito de "sin registro previo" choca de frente con cualquier diseño donde el botón esté detrás del login.
+
+---
+
 ## El contrato de la API
 
-Ya está definido por los servicios mock. Cada método es un endpoint.
+`GET /auth/me` ya devuelve exactamente esto, verificado por un test que compara el **conjunto completo** de claves:
 
 ```json
 {
@@ -168,31 +242,34 @@ Ya está definido por los servicios mock. Cada método es un endpoint.
   "name": "Nombre Apellido",
   "plan": "starter | pro | unlimited",
   "role": "user | admin",
-  "purchasedCourses": ["course_macro_101"],
-  "completedLessons": ["course_macro_101_l_101"],
-  "lastActivity": { "course_macro_101": "course_macro_101_l_101" },
+  "emailVerified": false,
+  "purchasedCourses": [],
+  "completedLessons": [],
+  "lastActivity": {},
   "createdAt": "2026-01-15T10:30:00Z"
 }
 ```
 
-| Servicio mock | Método | Endpoint |
-|---|---|---|
-| `userStatus` | `login({email})` | `POST /auth/login` |
-| | `fetchUser()` | `GET /auth/me` |
-| | `logout()` | `POST /auth/logout` |
-| | `updateProfile(data)` | `PATCH /users/me` |
-| | `updatePlan(planId)` | `POST /subscriptions` |
-| | `grantAccess(ids)` | interno, tras pago confirmado |
-| `courseService` | `getAllCourses()` / `getCourseById(id)` / `searchCourses(q)` | `GET /courses`, `/courses/{id}`, `/courses?search=` |
-| `progressService` | `markLessonAsCompleted()` | `POST /progress/lessons/{id}/complete` |
-| | `getAllCompletedLessons()` | `GET /progress/me` |
-| | `saveWatchTime(id, s)` | `PUT /progress/lessons/{id}/watchtime` |
-| `cartService` | get / add / remove | `GET·POST·DELETE /cart` |
-| `orderService` | `getOrders()` / `createOrder()` | `GET /orders`, `POST /orders` |
-| | `hasPurchased(id)` | derivar de `GET /auth/me` |
-| `checkoutService` | `processPayment(data)` | `POST /checkout` |
-| | `validateCoupon(code)` | `GET /coupons/{code}` |
-| `wishlistService` | get / add / remove | `GET·POST·DELETE /wishlist` |
+`purchasedCourses`, `completedLessons` y `lastActivity` vienen vacíos **a propósito**: los modelos de cursos y progreso llegan en una fase posterior, pero la *forma* del contrato ya está completa, así que el frontend no rompe.
+
+| Servicio mock | Método | Endpoint | Estado |
+|---|---|---|---|
+| `userStatus` | `login({email})` | `POST /auth/login` | ✅ |
+| | `fetchUser()` | `GET /auth/me` | ✅ |
+| | `logout()` | `POST /auth/logout` | ✅ |
+| | `updateProfile(data)` | `PATCH /users/me` | pendiente |
+| | `updatePlan(planId)` | `POST /subscriptions` | pendiente |
+| | `grantAccess(ids)` | interno, tras pago confirmado | pendiente |
+| `courseService` | `getAllCourses()` / `getCourseById(id)` / `searchCourses(q)` | `GET /courses`, `/courses/{id}`, `/courses?search=` | pendiente |
+| `progressService` | `markLessonAsCompleted()` | `POST /progress/lessons/{id}/complete` | pendiente |
+| | `getAllCompletedLessons()` | `GET /progress/me` | pendiente |
+| | `saveWatchTime(id, s)` | `PUT /progress/lessons/{id}/watchtime` | pendiente |
+| `cartService` | get / add / remove | `GET·POST·DELETE /cart` | pendiente |
+| `orderService` | `getOrders()` / `createOrder()` | `GET /orders`, `POST /orders` | pendiente |
+| | `hasPurchased(id)` | derivar de `GET /auth/me` | pendiente |
+| `checkoutService` | `processPayment(data)` | `POST /checkout` | pendiente |
+| | `validateCoupon(code)` | `GET /coupons/{code}` | pendiente |
+| `wishlistService` | get / add / remove | `GET·POST·DELETE /wishlist` | pendiente |
 
 Planes vigentes: `starter` (gratis) · `pro` (40.000) · `unlimited` (100.000).
 
@@ -223,33 +300,66 @@ Archivos con esta característica: `StatCard.jsx`, `Terminos.jsx`, `ApiDocs.jsx`
 
 ## Deuda técnica anotada, sin resolver
 
+### Backend (Fase 3)
+
+- **`get_client_info` lee `request.client.host`.** Detrás de un proxy inverso eso devuelve la IP del proxy para todos los usuarios: el rate limiter contaría a todo el mundo junto y la bitácora registraría siempre la misma IP inútil. Hay que pasar a `X-Forwarded-For` **junto con** una lista de proxies confiables — **nunca antes**, porque sin esa lista cualquiera falsea el header y se saltea el límite por completo, quedando peor que ahora. Fase 8.
+- **El rate limit de slowapi vive en memoria del proceso.** Se pierde al reiniciar y no se comparte entre workers. Con varios workers de uvicorn el límite es ficticio. Redis en la Fase 8.
+- **Argon2id consume 64 MB de RAM por login concurrente.** En un VPS de 2 GB, veinte logins simultáneos son 1,3 GB. Hay que volver a medir con el hardware real antes de decidir si se bajan los parámetros. Dato tranquilizador: los parámetros van escritos dentro del hash, así que cambiarlos no invalida los hashes viejos.
+- **`TestClient` con `httpx` quedó deprecado** en Starlette 1.3 (`StarletteDeprecationWarning`); migrar a `httpx2`.
+- **El 409 al registrar un email existente revela qué direcciones tienen cuenta** (enumeración de usuarios). Ocultarlo requiere poder mandar mails. Revisar en la Fase 4.
+- **`TERMS_VERSION` no quedó documentada en `backend/.env.example`**: la regla de `.claude/settings.json` que protege los `.env` bloquea también al `.env.example`. Conviene afinar el patrón para denegar `.env` pero permitir `.env.example`.
+- **Sin límite de sesiones activas por usuario**, y sin job que purgue sesiones y tokens vencidos. Ambas tablas crecen sin techo.
+- **`auth_events` no tiene política de retención** y guarda emails intentados, que son datos personales.
+
+### Frontend
+
+- **`VITE_API_URL=http://localhost:3000/api`** — valor viejo de cuando el backend no existía. El backend real corre en **`:8000` sin prefijo `/api`**. Se corrige en la Fase 7; anotado ahora porque es la clase de detalle que hace perder una tarde buscando un bug de backend que en realidad es una variable de entorno.
 - **31 colores hex fijos en gráficos de Recharts** (`stroke="#334155"`, etc.) que no responden al tema.
 - **2 placeholders en `slate-600`**, bastante oscuros. Si un campo vacío se lee como si estuviera lleno, `slate-500` es el punto medio.
 - **Tokens semánticos**: definir variables CSS (`--color-surface`, `--color-text-muted`) en vez de repartir clases de Tailwind por 100 archivos. Refactor grande, para cuando el proyecto se asiente.
-- **`src/utils/formulas.js`** es el motor financiero central, pero solo ~13 de las 44 calculadoras lo usan. El resto calcula inline. Riesgo de que dos calculadoras den resultados distintos para lo mismo.
-- **`public/demo-video.mp4` pesa 82 MB y está en Git.** Hizo fallar el clone dos veces (hay que forzar HTTP/1.1: `git config --global http.version HTTP/1.1`). Cuando haya videos reales, van a un servicio de streaming.
-- **El token de `gh` quedó guardado en texto plano** en `~/.config/gh/hosts.yml` dentro de WSL. Aceptable en una máquina personal; conviene saberlo.
-- **La carpeta vieja en `C:\Users\kakif\Documents\monitor-economico`** sigue ahí, bloqueada por algún proceso. Renombrarla o borrarla cuando se libere.
+- **`src/utils/formulas.js`** es el motor financiero central, pero sólo ~13 de las 44 calculadoras lo usan. El resto calcula inline. Riesgo de que dos calculadoras den resultados distintos para lo mismo.
+- **`public/demo-video.mp4` pesa 82 MB y está en Git.** Hizo fallar el clone dos veces (`git config --global http.version HTTP/1.1`). Cuando haya videos reales, van a un servicio de streaming.
+
+### Entorno
+
+- **El token de `gh` está en texto plano** en `~/.config/gh/hosts.yml` dentro de WSL. Aceptable en una máquina personal; conviene saberlo.
+- **La carpeta vieja en `C:\Users\kakif\Documents\monitor-economico`** sigue bloqueada por algún proceso.
 
 ---
 
 ## Seguridad — dónde está parado
 
-**Resuelto en el frontend:** bug de autorización, `.env` protegido, sin token placeholder, `IS_MOCK_MODE` apagable, open redirect mitigado, sin logs de datos sensibles.
+### Resuelto en el frontend
 
-**Resuelto en el backend (Fase 2):** credenciales fuera de Git con verificación explícita, contraseña generada al azar, restricciones de dominio impuestas por la base.
+Bug de autorización, `.env` protegido, sin token placeholder, `IS_MOCK_MODE` apagable, open redirect mitigado, sin logs de datos sensibles.
 
-**Sin resolver, y no se puede desde React:**
+### Resuelto en el backend (Fase 2)
 
-- El login **no valida contraseña**. Acepta cualquier email, y `admin@monitoreco.com` entra como admin.
-- `ProtectedRoute` es solo UX. La autorización real la tiene que validar el backend.
-- `CheckoutPage.jsx` captura `cardNumber`/`expiry`/`cvc` en formulario propio → alcance PCI-DSS. Hay que reemplazarlo por MercadoPago Checkout Pro o Stripe Elements antes de conectar pagos reales.
+Credenciales fuera de Git con verificación explícita, contraseña generada al azar, restricciones de dominio impuestas por la propia base.
+
+### Resuelto en el backend (Fase 3)
+
+- El login **valida contraseña de verdad**, con Argon2id.
+- **La autorización la impone el backend** en cada endpoint protegido, no el frontend. Un `curl` que se saltee la interfaz recibe el mismo 401 o 403.
+- Sesión en cookie `httpOnly` — un XSS ya no puede robar el token, a diferencia de `localStorage`.
+- Logout, cambio de contraseña y baja de plan pueden revocar sesiones al instante.
+- Sin enumeración de usuarios en el login: mismo mensaje y mismo tiempo de respuesta para email inexistente y contraseña incorrecta.
+- Rate limit en `/auth/login`.
+- Bitácora de eventos de autenticación que sobrevive al borrado de la cuenta.
+- Consentimiento de términos acreditable con fecha y versión.
+
+### Sin resolver
+
+- **Verificación de email no implementada en endpoints.** La tabla y las funciones están; faltan las rutas y el proveedor de mail. Mientras tanto el **pre-hijacking** sigue abierto: alguien puede registrar una cuenta con el email de otra persona, y cuando el dueño real la recupere, el atacante seguiría adentro. La mitigación ya está escrita (`revoke_all_sessions`), falta el endpoint que la dispare.
+- **No existe forma de crear un administrador.** Falta el comando de CLI.
+- **Los 14 tests no corren en el CI.**
+- **`CheckoutPage.jsx` captura `cardNumber`/`expiry`/`cvc` en formulario propio** → alcance PCI-DSS. Hay que reemplazarlo por MercadoPago Checkout Pro o Stripe Elements antes de conectar pagos reales.
 
 **Sin fix disponible:** react-router tiene CVEs abiertos sin versión corregida. La mayoría aplican a SSR/RSC (no a este SPA). El único que tocaba —open redirect— está mitigado a mano.
 
 Detalle completo en `docs/SEGURIDAD.md`.
 
-**Usuarios de prueba del mock** (acepta cualquier contraseña): `admin@monitoreco.com` (admin, unlimited), `pro@monitoreco.com` (plan pro, con cursos comprados), `free@monitoreco.com` (starter).
+**Usuarios de prueba del mock del frontend** (acepta cualquier contraseña, sigue vivo hasta la Fase 7): `admin@monitoreco.com` (admin, unlimited), `pro@monitoreco.com` (plan pro, con cursos comprados), `free@monitoreco.com` (starter). **Ninguno de los tres se migra al backend real.**
 
 ---
 
@@ -260,10 +370,19 @@ Detalle completo en `docs/SEGURIDAD.md`.
 - `npm run lint` en verde antes de cada commit del frontend.
 - **Verificar que `.env` no entre a Git** antes de cada commit del backend: `git add -n backend/`.
 - **Todo lo que exista en la base tiene que estar descrito en una migración de Alembic.** Nada de crear tablas a mano.
+- **Revisar la migración autogenerada antes de aplicarla.** Alembic no detecta todo.
 - Convenciones completas en `CLAUDE.md` (raíz del repo).
 
-**Lección con los agentes en paralelo:** en la expansión del tema claro, Claude Code lanzó 6 agentes por carpeta (~800k tokens). Funcionó, pero **se saltearon 5 casos y un archivo entero** (`Layout.jsx`). Aparecieron solo al pedir una verificación explícita post-hoc. Si se vuelve a paralelizar, **pedir siempre la verificación exhaustiva antes de commitear**.
+### Comandos frecuentes del backend
 
-**Lección de la Fase 2:** los planes escritos envejecen. El roadmap pedía Node 20 LTS, que llegó a fin de vida en abril de 2026. Verificar versiones antes de seguir un documento, aunque sea propio.
+```bash
+cd ~/proyectos/monitor-economico/backend
+set -a && . ./.env && set +a        # cargar las variables del .env en el shell antes de usar psql
+docker compose up -d                 # levantar Postgres
+uv run alembic upgrade head          # aplicar migraciones
+uv run uvicorn app.main:app --reload --port 8000
+uv run pytest -v                     # 14 tests
+docker compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"
+```
 
-**Lección del primer encargo a Claude Code:** produce resultados que se ven bien y a veces no funcionan. Verificar contra el archivo (`grep`, `git diff`), nunca contra su propio reporte.
+⚠️ `docker compose down -v` borra el volumen y con él toda la base.
