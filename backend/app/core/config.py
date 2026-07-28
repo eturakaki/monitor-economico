@@ -27,8 +27,18 @@ class Settings(BaseSettings):
     session_lifetime_days: int = 30
     verification_token_hours: int = 24
     reset_token_minutes: int = 60
+    # El token de verificacion vence a las 24 horas y todavia no existe
+    # endpoint de reenvio. Mientras este flag este en False es inofensivo,
+    # pero el dia que se prenda, un usuario cuyo token vencio queda sin
+    # ninguna forma de verificarse. El reenvio tiene que existir antes de
+    # prender el flag.
     email_verification_required: bool = False
     terms_version: str = "1.0"
+    # URL publica del backend, usada para armar los links de verificacion/reset
+    # que van por mail. Nunca se construye con el header Host de la request:
+    # eso permite Host Header Injection (un atacante manda un Host falso y el
+    # link de "confirma tu email" apunta a un dominio suyo).
+    public_base_url: str = "http://localhost:8000"
 
     @property
     def database_url(self) -> str:
