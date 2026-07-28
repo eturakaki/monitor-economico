@@ -5,7 +5,7 @@ Documento de traspaso. Pegá esto (o su contenido) al arrancar un chat nuevo par
 **Repo:** https://github.com/eturakaki/monitor-economico
 **Local:** `~/proyectos/monitor-economico` **dentro de WSL 2 / Ubuntu 24.04**
 **Equipo:** Iñaki (economía + programación) y Sofía (psicología, no programa)
-**Última actualización:** 28 de julio de 2026, tras cerrar la Fase 3
+**Última actualización:** 28 de julio de 2026, tras cerrar los puntos 1 y 2 de lo que quedó afuera de la Fase 3
 
 ---
 
@@ -37,9 +37,9 @@ El frontend sigue funcionando con datos simulados en `localStorage`. Los servici
 | 8 | Piloto de tema claro (5 archivos): contraste WCAG, profundidad, sombras | mergeado |
 | 9 | Expansión del tema claro a todo el proyecto (77 archivos) | mergeado — PR #9 |
 
-**Infraestructura activa:** `main` protegida (solo por PR), CI que corre lint + build + audit del frontend en cada PR, `CLAUDE.md` que Claude Code lee solo, permisos en `.claude/settings.json`.
+**Infraestructura activa:** `main` protegida por un *ruleset* (no por las *classic branch protections*, que quedan vacías — ver el recuadro debajo). CI de frontend (lint + build + audit) y CI de backend (`pytest`, PR #13) corren en cada PR, ambos como checks obligatorios. `CLAUDE.md` que Claude Code lee solo, permisos en `.claude/settings.json`.
 
-⚠️ **Descubierto el 28/7:** la protección de `main` exige PR pero **no** exige checks verdes. El PR #11 se mergeó con el CI todavía en `pending`. Si querés que sea una barrera real, hay que activar *Require status checks to pass before merging* en Settings → Branches.
+✅ **Verificado el 28/7:** la protección de `main` ya exige checks verdes. Se configuró en el *ruleset* "proteger main" (`id 19746900`), no en las *classic branch protections* —que están vacías y confunden—. Checks obligatorios: `tests` (backend) y `build` (frontend). `bypass_actors: []`, nadie puede saltearlo, tampoco el dueño. Verificado rompiendo un test a propósito: el PR #14 quedó en `mergeStateStatus: BLOCKED` y se cerró sin mergear.
 
 ---
 
@@ -92,6 +92,7 @@ Pendientes menores: rotar la contraseña del usuario de Ubuntu (`passwd`); la ca
 | pwdlib[argon2] | 0.3.0 (argon2-cffi 25.1.0) |
 | slowapi | 0.1.10 (limits 5.8.0) |
 | pytest | 9.1.1 |
+| pytest-asyncio | 1.4.0 |
 | httpx | 0.28.1 |
 
 ⚠️ Se usó `standard-no-fastapi-cloud-cli` **a propósito**: el extra `standard` arrastra `fastapi-cloud-cli` y `sentry-sdk`, herramientas de despliegue comercial con acceso de red que no necesitamos.
@@ -134,6 +135,8 @@ backend/tests/
 | POST | `/auth/login` | 200 + cookie. Rate limit 5 intentos / 15 min por IP. |
 | POST | `/auth/logout` | 200. Nunca falla, haya sesión o no. |
 | GET | `/auth/me` | 200 con el contrato exacto, o 401. |
+| GET | `/auth/verify` | Muestra el formulario de confirmación. No toca la base. |
+| POST | `/auth/verify` | Consume el token, marca `email_verified_at`, revoca todas las sesiones, borra la cookie. Rate limit 5/15min. |
 | GET | `/health` | 200 |
 
 #### Decisiones de diseño (no revisar sin motivo)
@@ -148,6 +151,10 @@ backend/tests/
 8. **Defensa contra timing attack en el login:** si el email no existe, se verifica igual contra un hash ficticio. Sin eso, la diferencia entre 1 ms y 40 ms revela quién tiene cuenta.
 9. **Mismo mensaje de error** para email inexistente y contraseña incorrecta. Hay un test que compara los dos textos entre sí.
 10. **Política de acceso: "portón por acción, no por login".** Las 44 calculadoras son libres y sirven de carnada. Comprar, acceder a cursos, generar informes de IA y todo lo pago exige sesión **y** email verificado. El flag `EMAIL_VERIFICATION_REQUIRED` (hoy `false`) mueve el portón afuera del login entero cuando exista proveedor de mail.
+11. **`GET /auth/verify` no consulta la base a propósito.** Los escáneres de correo y los prefetchers abren los links antes que el usuario; si el GET consumiera o validara el token, el usuario real vería "inválido" al hacer clic. Como no hay lookup, la respuesta es idéntica exista o no el token: tampoco hay oráculo de tiempo ni de contenido.
+12. **La pantalla de confirmación la sirve el backend como HTML mínimo, sin JavaScript.** Es un interino deliberado: el frontend sigue en modo mock hasta la Fase 7, así que una página React ahí quedaría huérfana. Se reemplaza sin cambiar el endpoint.
+13. **Al verificar se revocan todas las sesiones, incluida la del navegador que confirmó.** OWASP desaconseja loguear automáticamente después de estos flujos: agrega complejidad al manejo de sesiones, que es donde aparecen los bugs.
+14. **El guardarraíl del log usa comparación positiva (`== "development"`), no negativa.** Con `!= "production"`, un `.env` que diga `prod` o `Production` dejaría el guardarraíl inservible sin que nadie se entere. Con la positiva, cualquier valor inesperado cae del lado seguro.
 
 #### Verificación hecha
 
@@ -157,15 +164,26 @@ backend/tests/
 
 ---
 
+## Lo que quedó afuera de la Fase 3 — puntos 1 y 2
+
+- **PR #13 — `pytest` en el CI.** Workflow `.github/workflows/backend-ci.yml`, separado del frontend y sin `paths:` a propósito, para que el check siempre reporte y nunca deje un PR colgado cuando se vuelva obligatorio. Servicio con la misma imagen fijada del `docker-compose.yml`. Credenciales de la base en claro en el YAML, decisión explicada en un comentario del propio archivo. 43 segundos por corrida, verde a la primera.
+- **Candado de `main`.** Los checks obligatorios se configuraron en el *ruleset* "proteger main" (`id 19746900`), no en las *classic branch protections*, que están vacías y confunden. Checks requeridos: `tests` y `build`. `bypass_actors: []` — nadie puede saltearlo, tampoco el dueño. Verificado rompiendo un test a propósito: el PR #14 quedó en `mergeStateStatus: BLOCKED` y se cerró sin mergear.
+- **PR #15 — verificación de email.** Cierra el pre-hijacking. 21 tests en total, los 14 originales intactos más 7 nuevos.
+
+---
+
 ## Lo primero que hay que hacer
 
-**Terminar lo que quedó afuera de la Fase 3.** Un PR, cinco cosas, en este orden:
+**Terminar lo que quedó afuera de la Fase 3.** Los puntos 1 y 2 originales ya salieron, cada uno en su propio PR (regla de un propósito por PR):
 
-1. **`pytest` en el CI de GitHub Actions.** Los 14 tests hoy sólo corren si vos los corrés a mano. Es lo más urgente: un test que no corre solo es un test que en tres meses nadie recuerda correr.
-2. **`GET /auth/verify`** — consume el token de verificación, marca `email_verified_at` y **revoca todas las sesiones previas** (cierra el pre-hijacking).
-3. **`POST /auth/recovery`** (siempre 202, sin revelar si el email existe) + **`POST /auth/reset`** + reenvío de verificación. La maquinaria ya está: `create_auth_token` y `consume_auth_token`. En desarrollo, el link se imprime en el log del servidor; en la Fase 4 se reemplaza el `print` por el envío real.
-4. **Comando de CLI para crear el primer administrador**, que pida la contraseña por consola. Nada en Git, nada en el `.env`. Hoy **no existe ninguna forma de crear un admin**.
-5. Test del caso positivo de `require_plan` con un usuario `unlimited` (hoy sólo está el negativo y el bypass de admin).
+- ~~**`pytest` en el CI de GitHub Actions.**~~ ✅ Hecho — PR #13. Workflow `.github/workflows/backend-ci.yml`, 43 s por corrida, verde a la primera.
+- ~~**Verificación de email** (`GET /auth/verify` muestra el formulario, `POST /auth/verify` consume el token y revoca las sesiones previas).~~ ✅ Hecho — PR #15. Cierra el pre-hijacking. 21 tests en total, los 14 originales más 7 nuevos.
+
+Quedan tres, renumeradas, en este orden:
+
+1. **`POST /auth/recovery`** (siempre 202, sin revelar si el email existe) + **`POST /auth/reset`** + reenvío de verificación. La maquinaria ya está: `create_auth_token` y `consume_auth_token`. En desarrollo, el link se imprime en el log del servidor; en la Fase 4 se reemplaza el `print` por el envío real.
+2. **Comando de CLI para crear el primer administrador**, que pida la contraseña por consola. Nada en Git, nada en el `.env`. Hoy **no existe ninguna forma de crear un admin**.
+3. Test del caso positivo de `require_plan` con un usuario `unlimited` (hoy sólo está el negativo y el bypass de admin).
 
 ---
 
@@ -194,6 +212,10 @@ backend/tests/
 5. **"14 passed" no prueba nada por sí solo.** Un test que no afirma nada también pasa. La prueba de mutación —romper algo a propósito y ver si los tests se dan cuenta— es lo que valida la suite.
 6. **Verificar la versión de la librería antes de diagnosticar, no sólo antes de recomendar.** En FastAPI 0.140, `include_router` ya no aplana las rutas dentro de `app.routes`: mete un objeto `_IncludedRouter` que las contiene. Contar `app.routes` esperando la forma vieja produjo cuatro rondas de diagnóstico sobre un bug que no existía. La forma correcta de preguntar qué endpoints expone la app es `app.openapi()['paths']`.
 7. **Si paralelizás agentes, pedí siempre la verificación exhaustiva antes de commitear.** (Expansión del tema claro: 6 agentes, ~800k tokens, se saltearon 5 casos y un archivo entero.)
+8. **FastAPI descarta el `Response` inyectado si el endpoint devuelve su propio objeto `Response`.** Cualquier `set_cookie` o `delete_cookie` sobre el inyectado se pierde en silencio, y ningún test lo detecta. Encontrado levantando un mini FastAPI para probarlo, antes de escribir el código.
+9. **Para guardarraíles de seguridad, lista blanca y no lista negra.** "Permitido sólo X" falla cerrado ante lo imprevisto; "prohibido Y" falla abierto.
+10. **Una página web puede estar cacheada y mentirte sobre la última versión.** La página de releases de `actions/checkout` mostraba `v6.0.3` cuando `gh api` devolvía `v7.0.1`. Para versiones, preguntarle a la API, no leer una página.
+11. **`git checkout -b` arrastra los cambios sin commitear a la rama nueva.** Un archivo de otra tarea puede colarse a un PR sin que nadie lo note; por eso se stagean archivos por nombre y nunca con `git add .`.
 
 ---
 
@@ -310,6 +332,10 @@ Archivos con esta característica: `StatCard.jsx`, `Terminos.jsx`, `ApiDocs.jsx`
 - **`TERMS_VERSION` no quedó documentada en `backend/.env.example`**: la regla de `.claude/settings.json` que protege los `.env` bloquea también al `.env.example`. Conviene afinar el patrón para denegar `.env` pero permitir `.env.example`.
 - **Sin límite de sesiones activas por usuario**, y sin job que purgue sesiones y tokens vencidos. Ambas tablas crecen sin techo.
 - **`auth_events` no tiene política de retención** y guarda emails intentados, que son datos personales.
+- **`settings.environment` es un string libre, sin validación.** Debería ser `Literal["development", "staging", "production"]` y sin valor por defecto, como `postgres_user`: hoy el default es `development`, así que un deploy que se olvide de setearla escribiría tokens de verificación en los logs de producción. El guardarraíl falla abierto por omisión.
+- **El reenvío de verificación es prerrequisito de prender `EMAIL_VERIFICATION_REQUIRED`, no un extra.** El token vence a las 24 horas y sin endpoint de reenvío el usuario cuyo token venció queda trabado, sin ninguna forma de verificarse.
+- **La segunda defensa contra XSS del `GET /auth/verify` (`html.escape`) no está cubierta por ningún test**, porque el regex de formato rechaza antes. Es defensa en profundidad deliberada, pero conviene saber que sólo la primera capa está probada.
+- **`logout` no envuelve su `db.commit()` en `try`/`except`.** Decisión tomada, no deuda: atajarlo devolvería 200 con la sesión todavía válida en el servidor durante 30 días, lo que contradice la decisión de diseño #1 y le miente al usuario. Un 500 deja el estado coherente.
 
 ### Frontend
 
@@ -350,9 +376,8 @@ Credenciales fuera de Git con verificación explícita, contraseña generada al 
 
 ### Sin resolver
 
-- **Verificación de email no implementada en endpoints.** La tabla y las funciones están; faltan las rutas y el proveedor de mail. Mientras tanto el **pre-hijacking** sigue abierto: alguien puede registrar una cuenta con el email de otra persona, y cuando el dueño real la recupere, el atacante seguiría adentro. La mitigación ya está escrita (`revoke_all_sessions`), falta el endpoint que la dispare.
+- **Pre-hijacking: el mecanismo está cerrado.** El endpoint `POST /auth/verify` existe y revoca todas las sesiones previas al confirmar el email. Pero la entrega del link todavía depende del log del servidor, porque no hay proveedor de mail — en producción real el flujo no está operativo hasta la Fase 4.
 - **No existe forma de crear un administrador.** Falta el comando de CLI.
-- **Los 14 tests no corren en el CI.**
 - **`CheckoutPage.jsx` captura `cardNumber`/`expiry`/`cvc` en formulario propio** → alcance PCI-DSS. Hay que reemplazarlo por MercadoPago Checkout Pro o Stripe Elements antes de conectar pagos reales.
 
 **Sin fix disponible:** react-router tiene CVEs abiertos sin versión corregida. La mayoría aplican a SSR/RSC (no a este SPA). El único que tocaba —open redirect— está mitigado a mano.
