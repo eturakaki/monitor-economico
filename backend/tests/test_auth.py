@@ -1,7 +1,12 @@
+from datetime import datetime, timedelta, timezone
+
 from sqlalchemy import select
 
 from app.core.config import settings
+from app.core.security import hash_token
 from app.models.auth_event import AuthEvent
+from app.models.auth_token import AuthToken
+from app.services import auth as auth_service
 
 # --- OBLIGATORIOS: sello de la fase 3 --------------------------------
 
@@ -217,3 +222,109 @@ def test_login_fallido_deja_fila_en_auth_events(client, crear_usuario, db):
         )
     ).scalar_one_or_none()
     assert evento is not None, "el login fallido debe dejar una fila en auth_events"
+
+
+# --- /auth/verify: cierra el pre-hijacking ------------------------------
+
+def test_verificacion_get_devuelve_200_y_no_consume_el_token(client, crear_usuario, db):
+    user = crear_usuario(email="verificar1@example.com", password="contrasena-larga-123")
+    token = auth_service.create_auth_token(db, user, purpose="email_verification")
+    db.commit()
+
+    r_get = client.get(f"/auth/verify?token={token}")
+    assert r_get.status_code == 200
+
+    r_post = client.post("/auth/verify", data={"token": token})
+    assert r_post.status_code == 200, (
+        "el GET no debe haber consumido el token: el POST posterior tiene que funcionar"
+    )
+
+
+def test_verificacion_post_con_token_valido_marca_email_verified_at(client, crear_usuario, db):
+    user = crear_usuario(email="verificar2@example.com", password="contrasena-larga-123")
+    token = auth_service.create_auth_token(db, user, purpose="email_verification")
+    db.commit()
+
+    r = client.post("/auth/verify", data={"token": token})
+
+    assert r.status_code == 200
+    db.refresh(user)
+    assert user.email_verified_at is not None
+
+
+def test_verificacion_con_el_mismo_token_dos_veces_la_segunda_falla(client, crear_usuario, db):
+    user = crear_usuario(email="verificar3@example.com", password="contrasena-larga-123")
+    token = auth_service.create_auth_token(db, user, purpose="email_verification")
+    db.commit()
+
+    r1 = client.post("/auth/verify", data={"token": token})
+    r2 = client.post("/auth/verify", data={"token": token})
+
+    assert r1.status_code == 200
+    assert r2.status_code == 400
+
+
+def test_verificacion_revoca_sesiones_previas_y_cierra_el_pre_hijacking(client, crear_usuario, db):
+    user = crear_usuario(email="verificar4@example.com", password="contrasena-larga-123")
+    r_login = client.post(
+        "/auth/login",
+        json={"email": "verificar4@example.com", "password": "contrasena-larga-123"},
+    )
+    assert r_login.status_code == 200
+    assert client.get("/auth/me").status_code == 200
+
+    token = auth_service.create_auth_token(db, user, purpose="email_verification")
+    db.commit()
+
+    r_verify = client.post("/auth/verify", data={"token": token})
+    assert r_verify.status_code == 200
+
+    r_me = client.get("/auth/me")
+    assert r_me.status_code == 401, (
+        "verificar el email debe revocar la sesion que dejo el atacante (pre-hijacking)"
+    )
+
+
+def test_verificacion_desde_cliente_sin_cookie_funciona_igual(client, crear_usuario, db):
+    """El fixture `client` arranca sin cookies (no hay login previo en este
+    test): simula abrir el link del mail en un navegador o dispositivo
+    distinto del que hizo el registro. Tiene que verificar igual y no
+    romper al intentar borrar una cookie de sesion que nunca existio.
+    """
+    user = crear_usuario(email="verificar5@example.com", password="contrasena-larga-123")
+    token = auth_service.create_auth_token(db, user, purpose="email_verification")
+    db.commit()
+
+    r = client.post("/auth/verify", data={"token": token})
+
+    assert r.status_code == 200
+    db.refresh(user)
+    assert user.email_verified_at is not None
+
+
+def test_verificacion_get_con_token_malicioso_no_aparece_sin_escapar(client):
+    token_malicioso = '"><script>alert(1)</script>'
+
+    r = client.get("/auth/verify", params={"token": token_malicioso})
+
+    assert r.status_code == 400, (
+        "el regex de formato ya lo rechaza: es la primera de las dos defensas contra XSS"
+    )
+    assert "<script>" not in r.text
+    assert token_malicioso not in r.text
+
+
+def test_verificacion_con_token_vencido_falla(client, crear_usuario, db):
+    user = crear_usuario(email="verificar6@example.com", password="contrasena-larga-123")
+    token = auth_service.create_auth_token(db, user, purpose="email_verification")
+    db.commit()
+
+    auth_token_row = db.execute(
+        select(AuthToken).where(AuthToken.token_hash == hash_token(token))
+    ).scalar_one()
+    auth_token_row.expires_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+    db.commit()
+
+    r = client.post("/auth/verify", data={"token": token})
+
+    assert r.status_code == 400
