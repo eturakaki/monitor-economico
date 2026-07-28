@@ -54,3 +54,7 @@ class User(Base):
         passive_deletes=True,
         lazy="raise_on_sql",
     )
+
+    @property
+    def email_verified(self) -> bool:
+        return self.email_verified_at is not None

@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     verification_token_hours: int = 24
     reset_token_minutes: int = 60
     email_verification_required: bool = False
+    terms_version: str = "1.0"
 
     @property
     def database_url(self) -> str:
