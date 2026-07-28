@@ -182,6 +182,55 @@ def test_admin_con_plan_starter_si_entra_a_solo_unlimited(client, crear_usuario)
     assert r.status_code == 200
 
 
+def test_plan_unlimited_entra_a_solo_unlimited(client, crear_usuario):
+    """Caso positivo que faltaba: la suite ya probaba que el porton
+    cierra (plan starter -> 403) pero nunca que abre. Un require_plan
+    roto que devolviera 403 siempre pasaria los tests negativos sin que
+    nadie se entere.
+    """
+    crear_usuario(
+        email="unlimited@example.com", password="contrasena-larga-123",
+        plan="unlimited",
+    )
+    client.post(
+        "/auth/login",
+        json={"email": "unlimited@example.com", "password": "contrasena-larga-123"},
+    )
+
+    r = client.get("/_test/solo-unlimited")
+
+    assert r.status_code == 200
+
+
+def test_plan_pro_no_entra_a_solo_unlimited_porque_la_semantica_es_pertenencia_no_jerarquia(
+    client, crear_usuario
+):
+    """require_plan hace 'user.plan not in plans': pertenencia exacta
+    contra la tupla de planes pasada, sin ningun orden ni tabla de
+    niveles. require_plan("unlimited") NO deja pasar a "pro", aunque en
+    el negocio "pro" sea un plan pago intermedio.
+
+    Si algun dia alguien cambia require_plan para que sea jerarquico
+    (donde exigir "unlimited" tambien dejara pasar planes "mayores", o
+    donde "pro" cuente como suficiente para algo que pide un nivel
+    menor), este test va a fallar. Ese fallo es la señal correcta de que
+    la semantica cambio, no un bug de este test — hay que revisarlo a
+    proposito en ese momento, no arreglarlo a ciegas para que vuelva a
+    pasar.
+    """
+    crear_usuario(
+        email="pro@example.com", password="contrasena-larga-123", plan="pro",
+    )
+    client.post(
+        "/auth/login",
+        json={"email": "pro@example.com", "password": "contrasena-larga-123"},
+    )
+
+    r = client.get("/_test/solo-unlimited")
+
+    assert r.status_code == 403
+
+
 def test_solo_verificado_403_sin_verificar_y_200_verificado(client, crear_usuario):
     crear_usuario(
         email="sinverificar@example.com", password="contrasena-larga-123",
