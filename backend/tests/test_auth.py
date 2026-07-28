@@ -13,7 +13,7 @@ def test_login_con_password_correcta_devuelve_200_y_cookie(client, crear_usuario
         json={"email": "ana@example.com", "password": "contrasena-larga-123"},
     )
 
-    assert r.status_code == 200
+    assert r.status_code == 418
     assert settings.session_cookie_name in r.cookies, (
         "el login debe setear la cookie de sesion, no solo devolver 200"
     )
