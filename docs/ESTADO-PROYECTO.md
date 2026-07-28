@@ -5,7 +5,7 @@ Documento de traspaso. Pegá esto (o su contenido) al arrancar un chat nuevo par
 **Repo:** https://github.com/eturakaki/monitor-economico
 **Local:** `~/proyectos/monitor-economico` **dentro de WSL 2 / Ubuntu 24.04**
 **Equipo:** Iñaki (economía + programación) y Sofía (psicología, no programa)
-**Última actualización:** 28 de julio de 2026, tras cerrar los puntos 1 y 2 de lo que quedó afuera de la Fase 3
+**Última actualización:** 28 de julio de 2026, Fase 3 cerrada por completo, incluidos los cinco puntos que habían quedado afuera
 
 ---
 
@@ -137,6 +137,10 @@ backend/tests/
 | GET | `/auth/me` | 200 con el contrato exacto, o 401. |
 | GET | `/auth/verify` | Muestra el formulario de confirmación. No toca la base. |
 | POST | `/auth/verify` | Consume el token, marca `email_verified_at`, revoca todas las sesiones, borra la cookie. Rate limit 5/15min. |
+| POST | `/auth/recovery` | 202 siempre, sin revelar si el email existe. Todo el trabajo corre en background. Rate limit por IP y por cuenta. |
+| GET | `/auth/reset` | Muestra el formulario para elegir contraseña nueva. No toca la base. |
+| POST | `/auth/reset` | Consume el token, cambia la contraseña, marca `email_verified_at` si estaba en null, revoca todas las sesiones. |
+| POST | `/auth/verify/resend` | Reenvía el link de verificación. Exige sesión. |
 | GET | `/health` | 200 |
 
 #### Decisiones de diseño (no revisar sin motivo)
@@ -155,6 +159,10 @@ backend/tests/
 12. **La pantalla de confirmación la sirve el backend como HTML mínimo, sin JavaScript.** Es un interino deliberado: el frontend sigue en modo mock hasta la Fase 7, así que una página React ahí quedaría huérfana. Se reemplaza sin cambiar el endpoint.
 13. **Al verificar se revocan todas las sesiones, incluida la del navegador que confirmó.** OWASP desaconseja loguear automáticamente después de estos flujos: agrega complejidad al manejo de sesiones, que es donde aparecen los bugs.
 14. **El guardarraíl del log usa comparación positiva (`== "development"`), no negativa.** Con `!= "production"`, un `.env` que diga `prod` o `Production` dejaría el guardarraíl inservible sin que nadie se entere. Con la positiva, cualquier valor inesperado cae del lado seguro.
+15. **`/auth/recovery` no toca la base antes de responder.** Todo va a una tarea en segundo plano, así el tiempo de respuesta es idéntico exista o no la cuenta por construcción, no por compensación. Mismo agujero que se tapó en el login con el hash ficticio, resuelto de otra forma.
+16. **Rate limit por cuenta además de por IP.** El de slowapi es por origen y no frena el ataque real: inundarle la casilla a una persona rotando IPs.
+17. **Resetear la contraseña marca el email como verificado si no lo estaba.** Para completar el reset hay que leer ese correo, la misma prueba que pide la verificación. Cierra el pre-hijacking por una segunda vía.
+18. **`require_plan` usa pertenencia exacta, no jerarquía.** Hay un test cuyo nombre defiende esa semántica: si alguien la cambia, ese test falla, y ese fallo es la señal correcta.
 
 #### Verificación hecha
 
@@ -164,26 +172,23 @@ backend/tests/
 
 ---
 
-## Lo que quedó afuera de la Fase 3 — puntos 1 y 2
+## Lo que quedó afuera de la Fase 3
 
 - **PR #13 — `pytest` en el CI.** Workflow `.github/workflows/backend-ci.yml`, separado del frontend y sin `paths:` a propósito, para que el check siempre reporte y nunca deje un PR colgado cuando se vuelva obligatorio. Servicio con la misma imagen fijada del `docker-compose.yml`. Credenciales de la base en claro en el YAML, decisión explicada en un comentario del propio archivo. 43 segundos por corrida, verde a la primera.
 - **Candado de `main`.** Los checks obligatorios se configuraron en el *ruleset* "proteger main" (`id 19746900`), no en las *classic branch protections*, que están vacías y confunden. Checks requeridos: `tests` y `build`. `bypass_actors: []` — nadie puede saltearlo, tampoco el dueño. Verificado rompiendo un test a propósito: el PR #14 quedó en `mergeStateStatus: BLOCKED` y se cerró sin mergear.
 - **PR #15 — verificación de email.** Cierra el pre-hijacking. 21 tests en total, los 14 originales intactos más 7 nuevos.
+- **PR #17 — CLI del primer administrador.** `uv run python -m app.cli crear-admin`. Contraseña por consola con `getpass`, exige TTY real, se niega si ya existe un admin, pide escribir `SI` para acreditar el consentimiento de términos. Migración `023d70051b96` para agregar `admin_created_via_cli` al CHECK de `auth_events`, así la bitácora distingue una cuenta creada por consola de un registro web.
+- **PR #18 — recuperación, reset y reenvío.** `POST /auth/recovery` responde 202 sin tocar la base; todo corre en una tarea en segundo plano. Rate limit por cuenta (3 tokens por hora) además del de IP. `GET`/`POST /auth/reset` calcados del flujo de verificación. `POST /auth/verify/resend` exige sesión. Migración `3807584609cf` para `email_verification_resent`.
+- **PR #19 — caso positivo de `require_plan`.** La suite probaba que el portón cierra pero nunca que abre. Se confirmó leyendo el código que la semántica es pertenencia exacta, no jerarquía, y el nombre del test lo deja escrito.
+- **PR #20 — `environment` obligatoria y restringida.** De `str` con default a `Literal["development", "staging", "production"]` sin default. Antes, un deploy que se olvidara de setearla asumía desarrollo y escribía links con tokens válidos en los logs de producción: el guardarraíl fallaba abierto por omisión. Consecuencia operativa: cualquier `.env` sin `ENVIRONMENT` deja de arrancar.
 
 ---
 
 ## Lo primero que hay que hacer
 
-**Terminar lo que quedó afuera de la Fase 3.** Los puntos 1 y 2 originales ya salieron, cada uno en su propio PR (regla de un propósito por PR):
+**La Fase 3 está cerrada.** Los cinco puntos que habían quedado afuera salieron, cada uno en su propio PR (regla de un propósito por PR): `pytest` en el CI (#13), verificación de email (#15), CLI del primer administrador (#17), recuperación/reset/reenvío (#18), caso positivo de `require_plan` (#19). Además salió `environment` obligatoria y restringida (#20), encontrada revisando la deuda técnica anotada — no era uno de los cinco puntos originales, pero cerraba el mismo tipo de agujero (fail-open por omisión).
 
-- ~~**`pytest` en el CI de GitHub Actions.**~~ ✅ Hecho — PR #13. Workflow `.github/workflows/backend-ci.yml`, 43 s por corrida, verde a la primera.
-- ~~**Verificación de email** (`GET /auth/verify` muestra el formulario, `POST /auth/verify` consume el token y revoca las sesiones previas).~~ ✅ Hecho — PR #15. Cierra el pre-hijacking. 21 tests en total, los 14 originales más 7 nuevos.
-
-Quedan tres, renumeradas, en este orden:
-
-1. **`POST /auth/recovery`** (siempre 202, sin revelar si el email existe) + **`POST /auth/reset`** + reenvío de verificación. La maquinaria ya está: `create_auth_token` y `consume_auth_token`. En desarrollo, el link se imprime en el log del servidor; en la Fase 4 se reemplaza el `print` por el envío real.
-2. **Comando de CLI para crear el primer administrador**, que pida la contraseña por consola. Nada en Git, nada en el `.env`. Hoy **no existe ninguna forma de crear un admin**.
-3. Test del caso positivo de `require_plan` con un usuario `unlimited` (hoy sólo está el negativo y el bypass de admin).
+Lo que sigue es la **Fase 4 (Pagos)**, con el bloqueante suave del dominio (ver más abajo): sin dominio no hay proveedor de mail, y sin proveedor de mail los cuatro flujos de correo que ya están implementados y probados no le llegan a nadie.
 
 ---
 
@@ -216,6 +221,12 @@ Quedan tres, renumeradas, en este orden:
 9. **Para guardarraíles de seguridad, lista blanca y no lista negra.** "Permitido sólo X" falla cerrado ante lo imprevisto; "prohibido Y" falla abierto.
 10. **Una página web puede estar cacheada y mentirte sobre la última versión.** La página de releases de `actions/checkout` mostraba `v6.0.3` cuando `gh api` devolvía `v7.0.1`. Para versiones, preguntarle a la API, no leer una página.
 11. **`git checkout -b` arrastra los cambios sin commitear a la rama nueva.** Un archivo de otra tarea puede colarse a un PR sin que nadie lo note; por eso se stagean archivos por nombre y nunca con `git add .`.
+12. **Por cada test que prueba que algo está prohibido, buscar el espejo que prueba que algo está permitido.** Una autorización rota que rechace a todo el mundo pasa todos los tests negativos.
+13. **Un test que espera "algún error" pasa aunque el error sea otro.** `pytest.raises(ValidationError)` sobre una config con varios campos obligatorios se satisface con cualquier campo faltante: hay que afirmar sobre el `loc`, no sobre el tipo.
+14. **Un "confirmame X antes de escribir" que viene con la respuesta ya redactada no es un gate, es un trámite.** Para que tenga dientes hay que decir qué hacer si la respuesta es la otra.
+15. **Las tareas en segundo plano no pueden usar la sesión que inyecta `Depends(get_db)`: esa muere con el request.** Tienen que abrir la suya y cerrarla en un `finally`. En los tests eso apunta a la base equivocada si no se parchea.
+16. **Un grep mal anclado produce un diagnóstico falso con cara de dato duro.** Buscando variables en `.env.example` con un patrón anclado al inicio de línea, las que ya estaban documentadas como comentario (`# VAR=valor`) no aparecieron, y el resultado —"faltan diez"— era falso: faltaban dos. Antes de actuar sobre la salida de un comando, mirar el archivo.
+17. **El chequeo en código es cortesía; la garantía vive en la constraint de la base.** Un `SELECT` antes de un `INSERT` sirve para devolver un error prolijo, pero siempre tiene una ventana de carrera; el `UNIQUE` de la base no la tiene. Por eso el TOCTOU de `POST /auth/register` es robustez y no seguridad: la base aguantó y nunca se creó una cuenta duplicada. Cuando una regla importa de verdad, tiene que estar impuesta por la base, y el chequeo en código es sólo la capa de buenos modales.
 
 ---
 
@@ -329,13 +340,15 @@ Archivos con esta característica: `StatCard.jsx`, `Terminos.jsx`, `ApiDocs.jsx`
 - **Argon2id consume 64 MB de RAM por login concurrente.** En un VPS de 2 GB, veinte logins simultáneos son 1,3 GB. Hay que volver a medir con el hardware real antes de decidir si se bajan los parámetros. Dato tranquilizador: los parámetros van escritos dentro del hash, así que cambiarlos no invalida los hashes viejos.
 - **`TestClient` con `httpx` quedó deprecado** en Starlette 1.3 (`StarletteDeprecationWarning`); migrar a `httpx2`.
 - **El 409 al registrar un email existente revela qué direcciones tienen cuenta** (enumeración de usuarios). Ocultarlo requiere poder mandar mails. Revisar en la Fase 4.
-- **`TERMS_VERSION` no quedó documentada en `backend/.env.example`**: la regla de `.claude/settings.json` que protege los `.env` bloquea también al `.env.example`. Conviene afinar el patrón para denegar `.env` pero permitir `.env.example`.
+- **`.env.example` ya está completo.** Faltaban dos variables: `PUBLIC_BASE_URL` (agregada en el PR #15 y nunca documentada) y `TERMS_VERSION`. Sigue pendiente afinar el patrón de `.claude/settings.json`, que bloquea `.env.example` junto con los `.env` reales y obliga a editarlo a mano.
 - **Sin límite de sesiones activas por usuario**, y sin job que purgue sesiones y tokens vencidos. Ambas tablas crecen sin techo.
 - **`auth_events` no tiene política de retención** y guarda emails intentados, que son datos personales.
-- **`settings.environment` es un string libre, sin validación.** Debería ser `Literal["development", "staging", "production"]` y sin valor por defecto, como `postgres_user`: hoy el default es `development`, así que un deploy que se olvide de setearla escribiría tokens de verificación en los logs de producción. El guardarraíl falla abierto por omisión.
-- **El reenvío de verificación es prerrequisito de prender `EMAIL_VERIFICATION_REQUIRED`, no un extra.** El token vence a las 24 horas y sin endpoint de reenvío el usuario cuyo token venció queda trabado, sin ninguna forma de verificarse.
 - **La segunda defensa contra XSS del `GET /auth/verify` (`html.escape`) no está cubierta por ningún test**, porque el regex de formato rechaza antes. Es defensa en profundidad deliberada, pero conviene saber que sólo la primera capa está probada.
 - **`logout` no envuelve su `db.commit()` en `try`/`except`.** Decisión tomada, no deuda: atajarlo devolvería 200 con la sesión todavía válida en el servidor durante 30 días, lo que contradice la decisión de diseño #1 y le miente al usuario. Un 500 deja el estado coherente.
+- **`_sesion_de_test_para_tareas_en_background` neutraliza `close()` en los 52 tests, no sólo en los de recuperación**, y hace que la tarea en segundo plano comparta sesión y transacción con el test — en producción usa una aparte. La suite no ejercita el comportamiento real de dos transacciones separadas.
+- **El `TestClient` corre las tareas en segundo plano de forma síncrona**, así que la suite no prueba la propiedad de tiempo de respuesta constante de `/auth/recovery`. Esa propiedad la garantiza el diseño, no los tests.
+- **Van dos migraciones sólo para agregar valores al CHECK de `auth_events`.** Es el precio de que la base imponga el dominio y sigue siendo correcto, pero el riesgo real es que alguien deje de loguear un evento para no escribir una migración. Si aparece un tercer caso, revisarlo.
+- **Race condition en `POST /auth/register` (TOCTOU sobre el email duplicado).** El endpoint hace `SELECT` para ver si el email existe y después `INSERT`, sin `try`/`except` alrededor del insert. Si dos requests con el mismo email llegan lo bastante cerca, ambas pueden pasar el `SELECT` antes de que la primera haga commit; la tabla tiene `UNIQUE` en `email`, así que nunca hay fila duplicada, pero la segunda request revienta con un `IntegrityError` sin atajar → 500 crudo en vez de un 409 prolijo. Diagnosticado leyendo el código el 28/7, nunca reproducido con concurrencia real ni arreglado.
 
 ### Frontend
 
@@ -376,8 +389,7 @@ Credenciales fuera de Git con verificación explícita, contraseña generada al 
 
 ### Sin resolver
 
-- **Pre-hijacking: el mecanismo está cerrado.** El endpoint `POST /auth/verify` existe y revoca todas las sesiones previas al confirmar el email. Pero la entrega del link todavía depende del log del servidor, porque no hay proveedor de mail — en producción real el flujo no está operativo hasta la Fase 4.
-- **No existe forma de crear un administrador.** Falta el comando de CLI.
+- **Los cuatro flujos de correo (verificación, reenvío, recuperación, reset) están implementados y probados, pero ninguno le llega a nadie**: el link se escribe en el log del servidor. Sin dominio no hay proveedor de mail, y sin proveedor de mail `EMAIL_VERIFICATION_REQUIRED` no se puede prender. El pre-hijacking ya tiene el mecanismo cerrado del lado del código (`POST /auth/verify` y `POST /auth/reset` revocan todas las sesiones previas); falta que el link llegue de verdad.
 - **`CheckoutPage.jsx` captura `cardNumber`/`expiry`/`cvc` en formulario propio** → alcance PCI-DSS. Hay que reemplazarlo por MercadoPago Checkout Pro o Stripe Elements antes de conectar pagos reales.
 
 **Sin fix disponible:** react-router tiene CVEs abiertos sin versión corregida. La mayoría aplican a SSR/RSC (no a este SPA). El único que tocaba —open redirect— está mitigado a mano.
@@ -406,7 +418,8 @@ set -a && . ./.env && set +a        # cargar las variables del .env en el shell 
 docker compose up -d                 # levantar Postgres
 uv run alembic upgrade head          # aplicar migraciones
 uv run uvicorn app.main:app --reload --port 8000
-uv run pytest -v                     # 14 tests
+uv run python -m app.cli crear-admin # crea el primer administrador
+uv run pytest -v                     # 52 tests
 docker compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"
 ```
 
