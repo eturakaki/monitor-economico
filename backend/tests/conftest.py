@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import NullPool
 
 from app.api.deps import require_plan, require_verified_email
+from app.api.routes import auth as auth_routes
 from app.core.config import settings
 from app.core.limiter import limiter
 from app.core.security import hash_password
@@ -107,6 +108,41 @@ def client(db: Session) -> Generator[TestClient, None, None]:
     test_client = TestClient(app, base_url="https://testserver")
     yield test_client
     app.dependency_overrides.pop(get_db, None)
+
+
+@pytest.fixture(autouse=True)
+def _sesion_de_test_para_tareas_en_background(monkeypatch, db: Session) -> None:
+    """Las tareas en background (recovery) abren su propia SessionLocal()
+    en vez de usar Depends(get_db): sin este parche apuntarian a la base
+    real en vez de a la de test.
+
+    TestClient corre las background tasks de forma sincronica, asi que
+    su propio db.close() se ejecutaria a mitad del test sobre esta misma
+    sesion compartida, dejando detached cualquier objeto (por ejemplo
+    `user`) que el test siguiera usando despues. Neutralizamos close()
+    durante el test: la limpieza real ya la hace el rollback de la
+    transaccion externa en la fixture `db`, no este close().
+
+    Dos limites conocidos de este parche, anotados a proposito:
+
+    (a) autouse=True neutraliza close() en los 44 tests, no solo en los
+        de recuperacion. No hace daño (el rollback es lo que realmente
+        limpia, y con NullPool no quedan conexiones colgadas), pero es
+        mas amplio de lo necesario.
+
+    (b) la tarea en background termina usando la MISMA sesion y la
+        MISMA transaccion que el test, mientras que en produccion usa
+        una sesion aparte (SessionLocal() propia). La suite entonces no
+        ejercita el comportamiento real de dos transacciones separadas.
+        Hoy no importa porque /auth/recovery no toca la base antes de
+        responder, asi que no hay nada con que choque. El dia que ese
+        endpoint (u otro que use este mismo patron) le agregue trabajo
+        a la base ANTES de programar la background task, hay que
+        revisar este parche: podria estar ocultando un conflicto de
+        transacciones que en produccion si existiria.
+    """
+    monkeypatch.setattr(db, "close", lambda: None)
+    monkeypatch.setattr(auth_routes, "SessionLocal", lambda: db)
 
 
 @pytest.fixture(autouse=True)

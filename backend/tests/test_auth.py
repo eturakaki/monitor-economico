@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.core.config import settings
 from app.core.security import hash_token
@@ -328,3 +328,298 @@ def test_verificacion_con_token_vencido_falla(client, crear_usuario, db):
     r = client.post("/auth/verify", data={"token": token})
 
     assert r.status_code == 400
+
+
+# --- /auth/recovery, /auth/reset, /auth/verify/resend -------------------
+
+def test_recovery_con_email_existente_devuelve_202_y_crea_un_token(client, crear_usuario, db):
+    user = crear_usuario(email="recovery1@example.com", password="contrasena-larga-123")
+
+    r = client.post("/auth/recovery", json={"email": "recovery1@example.com"})
+
+    assert r.status_code == 202
+    tokens = db.execute(
+        select(AuthToken).where(
+            AuthToken.user_id == user.id, AuthToken.purpose == "password_reset"
+        )
+    ).scalars().all()
+    assert len(tokens) == 1
+
+
+def test_recovery_con_email_inexistente_devuelve_202_y_no_crea_ningun_token(client, db):
+    r = client.post("/auth/recovery", json={"email": "no-existe-recovery@example.com"})
+
+    assert r.status_code == 202
+    tokens = db.execute(select(AuthToken)).scalars().all()
+    assert tokens == []
+
+
+def test_recovery_cuerpos_de_respuesta_son_identicos_exista_o_no_la_cuenta(
+    client, crear_usuario
+):
+    crear_usuario(email="recovery3@example.com", password="contrasena-larga-123")
+
+    r_existente = client.post("/auth/recovery", json={"email": "recovery3@example.com"})
+    r_inexistente = client.post(
+        "/auth/recovery", json={"email": "no-existe-3@example.com"}
+    )
+
+    assert r_existente.status_code == 202
+    assert r_inexistente.status_code == 202
+    assert r_existente.json() == r_inexistente.json()
+
+
+def test_pedir_recovery_dos_veces_invalida_el_token_anterior(client, crear_usuario, db):
+    user = crear_usuario(email="recovery4@example.com", password="contrasena-larga-123")
+
+    primer_token = auth_service.create_auth_token(db, user, purpose="password_reset")
+    db.commit()
+
+    r = client.post("/auth/recovery", json={"email": "recovery4@example.com"})
+    assert r.status_code == 202
+
+    resultado = auth_service.consume_auth_token(db, primer_token, purpose="password_reset")
+    assert resultado is None, "el segundo pedido de recovery debia invalidar el primer token"
+
+
+def test_cuarto_pedido_de_recovery_en_la_misma_hora_no_crea_token_nuevo(
+    client, crear_usuario, db
+):
+    user = crear_usuario(email="recovery14@example.com", password="contrasena-larga-123")
+
+    def _cantidad_tokens() -> int:
+        return db.execute(
+            select(func.count())
+            .select_from(AuthToken)
+            .where(AuthToken.user_id == user.id, AuthToken.purpose == "password_reset")
+        ).scalar_one()
+
+    for _ in range(3):
+        r = client.post("/auth/recovery", json={"email": "recovery14@example.com"})
+        assert r.status_code == 202
+
+    assert _cantidad_tokens() == 3
+
+    r4 = client.post("/auth/recovery", json={"email": "recovery14@example.com"})
+    assert r4.status_code == 202
+    assert _cantidad_tokens() == 3, "el cuarto pedido en la misma hora no debia crear un token nuevo"
+
+
+def test_cuarto_pedido_de_recovery_igual_devuelve_202_con_mismo_cuerpo(client, crear_usuario):
+    crear_usuario(email="recovery15@example.com", password="contrasena-larga-123")
+
+    respuestas = [
+        client.post("/auth/recovery", json={"email": "recovery15@example.com"})
+        for _ in range(4)
+    ]
+
+    for r in respuestas:
+        assert r.status_code == 202
+    cuerpos = {r.json()["detail"] for r in respuestas}
+    assert len(cuerpos) == 1, "el cuerpo debe ser identico aunque el rate limit por cuenta actue"
+
+
+def test_reset_get_no_consume_el_token(client, crear_usuario, db):
+    user = crear_usuario(email="reset5@example.com", password="contrasena-larga-123")
+    token = auth_service.create_auth_token(db, user, purpose="password_reset")
+    db.commit()
+
+    r_get = client.get(f"/auth/reset?token={token}")
+    assert r_get.status_code == 200
+
+    r_post = client.post(
+        "/auth/reset",
+        data={
+            "token": token,
+            "password_nueva": "nueva-contrasena-456",
+            "password_repetida": "nueva-contrasena-456",
+        },
+    )
+    assert r_post.status_code == 200, "el GET no debia haber consumido el token"
+
+
+def test_despues_del_reset_password_vieja_401_y_nueva_200(client, crear_usuario, db):
+    user = crear_usuario(email="reset6@example.com", password="contrasena-vieja-123")
+    token = auth_service.create_auth_token(db, user, purpose="password_reset")
+    db.commit()
+
+    r = client.post(
+        "/auth/reset",
+        data={
+            "token": token,
+            "password_nueva": "contrasena-nueva-456",
+            "password_repetida": "contrasena-nueva-456",
+        },
+    )
+    assert r.status_code == 200
+
+    r_vieja = client.post(
+        "/auth/login",
+        json={"email": "reset6@example.com", "password": "contrasena-vieja-123"},
+    )
+    assert r_vieja.status_code == 401
+
+    r_nueva = client.post(
+        "/auth/login",
+        json={"email": "reset6@example.com", "password": "contrasena-nueva-456"},
+    )
+    assert r_nueva.status_code == 200
+
+
+def test_reset_revoca_las_sesiones_previas(client, crear_usuario, db):
+    user = crear_usuario(email="reset7@example.com", password="contrasena-vieja-123")
+    client.post(
+        "/auth/login",
+        json={"email": "reset7@example.com", "password": "contrasena-vieja-123"},
+    )
+    assert client.get("/auth/me").status_code == 200
+
+    token = auth_service.create_auth_token(db, user, purpose="password_reset")
+    db.commit()
+
+    r = client.post(
+        "/auth/reset",
+        data={
+            "token": token,
+            "password_nueva": "contrasena-nueva-456",
+            "password_repetida": "contrasena-nueva-456",
+        },
+    )
+    assert r.status_code == 200
+
+    r_me = client.get("/auth/me")
+    assert r_me.status_code == 401
+
+
+def test_reset_marca_email_verified_at_si_estaba_en_null(client, crear_usuario, db):
+    user = crear_usuario(
+        email="reset8@example.com", password="contrasena-vieja-123", verificado=False
+    )
+    assert user.email_verified_at is None
+
+    token = auth_service.create_auth_token(db, user, purpose="password_reset")
+    db.commit()
+
+    r = client.post(
+        "/auth/reset",
+        data={
+            "token": token,
+            "password_nueva": "contrasena-nueva-456",
+            "password_repetida": "contrasena-nueva-456",
+        },
+    )
+    assert r.status_code == 200
+
+    db.refresh(user)
+    assert user.email_verified_at is not None
+
+
+def test_token_de_email_verification_no_sirve_para_resetear_password(
+    client, crear_usuario, db
+):
+    user = crear_usuario(email="reset9@example.com", password="contrasena-vieja-123")
+    token = auth_service.create_auth_token(db, user, purpose="email_verification")
+    db.commit()
+
+    r = client.post(
+        "/auth/reset",
+        data={
+            "token": token,
+            "password_nueva": "contrasena-nueva-456",
+            "password_repetida": "contrasena-nueva-456",
+        },
+    )
+    assert r.status_code == 400
+
+
+def test_reset_con_passwords_distintas_falla_y_no_consume_el_token(
+    client, crear_usuario, db
+):
+    user = crear_usuario(email="reset10@example.com", password="contrasena-vieja-123")
+    token = auth_service.create_auth_token(db, user, purpose="password_reset")
+    db.commit()
+
+    r = client.post(
+        "/auth/reset",
+        data={
+            "token": token,
+            "password_nueva": "contrasena-nueva-456",
+            "password_repetida": "otra-cosa-distinta-789",
+        },
+    )
+    assert r.status_code == 400
+
+    r2 = client.post(
+        "/auth/reset",
+        data={
+            "token": token,
+            "password_nueva": "contrasena-nueva-456",
+            "password_repetida": "contrasena-nueva-456",
+        },
+    )
+    assert r2.status_code == 200, "el token debia seguir sirviendo tras el intento fallido"
+
+
+def test_reset_con_token_vencido_falla(client, crear_usuario, db):
+    user = crear_usuario(email="reset11@example.com", password="contrasena-vieja-123")
+    token = auth_service.create_auth_token(db, user, purpose="password_reset")
+    db.commit()
+
+    token_row = db.execute(
+        select(AuthToken).where(AuthToken.token_hash == hash_token(token))
+    ).scalar_one()
+    token_row.expires_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+    db.commit()
+
+    r = client.post(
+        "/auth/reset",
+        data={
+            "token": token,
+            "password_nueva": "contrasena-nueva-456",
+            "password_repetida": "contrasena-nueva-456",
+        },
+    )
+    assert r.status_code == 400
+
+
+def test_resend_sin_sesion_devuelve_401(client):
+    r = client.post("/auth/verify/resend")
+
+    assert r.status_code == 401
+
+
+def test_resend_de_usuario_ya_verificado_es_rechazado(client, crear_usuario):
+    crear_usuario(
+        email="resend13@example.com", password="contrasena-larga-123", verificado=True
+    )
+    client.post(
+        "/auth/login",
+        json={"email": "resend13@example.com", "password": "contrasena-larga-123"},
+    )
+
+    r = client.post("/auth/verify/resend")
+
+    assert r.status_code == 400
+
+
+def test_resend_deja_una_fila_email_verification_resent_en_auth_events(
+    client, crear_usuario, db
+):
+    user = crear_usuario(
+        email="resend14@example.com", password="contrasena-larga-123", verificado=False
+    )
+    client.post(
+        "/auth/login",
+        json={"email": "resend14@example.com", "password": "contrasena-larga-123"},
+    )
+
+    r = client.post("/auth/verify/resend")
+
+    assert r.status_code == 200
+    evento = db.execute(
+        select(AuthEvent).where(
+            AuthEvent.user_id == user.id,
+            AuthEvent.event_type == "email_verification_resent",
+        )
+    ).scalar_one_or_none()
+    assert evento is not None
