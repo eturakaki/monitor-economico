@@ -4,7 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-"Monitor Económico" is a Spanish-language (Argentina) financial content platform: a hub of 50+ financial calculators ("Herramientas"/"Calculadoras"), a paid course/learning platform ("Academia"), an e-commerce flow for courses and subscription plans, and a markets dashboard. It's a React SPA with **no backend yet** — all data persistence is mocked via `localStorage`.
+"Monitor Económico" is a Spanish-language (Argentina) financial content platform: a hub of 50+ financial calculators ("Herramientas"/"Calculadoras"), a paid course/learning platform ("Academia"), an e-commerce flow for courses and subscription plans, and a markets dashboard. There's a FastAPI + PostgreSQL backend under active construction in `backend/`; the frontend keeps running entirely on mocks via `localStorage` until Phase 7 replaces them one service at a time — both coexist right now.
+
+## Documentos de referencia
+
+El estado y las decisiones del proyecto viven en `docs/`, no en la cabeza de nadie:
+
+- `docs/ESTADO-PROYECTO.md` — qué hay construido hoy, con la deuda técnica anotada.
+- `docs/ROADMAP.md` — las 8 fases y qué viene después.
+- `docs/FASE-4.md` — la fase en curso, con su secuencia de PRs.
+- `docs/MODELO-NEGOCIO.md` — qué se vende, cómo se cobra y por qué.
+
+Ante contradicción entre el código y estos documentos, preguntar. No resolver solo.
 
 ## Commands
 
@@ -15,7 +26,23 @@ npm run preview   # preview production build
 npm run lint      # eslint .
 ```
 
-There is no test suite/framework configured in this repo (no Jest/Vitest). Don't assume one exists when asked to "run tests."
+Backend (desde `backend/`):
+
+```bash
+cd ~/proyectos/monitor-economico/backend
+set -a && . ./.env && set +a        # cargar las variables del .env en el shell antes de usar psql
+docker compose up -d                 # levantar Postgres
+uv run alembic upgrade head          # aplicar migraciones
+uv run uvicorn app.main:app --reload --port 8000
+uv run python -m app.cli crear-admin # crea el primer administrador
+uv run pytest -v
+docker compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"
+```
+
+Los comandos que cargan el `.env` (`set -a && . ./.env`) los corre Iñaki, no Claude
+Code: el `deny` de `.claude/settings.json` bloquea cualquier acceso a `.env*`.
+
+The backend has a pytest suite that runs in CI and is required to pass on every PR. The frontend still has no test framework configured (no Jest/Vitest) — don't assume one exists when asked to "run tests."
 
 ## Environment
 
@@ -115,3 +142,67 @@ Tailwind CSS v3, `darkMode: 'class'`. `src/utils/StyleConfig.js` (`getStyles(col
 - `npm run lint` debe dar verde antes de cada commit.
 - Providers globales viven solo en `main.jsx`, nunca duplicados.
 - Trabajar siempre en ramas, nunca commitear directo a `main`.
+
+## Método de trabajo (obligatorio)
+
+Este archivo es cortesía; la garantía vive en `.claude/settings.json`, que bloquea de
+verdad lo que acá sólo se pide. Si una regla importa, tiene que estar en los dos lados.
+
+### Encargos
+- Todo cambio llega como ENCARGO con cuatro secciones: QUÉ LEER / QUÉ ESCRIBIR /
+  QUÉ NO TOCAR / AL TERMINAR. Si falta alguna, parar y pedirla.
+- Sin encargo: sólo analizar y proponer. No escribir.
+- Leer los archivos reales antes de escribir. Nunca responder de memoria sobre qué
+  contiene un archivo.
+- Si hay una librería de por medio, verificar su API real contra la versión
+  instalada antes de escribir. No escribirla de memoria.
+- Explicar el porqué en lenguaje simple ANTES de la solución.
+
+### Frenos
+Ante cualquiera de estos casos: parar, avisar con lo que se encontró, y esperar.
+Nunca resolver creativo para no frenar.
+- Un test existente falla por el cambio. No editarlo para que pase.
+- El encargo pide algo que el repo contradice.
+- Aparece algo mejorable fuera del alcance: anotarlo, no arreglarlo.
+- El propio trabajo se desvió del encargo: decirlo antes de que lo pregunten.
+
+### Verificación
+- `git diff` no muestra archivos sin trackear. Al terminar, mostrar siempre
+  `git diff HEAD` **y** `git status --short`.
+- Una suite en verde no prueba nada por sí sola. Para lo que importa, prueba de
+  mutación: romper el cambio a propósito y confirmar que caen exactamente los tests
+  que dependen de él.
+- El schema se verifica contra la base real (`\d tabla` en psql), no contra el
+  modelo de Python.
+- Por cada test que prueba que algo está prohibido, el espejo que prueba que algo
+  está permitido.
+
+### Git
+- Crear la rama es el paso cero de todo encargo, antes de leer nada.
+- Los comandos de git los corre Iñaki, no el agente.
+- NUNCA commitear sin que Iñaki revise el diff.
+- Stagear por nombre. Prohibido `git add .` y `git add -A` sin rutas explícitas.
+- Un PR = un propósito. Nunca mezclar limpieza con feature.
+- Mensajes de commit en español, con prefijo (`feat:`, `fix:`, `docs:`, `chore:`).
+
+### Mantener los documentos al día
+
+Un PR no está terminado hasta que los documentos dicen lo que el PR hizo. No es una
+tarea posterior ni un PR aparte: entra en el mismo PR.
+
+Antes de declarar MISIÓN CUMPLIDA, revisar si el cambio afecta alguno:
+
+- Cambió lo que hay construido, apareció deuda nueva, o se aprendió algo que no
+  queremos repetir → `docs/ESTADO-PROYECTO.md`.
+- Cambió el plan o el alcance de la fase en curso → `docs/FASE-4.md`.
+- Cambió qué se vende o cómo se cobra → `docs/MODELO-NEGOCIO.md`.
+- Cambió una fase futura → `docs/ROADMAP.md`.
+- Cambió una convención o una regla de trabajo → este archivo.
+
+Si ninguno aplica, decirlo explícito en el reporte: "ningún documento cambia por
+este PR". Lo que no puede pasar es no haberlo revisado.
+
+**La regla que sostiene todo esto: una decisión tomada en una conversación no
+existe hasta que está escrita en un documento del repo.** El chat se cierra y se
+olvida; el repo queda. `docs/ESTADO-PROYECTO.md` es el documento de traspaso: es lo
+que se pega al abrir un chat nuevo, y por eso tiene que estar siempre al día.
