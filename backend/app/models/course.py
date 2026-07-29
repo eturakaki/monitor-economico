@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from sqlalchemy import Boolean, CheckConstraint, DateTime, Numeric, String, Text, func, text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -20,7 +21,7 @@ class Course(Base):
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     title: Mapped[str] = mapped_column(String(200))
     description: Mapped[str] = mapped_column(Text)
-    price: Mapped[float] = mapped_column(Numeric(12, 2))
+    price: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     currency: Mapped[str] = mapped_column(String(3), server_default="ARS")
     active: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
     created_at: Mapped[datetime] = mapped_column(

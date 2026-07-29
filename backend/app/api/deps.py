@@ -8,6 +8,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.models.user_session import UserSession
 from app.services import auth as auth_service
+from app.services.payments import FakePaymentProvider, PaymentProvider
 
 
 def get_client_info(request: Request) -> tuple[str | None, str | None]:
@@ -93,3 +94,13 @@ def require_admin(user: User = Depends(get_current_user)) -> User:
             detail="Necesitas permisos de administrador",
         )
     return user
+
+
+def get_payment_provider() -> PaymentProvider:
+    """Dependencia de FastAPI para inyectar el proveedor de pago.
+
+    Va aca y no en services/ porque services/ no importa FastAPI (ver
+    services/checkout.py y services/payments.py: ninguno lo hace).
+    FakePaymentProvider es la unica implementacion hasta F4-4b.
+    """
+    return FakePaymentProvider()

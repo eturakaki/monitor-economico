@@ -5,7 +5,7 @@ Documento de traspaso. Pegá esto (o su contenido) al arrancar un chat nuevo par
 **Repo:** https://github.com/eturakaki/monitor-economico
 **Local:** `~/proyectos/monitor-economico` **dentro de WSL 2 / Ubuntu 24.04**
 **Equipo:** Iñaki (economía + programación) y Sofía (psicología, no programa)
-**Última actualización:** 29 de julio de 2026, Fase 4 en curso (F4-1 a F4-3 cerrados)
+**Última actualización:** 29 de julio de 2026, Fase 4 en curso (F4-1 a F4-4a cerrados)
 
 **`ESTADO-PROYECTO.md`** (este archivo): lo que hay construido.
 **`docs/ROADMAP.md`**: lo que viene.
@@ -185,7 +185,7 @@ backend/tests/
 Roadmap de referencia: `docs/FASE-4.md`, con el detalle completo (los tres portones
 de seguridad, la secuencia de diez PRs —F4-4 se partió en F4-4a/F4-4b el 29/7—, la
 MISIÓN CUMPLIDA ampliada a siete puntos). Acá sólo el resumen de lo cerrado. Sin
-dependencias nuevas hasta F4-3.
+dependencias nuevas hasta F4-4a.
 
 **F4-1 · TOCTOU en `POST /auth/register`** (PR #25) — el `INSERT` quedó envuelto en
 `try`/`except IntegrityError`, con las dos ramas (la del `SELECT` previo y la del
@@ -231,6 +231,89 @@ sacando el `UniqueConstraint` de `purchases`, cae únicamente el test de compra
 duplicada. Ciclo `downgrade`/`upgrade` de la migración verificado contra la base
 real.
 
+**F4-4a · Modelos `Order`/`OrderItem` + `POST /checkout` contra un proveedor de pago
+falso** — decisiones de diseño completas en `docs/FASE-4.md` §6.
+
+#### Tablas nuevas (migración `f0180ac18a07`)
+
+- **`orders`** — `id` (`ord_...`), `user_id` nullable (`ON DELETE SET NULL`, por el
+  borrado de cuenta, no por checkout anónimo), `status` con `CHECK` a seis valores
+  (`pending`/`paid`/`failed`/`refunded`/`expired`/`partially_refunded`), `total` en
+  `Numeric(12,2)`, `currency` con `CHECK` a `'ARS'`, `cancellation_code` único en
+  claro (no hasheado: hay que poder mostrárselo al usuario), `provider_preference_id`
+  y `provider_payment_id` nullable y `UNIQUE` a la vez (Postgres permite múltiples
+  `NULL`; ahí vive la idempotencia del webhook de F4-5). Índice único parcial
+  `uq_orders_una_pending_por_usuario` (`WHERE status = 'pending'`): una sola orden
+  `pending` por usuario, impuesta por la base, no por un `SELECT` previo.
+- **`order_items`** — `id` (`oit_...`), `order_id` (FK a `orders`, `ON DELETE
+  CASCADE`), `course_id` (FK a `courses`, sin `ondelete`), `title` y `unit_price`
+  como *snapshot* del momento de la compra (si se leyeran de `courses` al mostrar
+  una orden vieja, cambiar el precio de un curso reescribiría la historia de lo que
+  la gente pagó). `UNIQUE (order_id, course_id)`. Sin `quantity`: un curso es acceso
+  permanente, no una unidad.
+- **`purchases`** — se agregó `order_id` nullable (FK a `orders`, sin `ondelete`).
+  Llega vacía a propósito: el otorgamiento real la escribe el webhook de F4-5.
+- `courses.price` pasó de `Mapped[float]` a `Mapped[Decimal]` (la columna
+  `Numeric(12,2)` no cambió). Corrección de anotación: ver la entrada que salió de
+  la deuda técnica, más abajo.
+
+#### Estructura de archivos
+
+- `backend/app/models/order.py` — nuevo (`Order`, `OrderItem`).
+- `backend/app/services/checkout.py` — nuevo. Lógica pura sin FastAPI: valida el
+  carrito, chequea disponibilidad y compras previas, resuelve el reemplazo de la
+  orden `pending` anterior, crea la orden nueva. Levanta excepciones propias que la
+  ruta traduce a HTTP.
+- `backend/app/services/payments.py` — nuevo. `PaymentProvider` (`Protocol`) y
+  `FakePaymentProvider`, única implementación de este PR: sin red, con
+  `fail_create`/`fail_expire` para testear las dos ramas de error, y `self.calls`
+  para que los tests afirmen contra los argumentos exactos de cada llamada.
+- `backend/app/api/routes/checkout.py` — nuevo. `POST /checkout`, 201, detrás de
+  `require_verified_email` (primer consumidor en producción, antes sólo lo usaba
+  `conftest.py`). Rate limit de 10/hora **por usuario**, no por IP (`key_func`
+  nueva en `core/limiter.py`, `get_user_id_or_ip`).
+- `backend/app/api/deps.py` — sólo se agregó `get_payment_provider`; ninguna
+  dependencia existente se tocó.
+- `backend/app/schemas/order.py` — nuevo. Los montos viajan como **string** en el
+  JSON, no como número (verificado con Pydantic 2.13.4: lo hace por default).
+- `backend/tests/test_checkout.py` — nuevo, 26 tests.
+
+#### Contrato de API
+
+`POST /checkout` — entrada `{"items": [{"courseId": "..."}]}` (`unitPrice` se
+acepta y se ignora por completo: el precio siempre sale de `courses`). Salida 201:
+`{"orderId", "status", "total", "currency", "initPoint"}`.
+
+Todos los errores tienen la misma forma —`{"detail": {"code": "...", ...campos
+extra}}`, con `code` en snake_case y las claves de los campos extra en
+camelCase—, para que el frontend de la Fase 7 decida leyendo un campo estable,
+sin parsear texto ni adivinar el tipo de `detail`:
+
+| Status | `code` | Campos extra |
+|---|---|---|
+| 400 | `carrito_invalido` | — (vacío, repetido, o más de 20 ítems) |
+| 404 | `curso_no_disponible` | `unavailableCourseIds` |
+| 409 | `cursos_ya_comprados` | `conflictingCourseIds` (checkout completo rechazado, no se filtra el resto) |
+| 409 | `checkout_en_carrera` | — (dos checkouts del mismo usuario en paralelo) |
+| 502 | `proveedor_no_disponible` | — (la orden queda `expired`, nunca `pending` sin link de pago) |
+
+#### Verificación hecha
+
+91 tests en total (26 nuevos en `test_checkout.py`). Cuatro pruebas de mutación,
+revertidas después de confirmarlas:
+
+- Sacar el índice único parcial → cae únicamente
+  `test_dos_ordenes_pending_del_mismo_usuario_rechazadas_por_constraint`.
+- Que el precio salga del request en vez de `courses` → cae únicamente
+  `test_precio_manipulado_usa_el_precio_real_de_courses`.
+- Que el 409 filtre los ítems ya comprados y cobre el resto → caen los tres tests
+  del 409 (uno comprado, dos de tres comprados, no crea nada).
+- Sacar el `try`/`except IntegrityError` de `crear_checkout` → cae únicamente
+  `test_carrera_dos_checkouts_del_mismo_usuario_devuelve_409_y_no_deja_orden_colgada`.
+
+Ciclo `downgrade`/`upgrade` de la migración verificado contra la base real,
+incluyendo el índice parcial con su `WHERE` y las dos migraciones previas.
+
 ---
 
 ## Lo que quedó afuera de la Fase 3
@@ -249,13 +332,17 @@ real.
 
 **La Fase 3 está cerrada.** Los cinco puntos que habían quedado afuera salieron, cada uno en su propio PR (regla de un propósito por PR): `pytest` en el CI (#13), verificación de email (#15), CLI del primer administrador (#17), recuperación/reset/reenvío (#18), caso positivo de `require_plan` (#19). Además salió `environment` obligatoria y restringida (#20), encontrada revisando la deuda técnica anotada — no era uno de los cinco puntos originales, pero cerraba el mismo tipo de agujero (fail-open por omisión).
 
-Lo que sigue es **F4-4a** (modelos `Order`/`OrderItem` + `POST /checkout` contra una
-interfaz de pagos falsa). F4-4 quedó partida en dos —F4-4a y F4-4b (integración real
-de MercadoPago)— el 29/7: un PR = un propósito, y el esquema de base y la integración
-con un tercero son dos. Detalle de la partición y de las decisiones de diseño en
-`docs/FASE-4.md` §6. El bloqueante suave del dominio sigue vigente (ver más abajo): sin
-dominio no hay proveedor de mail, y sin proveedor de mail los cuatro flujos de correo
-que ya están implementados y probados no le llegan a nadie.
+**F4-4a está cerrado**: modelos `Order`/`OrderItem` y `POST /checkout` contra un
+proveedor de pago falso (`FakePaymentProvider`), sin salir a la red. Lo que sigue es
+**F4-4b**, la integración real de MercadoPago sobre esa misma interfaz
+(`PaymentProvider`). F4-4 quedó partida en dos el 29/7 —F4-4a y F4-4b—: un PR = un
+propósito, y el esquema de base y la integración con un tercero son dos. Detalle de
+la partición y de las decisiones de diseño en `docs/FASE-4.md` §6, y las cinco
+preguntas de verificación de MercadoPago (con tres ya respondidas) en su §7. El
+bloqueante suave del dominio sigue vigente (ver más abajo): sin dominio no hay
+proveedor de mail, y sin proveedor de mail los cuatro flujos de correo que ya están
+implementados y probados no le llegan a nadie — incluido el link de verificación que
+`POST /checkout` exige antes de dejar comprar.
 
 ---
 
@@ -423,17 +510,21 @@ Archivos con esta característica: `StatCard.jsx`, `Terminos.jsx`, `ApiDocs.jsx`
 - **El `TestClient` corre las tareas en segundo plano de forma síncrona**, así que la suite no prueba la propiedad de tiempo de respuesta constante de `/auth/recovery`. Esa propiedad la garantiza el diseño, no los tests.
 - **Van dos migraciones sólo para agregar valores al CHECK de `auth_events`.** Es el precio de que la base imponga el dominio y sigue siendo correcto, pero el riesgo real es que alguien deje de loguear un evento para no escribir una migración. Si aparece un tercer caso, revisarlo.
 - **Race condition en `POST /auth/register` (TOCTOU sobre el email duplicado) — resuelta en F4-1 (PR #25).** El endpoint hacía `SELECT` para ver si el email existía y después `INSERT`, sin `try`/`except` alrededor del insert; la segunda request de una carrera reventaba con `IntegrityError` sin atajar → 500 crudo en vez de un 409 prolijo. Diagnosticada leyendo el código el 28/7. F4-1 envolvió el `INSERT` en `try`/`except IntegrityError`, con las dos ramas —la del `SELECT` previo y la del `except`— saliendo por la misma función.
-- **`courses.price` está anotado `Mapped[float]` sobre una columna `Numeric(12,2)`.** Verificado
-  el 29/7: `asdecimal=True`, o sea que en runtime devuelve `Decimal` y la anotación miente. Hoy
-  es inofensivo porque nadie hace cuentas con ese campo; F4-4a es el primer código que lo lee, lo
-  copia a `order_items.unit_price` y lo suma en `orders.total`. El riesgo es que quien escriba
-  esa suma leyendo la anotación meta un `float()` para "arreglar" un error de tipos y reintroduzca
-  por esa puerta el bug que `FASE-4.md` prohibió por escrito. Se corrige a `Mapped[Decimal]`
-  **dentro** de F4-4a, que es el PR que empieza a hacer aritmética con la columna.
 - **`base.py` es un `DeclarativeBase` sin `naming_convention` en el `MetaData`.** Consecuencia:
   Alembic no puede generar el downgrade de constraints que no tienen nombre explícito. Ponerla
   ahora renombraría las que ya existen, así que no se toca; la convención de la casa mientras
   tanto es nombrar a mano los `CHECK` y los `UNIQUE` y dejar las FK con el default de Postgres.
+  **Ya cobró su primera factura**: el downgrade autogenerado de la migración `f0180ac18a07`
+  (F4-4a) salió con `op.drop_constraint(None, ...)` para la FK sin nombre de
+  `purchases.order_id`, y hubo que completarlo a mano con `purchases_order_id_fkey` para que el
+  downgrade no reventara. No es teórica.
+- **`get_user_id_or_ip` (rate limit por usuario de `POST /checkout`) abre una segunda `Session`
+  por request para releer la sesión que `get_current_session` ya leyó.** Es el precio de que
+  slowapi evalúe el `key_func` antes de que `Depends` resuelva el usuario: el `key_func` sólo
+  recibe el `Request`, no los argumentos ya resueltos del endpoint (ver el docstring de la
+  función en `core/limiter.py`). Duplica una consulta indexada de sólo lectura en cada
+  `POST /checkout`; aceptable con el volumen de hoy, a revisar cuando el limiter pase a Redis en
+  la Fase 8.
 
 ### Frontend
 

@@ -4,6 +4,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.api.routes import auth as auth_routes
+from app.api.routes import checkout as checkout_routes
 from app.core.config import settings
 from app.core.limiter import limiter
 
@@ -21,6 +22,7 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.include_router(auth_routes.router)
+app.include_router(checkout_routes.router)
 
 
 @app.get("/health")
