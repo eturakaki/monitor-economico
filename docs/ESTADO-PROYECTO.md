@@ -351,8 +351,8 @@ implementados y probados no le llegan a nadie — incluido el link de verificaci
 | Quién | De qué se ocupa |
 |---|---|
 | El chat | Diseño, decisiones, explicación, revisión, documentos, investigación |
-| Claude Code (en WSL) | Escribir archivos dentro del repo, correr lint y tests, cambios repetitivos |
-| Iñaki | Los comandos que enseñan, y aprobar lo que Claude Code propone |
+| Claude Code (en WSL) | Escribir archivos dentro del repo, correr lint y tests, cambios repetitivos, git local del propio encargo (rama, commit, push, `gh pr create --draft`) |
+| Iñaki | Los comandos que enseñan, editar `.claude/settings.json`, revisar el diff en el PR, marcarlo "Ready for review" y mergear |
 
 **Lo mecánico se delega, lo conceptual no.** Las instrucciones a Claude Code llevan siempre el formato ENCARGO — ver "Método de trabajo" en `CLAUDE.md`. La regla de verificar la API real de una librería antes de escribir, que vive ahí, evitó un bug grave en la Fase 3: el orden de los argumentos de `pwdlib.verify`.
 
@@ -387,6 +387,7 @@ implementados y probados no le llegan a nadie — incluido el link de verificaci
 21. **Una llave de idempotencia tiene que apuntar al hecho externo, no al estado propio.** Llavear contra el estado local —"si mi registro no está en el estado que espero, ya lo procesé, devuelvo OK"— parece idempotencia y es una alcancía rota: descarta en silencio el evento legítimo que llega cuando el estado local se movió por otra razón. La llave correcta es el identificador del hecho que ya se procesó.
 22. **Un working tree limpio no dice nada sobre de qué rama saliste.** `git status --short` responde por los cambios sin commitear; `git checkout -b` hereda además todos los commits de la rama donde estabas parado, y esos entran al PR sin que nadie los vea. Pasó el 29/7: la rama de un PR de documentación salió de una rama de fix sin mergear y arrastraba su commit. Se verifica con `git log --oneline main..HEAD`, que tiene que salir vacío en una rama recién creada desde main. Es la misma familia que las lecciones 11 y 19: las tres son "git usa la rama en la que estás parado, no la que tenías en la cabeza".
 23. **El tipo de un identificador cambia al cruzar el límite entre dos sistemas.** MercadoPago devuelve el id de un pago como número entero en el JSON; nosotros lo guardamos como texto. Comparar los dos sin convertir da "distinto" para el mismo pago, y si esa comparación es la llave de idempotencia, el hecho se procesa dos veces. Al guardar un identificador ajeno, fijar la conversión en un solo lugar y escribir de qué tipo llega.
+24. **Con squash-merge, `git log --oneline main..rama` muestra la rama como no mergeada para siempre.** El squash crea en `main` un commit nuevo con otro identificador, así que el commit original de la rama nunca aparece ahí. Ese comando sirve para verificar que una rama recién creada salga limpia de `main` (lección 22), pero NO para saber si un trabajo ya entró: para eso hay que buscar el contenido con un grep sobre el archivo, parado en una rama que salga de `main`. Pasó el 29/7/2026 y dio un diagnóstico falso con cara de dato duro.
 
 ---
 
