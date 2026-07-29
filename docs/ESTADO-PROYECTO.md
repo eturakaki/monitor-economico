@@ -73,7 +73,7 @@ Pendientes menores: rotar la contraseña del usuario de Ubuntu (`passwd`); la ca
 ### FASE 2 — La Heladera ✅ (PR #10)
 
 - **`docker-compose.yml`** con PostgreSQL 17.10 + TimescaleDB 2.28.3, imagen **fijada** a `timescale/timescaledb:2.28.3-pg17` (no `latest-*`), volumen `monitor_pgdata`, healthcheck con `pg_isready`, puerto 5432.
-- **Credenciales fuera de Git**: `.env` con contraseña de `openssl rand -base64 24`, verificado con `git check-ignore` y `git add -n`. `.env.example` versionado.
+- **Credenciales fuera de Git**: `.env` con contraseña de `openssl rand -base64 24`, verificado con `git check-ignore` y `git add -n`. `env.example` versionado.
 - **Proyecto Python con uv**: SQLAlchemy 2.0.51, Alembic 1.18.5, psycopg 3.3.4, pydantic-settings 2.14.2. `uv.lock` versionado.
 - **`app/core/config.py`**: `Settings` de pydantic-settings, variables críticas sin valor por defecto, `database_url` como propiedad calculada con `quote_plus` sobre la contraseña.
 - **`app/models/user.py`**: `User` con id de texto (`usr_...`), índice único en email, y dos `CheckConstraint` sobre `plan` y `role`.
@@ -229,7 +229,7 @@ Lo que sigue es la **Fase 4 (Pagos)**, con el bloqueante suave del dominio (ver 
 13. **Un test que espera "algún error" pasa aunque el error sea otro.** `pytest.raises(ValidationError)` sobre una config con varios campos obligatorios se satisface con cualquier campo faltante: hay que afirmar sobre el `loc`, no sobre el tipo.
 14. **Un "confirmame X antes de escribir" que viene con la respuesta ya redactada no es un gate, es un trámite.** Para que tenga dientes hay que decir qué hacer si la respuesta es la otra.
 15. **Las tareas en segundo plano no pueden usar la sesión que inyecta `Depends(get_db)`: esa muere con el request.** Tienen que abrir la suya y cerrarla en un `finally`. En los tests eso apunta a la base equivocada si no se parchea.
-16. **Un grep mal anclado produce un diagnóstico falso con cara de dato duro.** Buscando variables en `.env.example` con un patrón anclado al inicio de línea, las que ya estaban documentadas como comentario (`# VAR=valor`) no aparecieron, y el resultado —"faltan diez"— era falso: faltaban dos. Antes de actuar sobre la salida de un comando, mirar el archivo.
+16. **Un grep mal anclado produce un diagnóstico falso con cara de dato duro.** Buscando variables en `env.example` con un patrón anclado al inicio de línea, las que ya estaban documentadas como comentario (`# VAR=valor`) no aparecieron, y el resultado —"faltan diez"— era falso: faltaban dos. Antes de actuar sobre la salida de un comando, mirar el archivo.
 17. **El chequeo en código es cortesía; la garantía vive en la constraint de la base.** Un `SELECT` antes de un `INSERT` sirve para devolver un error prolijo, pero siempre tiene una ventana de carrera; el `UNIQUE` de la base no la tiene. Por eso el TOCTOU de `POST /auth/register` es robustez y no seguridad: la base aguantó y nunca se creó una cuenta duplicada. Cuando una regla importa de verdad, tiene que estar impuesta por la base, y el chequeo en código es sólo la capa de buenos modales.
 18. **Una afirmación verdadera se vuelve falsa al mudarla de documento.** El calificador que la sostenía —"de la Fase 4", "en desarrollo", "para este endpoint"— suele estar en la frase anterior y no viaja con la cita. Al trasplantar una conclusión entre documentos, verificar que el alcance del destino sea el mismo que el del origen.
 
@@ -345,7 +345,7 @@ Archivos con esta característica: `StatCard.jsx`, `Terminos.jsx`, `ApiDocs.jsx`
 - **Argon2id consume 64 MB de RAM por login concurrente.** En un VPS de 2 GB, veinte logins simultáneos son 1,3 GB. Hay que volver a medir con el hardware real antes de decidir si se bajan los parámetros. Dato tranquilizador: los parámetros van escritos dentro del hash, así que cambiarlos no invalida los hashes viejos.
 - **`TestClient` con `httpx` quedó deprecado** en Starlette 1.3 (`StarletteDeprecationWarning`); migrar a `httpx2`.
 - **El 409 al registrar un email existente revela qué direcciones tienen cuenta** (enumeración de usuarios). Ocultarlo requiere poder mandar mails. Revisar en la Fase 4.
-- **`.env.example` ya está completo.** Faltaban dos variables: `PUBLIC_BASE_URL` (agregada en el PR #15 y nunca documentada) y `TERMS_VERSION`. Sigue pendiente afinar el patrón de `.claude/settings.json`, que bloquea `.env.example` junto con los `.env` reales y obliga a editarlo a mano.
+- **`env.example` ya está completo.** Faltaban dos variables: `PUBLIC_BASE_URL` (agregada en el PR #15 y nunca documentada) y `TERMS_VERSION`. El bloqueo del patrón de `.claude/settings.json` se resolvió en este PR: se renombraron las dos plantillas (`.env.example` → `env.example`) para sacarlas del espacio de nombres `.env*`, se agregaron `Edit(.env)` y `Edit(.env.*)` al deny, y se consolidaron los cinco patrones del `.gitignore` en uno solo, `.env*`.
 - **Sin límite de sesiones activas por usuario**, y sin job que purgue sesiones y tokens vencidos. Ambas tablas crecen sin techo.
 - **`auth_events` no tiene política de retención** y guarda emails intentados, que son datos personales.
 - **La segunda defensa contra XSS del `GET /auth/verify` (`html.escape`) no está cubierta por ningún test**, porque el regex de formato rechaza antes. Es defensa en profundidad deliberada, pero conviene saber que sólo la primera capa está probada.

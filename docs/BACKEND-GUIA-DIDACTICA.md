@@ -185,17 +185,17 @@ Arrancamos con `latest-pg17` y después lo cambiamos a `2.28.3-pg17`.
 
 ---
 
-## Secretos: `.env`, `.env.example` y `.gitignore`
+## Secretos: `.env`, `env.example` y `.gitignore`
 
 Tres archivos, un solo patrón:
 
 | Archivo | Contiene | ¿Va a Git? |
 |---|---|---|
 | `.env` | Los valores reales, incluida la contraseña | **NO, nunca** |
-| `.env.example` | Los mismos nombres de variable, vacíos | Sí |
+| `env.example` | Los mismos nombres de variable, vacíos | Sí |
 | `.gitignore` | La regla que excluye `.env` | Sí |
 
-**El secreto afuera, la forma adentro.** El `.env.example` le dice a cualquiera (incluido tu yo de dentro de seis meses) *qué* variables hacen falta, sin decir *cuáles* son los valores.
+**El secreto afuera, la forma adentro.** El `env.example` le dice a cualquiera (incluido tu yo de dentro de seis meses) *qué* variables hacen falta, sin decir *cuáles* son los valores.
 
 Es el mismo patrón que vas a usar con las claves de MercadoPago en la Fase 4.
 
