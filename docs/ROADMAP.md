@@ -257,10 +257,18 @@ La ingesta de datos y la IA son lo que lo hacen bueno. Primero hay que tener pro
 Este roadmap completo es un proyecto grande para una persona. Dos observaciones que conviene
 tener presentes:
 
-**Se puede lanzar antes.** Con las fases 1 a 4 más un deploy básico ya hay una plataforma que
-cobra cursos y da acceso a lo comprado. Las 44 calculadoras funcionan sin backend: hacen la
-matemática en el navegador. Eso solo ya es un producto vendible. La suscripción a los planes es
-la capa siguiente, no un requisito para lanzar.
+**Se puede lanzar antes, pero primero hay que tener qué vender.** Con las fases 1 a
+4 más un deploy básico, la Academia ya puede cobrar: el circuito de compra, webhook
+y otorgamiento de acceso queda completo. Lo que falta es el inventario — hoy el
+catálogo de cursos es utilería y no hay contenido real grabado—, así que entre
+"Fase 4 cerrada" y "puedo vender" hay que grabar al menos un curso. Las 44
+calculadoras funcionan sin backend y hacen la matemática en el navegador, pero son
+gratis por decisión de producto: son la carnada, no el producto pago (ver
+`docs/MODELO-NEGOCIO.md`).
+
+**Los planes se lanzan después.** `pro` se vende por los informes de IA, que
+dependen de la ingesta de datos (Fase 5) y del motor de análisis (Fase 6).
+Publicarlos antes sería vender lo que no existe.
 
 **Los datos y la IA pueden venir después,** con usuarios reales diciendo qué necesitan.
 Construirlos antes es adivinar.

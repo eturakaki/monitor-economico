@@ -5,6 +5,9 @@ Documento de trabajo. Deriva de `Operacion-Restaurante-Financiero-v2.docx` (Fase
 
 **Estado**: los tres portones de seguridad quedaron resueltos el 28/7. Se arranca por F4-1.
 
+Modelo de negocio decidido: ver `docs/MODELO-NEGOCIO.md` (planes = datos + IA;
+Academia = cursos sueltos).
+
 ---
 
 ## 1. Tres hallazgos que cambian el orden del roadmap
