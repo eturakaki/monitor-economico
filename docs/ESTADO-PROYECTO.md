@@ -5,11 +5,12 @@ Documento de traspaso. Pegá esto (o su contenido) al arrancar un chat nuevo par
 **Repo:** https://github.com/eturakaki/monitor-economico
 **Local:** `~/proyectos/monitor-economico` **dentro de WSL 2 / Ubuntu 24.04**
 **Equipo:** Iñaki (economía + programación) y Sofía (psicología, no programa)
-**Última actualización:** 28 de julio de 2026, Fase 3 cerrada por completo, incluidos los cinco puntos que habían quedado afuera
+**Última actualización:** 29 de julio de 2026, Fase 4 en curso (F4-1 a F4-3 cerrados)
 
 **`ESTADO-PROYECTO.md`** (este archivo): lo que hay construido.
 **`docs/ROADMAP.md`**: lo que viene.
 **`docs/FASE-4.md`**: la fase en curso.
+**`docs/MODELO-NEGOCIO.md`**: qué se vende, cómo se cobra y por qué.
 
 **Toda la data en `src/data/**` (cursos, libros, indicadores) es utilería de
 maqueta:** esos registros no existen y nadie los compró. Lo único real hoy son las
@@ -179,6 +180,56 @@ backend/tests/
 - **Prueba de mutación:** rompiendo `verify_password` para que acepte cualquier contraseña, caen exactamente los 3 tests que dependen de ella. Los tests no son decorativos.
 - Prueba manual completa vía Swagger: registro, cookie con las banderas correctas, `/auth/me`, logout, 401 posterior, login fallido y login correcto.
 
+### FASE 4 — La Caja Registradora ⏳ (en curso)
+
+Roadmap de referencia: `docs/FASE-4.md`, con el detalle completo (los tres portones
+de seguridad, la secuencia de nueve PRs, la MISIÓN CUMPLIDA ampliada a siete puntos).
+Acá sólo el resumen de lo cerrado. Sin dependencias nuevas hasta F4-3.
+
+**F4-1 · TOCTOU en `POST /auth/register`** (PR #25) — el `INSERT` quedó envuelto en
+`try`/`except IntegrityError`, con las dos ramas (la del `SELECT` previo y la del
+`except`) saliendo por la misma función. Devuelve 409 en vez de 500 ante la carrera
+de email duplicado.
+
+**F4-2 · Patrón de `.claude/settings.json`** (PR #26) — se sacaron las plantillas
+del espacio de nombres de los secretos (`.env.example` → `env.example`,
+`backend/.env.example` → `backend/env.example`), se agregó `Edit(.env)` /
+`Edit(.env.*)` al deny para cerrar el hueco de escritura sobre `.env` real, y se
+consolidaron los cinco patrones del `.gitignore` en uno solo, `.env*`. `env.example`
+ya está completo, con `PUBLIC_BASE_URL` y `TERMS_VERSION` documentadas.
+
+**F4-3 · Modelos `Course` y `Purchase`** (PR #28)
+
+#### Tablas nuevas (migración `c8ee0f8a840e`)
+
+- **`courses`** — `id` como slug estable (ej. `course_valuacion_dcf`), `title`,
+  `description`, `price` en `Numeric(12,2)` (nunca `float`), `currency` con `CHECK`
+  a `'ARS'`, `active` boolean con default `false`. Sin `estudiantes` ni `rating`:
+  son números de la maqueta del frontend, no una medición real.
+- **`purchases`** — `id` (`pur_...`), `user_id` (FK a `users`, `ON DELETE CASCADE`
+  porque es acceso vigente, no registro contable), `course_id` (FK a `courses`),
+  `created_at`. `UNIQUE` sobre `(user_id, course_id)` impuesto por la base. Nace sin
+  `order_id`: la tabla `orders` llega en F4-4.
+
+#### Estructura de archivos
+
+- `backend/app/models/course.py`, `backend/app/models/purchase.py` — nuevos.
+- `backend/tests/test_purchases.py` — nuevo.
+
+#### Contrato de API
+
+`GET /auth/me` ya no devuelve `purchasedCourses: []` fijo: consulta `purchases` por
+`user_id` y devuelve la lista real de `course_id` comprados. El test que compara el
+conjunto completo de claves del contrato sigue pasando sin haberlo tocado.
+
+#### Verificación hecha
+
+58 tests (40 en `test_auth.py`, 8 en `test_cli.py`, 3 en `test_config.py` — uno
+parametrizado en 3 valores —, 5 en `test_purchases.py`). Prueba de mutación:
+sacando el `UniqueConstraint` de `purchases`, cae únicamente el test de compra
+duplicada. Ciclo `downgrade`/`upgrade` de la migración verificado contra la base
+real.
+
 ---
 
 ## Lo que quedó afuera de la Fase 3
@@ -197,7 +248,10 @@ backend/tests/
 
 **La Fase 3 está cerrada.** Los cinco puntos que habían quedado afuera salieron, cada uno en su propio PR (regla de un propósito por PR): `pytest` en el CI (#13), verificación de email (#15), CLI del primer administrador (#17), recuperación/reset/reenvío (#18), caso positivo de `require_plan` (#19). Además salió `environment` obligatoria y restringida (#20), encontrada revisando la deuda técnica anotada — no era uno de los cinco puntos originales, pero cerraba el mismo tipo de agujero (fail-open por omisión).
 
-Lo que sigue es la **Fase 4 (Pagos)**, con el bloqueante suave del dominio (ver más abajo): sin dominio no hay proveedor de mail, y sin proveedor de mail los cuatro flujos de correo que ya están implementados y probados no le llegan a nadie.
+Lo que sigue es **F4-4** (modelo `Order` + `POST /checkout`), según la secuencia de
+`docs/FASE-4.md`. El bloqueante suave del dominio sigue vigente (ver más abajo): sin
+dominio no hay proveedor de mail, y sin proveedor de mail los cuatro flujos de correo
+que ya están implementados y probados no le llegan a nadie.
 
 ---
 
@@ -209,7 +263,7 @@ Lo que sigue es la **Fase 4 (Pagos)**, con el bloqueante suave del dominio (ver 
 | Claude Code (en WSL) | Escribir archivos dentro del repo, correr lint y tests, cambios repetitivos |
 | Iñaki | Los comandos que enseñan, y aprobar lo que Claude Code propone |
 
-**Lo mecánico se delega, lo conceptual no.** Las instrucciones a Claude Code llevan siempre tres partes: **qué leer, qué escribir, qué no tocar.** Y cuando hay una librería de por medio, una cuarta: *verificá su API real antes de escribir, no la escribas de memoria.* Esa cuarta parte evitó un bug grave en la Fase 3 (el orden de los argumentos de `pwdlib.verify`).
+**Lo mecánico se delega, lo conceptual no.** Las instrucciones a Claude Code llevan siempre el formato ENCARGO — ver "Método de trabajo" en `CLAUDE.md`. La regla de verificar la API real de una librería antes de escribir, que vive ahí, evitó un bug grave en la Fase 3: el orden de los argumentos de `pwdlib.verify`.
 
 **Cuentas:** hay dos cuentas pagas de Claude. Conviene usar una para el chat y otra para Claude Code, así los límites no compiten.
 
@@ -237,6 +291,8 @@ Lo que sigue es la **Fase 4 (Pagos)**, con el bloqueante suave del dominio (ver 
 16. **Un grep mal anclado produce un diagnóstico falso con cara de dato duro.** Buscando variables en `env.example` con un patrón anclado al inicio de línea, las que ya estaban documentadas como comentario (`# VAR=valor`) no aparecieron, y el resultado —"faltan diez"— era falso: faltaban dos. Antes de actuar sobre la salida de un comando, mirar el archivo.
 17. **El chequeo en código es cortesía; la garantía vive en la constraint de la base.** Un `SELECT` antes de un `INSERT` sirve para devolver un error prolijo, pero siempre tiene una ventana de carrera; el `UNIQUE` de la base no la tiene. Por eso el TOCTOU de `POST /auth/register` es robustez y no seguridad: la base aguantó y nunca se creó una cuenta duplicada. Cuando una regla importa de verdad, tiene que estar impuesta por la base, y el chequeo en código es sólo la capa de buenos modales.
 18. **Una afirmación verdadera se vuelve falsa al mudarla de documento.** El calificador que la sostenía —"de la Fase 4", "en desarrollo", "para este endpoint"— suele estar en la frase anterior y no viaja con la cita. Al trasplantar una conclusión entre documentos, verificar que el alcance del destino sea el mismo que el del origen.
+19. **`gh pr create` usa la rama en la que estás parado, no la que nombraste en el push.** Si el `git push` falla y el `gh pr create` corre igual, se crea un PR contra la rama equivocada, con el título del trabajo que no contiene. Pasó con el PR #27: se llamaba "modelos Course y Purchase" y adentro tenía archivos de otro PR ya mergeado. Antes de crear un PR, `git branch --show-current`.
+20. **Para relajar un guardarraíl amplio, sacar el archivo del espacio protegido, no agregarle una excepción.** En los permisos de Claude Code `deny` le gana a `allow` siempre, así que no se puede exceptuar un archivo de un patrón que lo matchea. `.env.example` se destrabó renombrándolo a `env.example`, sin tocar el candado. Un archivo público no tiene que vivir en el espacio de nombres de los secretos.
 
 ---
 
@@ -293,7 +349,10 @@ No es asesoramiento legal; hace falta un abogado antes de producción. Pero esta
 }
 ```
 
-`purchasedCourses`, `completedLessons` y `lastActivity` vienen vacíos **a propósito**: los modelos de cursos y progreso llegan en una fase posterior, pero la *forma* del contrato ya está completa, así que el frontend no rompe.
+`purchasedCourses` ya devuelve las compras reales del usuario (F4-3, sobre la tabla
+`purchases`); en el ejemplo de arriba aparece vacío porque es el estado de un usuario
+sin compras, no un valor fijo. `completedLessons` y `lastActivity` siguen vacíos **a
+propósito**: los modelos de progreso llegan en una fase posterior.
 
 | Servicio mock | Método | Endpoint | Estado |
 |---|---|---|---|
@@ -350,15 +409,14 @@ Archivos con esta característica: `StatCard.jsx`, `Terminos.jsx`, `ApiDocs.jsx`
 - **Argon2id consume 64 MB de RAM por login concurrente.** En un VPS de 2 GB, veinte logins simultáneos son 1,3 GB. Hay que volver a medir con el hardware real antes de decidir si se bajan los parámetros. Dato tranquilizador: los parámetros van escritos dentro del hash, así que cambiarlos no invalida los hashes viejos.
 - **`TestClient` con `httpx` quedó deprecado** en Starlette 1.3 (`StarletteDeprecationWarning`); migrar a `httpx2`.
 - **El 409 al registrar un email existente revela qué direcciones tienen cuenta** (enumeración de usuarios). Ocultarlo requiere poder mandar mails. Revisar en la Fase 4.
-- **`env.example` ya está completo.** Faltaban dos variables: `PUBLIC_BASE_URL` (agregada en el PR #15 y nunca documentada) y `TERMS_VERSION`. El bloqueo del patrón de `.claude/settings.json` se resolvió en este PR: se renombraron las dos plantillas (`.env.example` → `env.example`) para sacarlas del espacio de nombres `.env*`, se agregaron `Edit(.env)` y `Edit(.env.*)` al deny, y se consolidaron los cinco patrones del `.gitignore` en uno solo, `.env*`.
 - **Sin límite de sesiones activas por usuario**, y sin job que purgue sesiones y tokens vencidos. Ambas tablas crecen sin techo.
 - **`auth_events` no tiene política de retención** y guarda emails intentados, que son datos personales.
 - **La segunda defensa contra XSS del `GET /auth/verify` (`html.escape`) no está cubierta por ningún test**, porque el regex de formato rechaza antes. Es defensa en profundidad deliberada, pero conviene saber que sólo la primera capa está probada.
 - **`logout` no envuelve su `db.commit()` en `try`/`except`.** Decisión tomada, no deuda: atajarlo devolvería 200 con la sesión todavía válida en el servidor durante 30 días, lo que contradice la decisión de diseño #1 y le miente al usuario. Un 500 deja el estado coherente.
-- **`_sesion_de_test_para_tareas_en_background` neutraliza `close()` en los 52 tests, no sólo en los de recuperación**, y hace que la tarea en segundo plano comparta sesión y transacción con el test — en producción usa una aparte. La suite no ejercita el comportamiento real de dos transacciones separadas.
+- **`_sesion_de_test_para_tareas_en_background` neutraliza `close()` en toda la suite, no sólo en los de recuperación**, y hace que la tarea en segundo plano comparta sesión y transacción con el test — en producción usa una aparte. La suite no ejercita el comportamiento real de dos transacciones separadas.
 - **El `TestClient` corre las tareas en segundo plano de forma síncrona**, así que la suite no prueba la propiedad de tiempo de respuesta constante de `/auth/recovery`. Esa propiedad la garantiza el diseño, no los tests.
 - **Van dos migraciones sólo para agregar valores al CHECK de `auth_events`.** Es el precio de que la base imponga el dominio y sigue siendo correcto, pero el riesgo real es que alguien deje de loguear un evento para no escribir una migración. Si aparece un tercer caso, revisarlo.
-- **Race condition en `POST /auth/register` (TOCTOU sobre el email duplicado).** El endpoint hace `SELECT` para ver si el email existe y después `INSERT`, sin `try`/`except` alrededor del insert. Si dos requests con el mismo email llegan lo bastante cerca, ambas pueden pasar el `SELECT` antes de que la primera haga commit; la tabla tiene `UNIQUE` en `email`, así que nunca hay fila duplicada, pero la segunda request revienta con un `IntegrityError` sin atajar → 500 crudo en vez de un 409 prolijo. Diagnosticado leyendo el código el 28/7, nunca reproducido con concurrencia real ni arreglado.
+- **Race condition en `POST /auth/register` (TOCTOU sobre el email duplicado) — resuelta en F4-1 (PR #25).** El endpoint hacía `SELECT` para ver si el email existía y después `INSERT`, sin `try`/`except` alrededor del insert; la segunda request de una carrera reventaba con `IntegrityError` sin atajar → 500 crudo en vez de un 409 prolijo. Diagnosticada leyendo el código el 28/7. F4-1 envolvió el `INSERT` en `try`/`except IntegrityError`, con las dos ramas —la del `SELECT` previo y la del `except`— saliendo por la misma función.
 
 ### Frontend
 
@@ -430,7 +488,7 @@ docker compose up -d                 # levantar Postgres
 uv run alembic upgrade head          # aplicar migraciones
 uv run uvicorn app.main:app --reload --port 8000
 uv run python -m app.cli crear-admin # crea el primer administrador
-uv run pytest -v                     # 52 tests
+uv run pytest -v
 docker compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"
 ```
 
