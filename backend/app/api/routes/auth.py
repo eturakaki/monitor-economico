@@ -31,6 +31,7 @@ from app.core.security import (
 from app.core.limiter import limiter
 from app.db.session import SessionLocal, get_db
 from app.models.auth_token import AuthToken
+from app.models.purchase import Purchase
 from app.models.user import User
 from app.schemas.auth import LoginIn, MessageOut, RecoveryIn, RegisterIn
 from app.schemas.user import UserOut
@@ -230,7 +231,11 @@ def logout(
 
 
 @router.get("/me", response_model=UserOut)
-def me(user: User = Depends(get_current_user)) -> User:
+def me(user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> User:
+    purchased = db.execute(
+        select(Purchase.course_id).where(Purchase.user_id == user.id)
+    ).scalars().all()
+    user.purchased_courses = list(purchased)
     return user
 
 
