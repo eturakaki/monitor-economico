@@ -47,7 +47,7 @@ The backend has a pytest suite that runs in CI and is required to pass on every 
 ## Environment
 
 Copy `env.example` to `.env`. Key variables:
-- `VITE_API_URL` — backend base URL (defaults to `http://localhost:3000/api`)
+- `VITE_API_URL` — backend base URL (defaults to `http://localhost:3000/api`; that default is stale, from before the real backend existed — it runs on `:8000` with no `/api` prefix. Fix scheduled for Phase 7. Tracked in `docs/ESTADO-PROYECTO.md`'s deuda técnica.)
 - `VITE_USE_MOCKS` — `true` (default) runs entirely on mock services/localStorage; set `false` to hit a real backend
 
 Anything prefixed `VITE_` is inlined into the client bundle and public — never put secrets there.
@@ -56,7 +56,7 @@ Anything prefixed `VITE_` is inlined into the client bundle and public — never
 
 ### Mock-backend pattern (important — read before touching any service)
 
-There is no real backend. Every service in `src/services/**` follows the same dual-mode shape:
+The backend is real, but the frontend doesn't consume it yet: every service in `src/services/**` still runs in mock mode until Phase 7 replaces them one at a time. That's exactly what this dual-mode shape is for — switching a service from mock to real without touching the components that call it:
 
 ```js
 async someMethod(...) {
@@ -64,7 +64,7 @@ async someMethod(...) {
     await _simulateLatency();       // artificial delay for realistic UX
     // read/write a namespaced localStorage key, return plain data
   }
-  return apiClient.get/post/...(...); // the "real" path, once a backend exists
+  return apiClient.get/post/...(...); // the "real" path, once this service stops running in mock mode
 }
 ```
 
