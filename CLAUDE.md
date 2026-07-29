@@ -179,12 +179,52 @@ Nunca resolver creativo para no frenar.
   está permitido.
 
 ### Git
-- Crear la rama es el paso cero de todo encargo, antes de leer nada.
-- Los comandos de git los corre Iñaki, no el agente.
-- NUNCA commitear sin que Iñaki revise el diff.
-- Stagear por nombre. Prohibido `git add .` y `git add -A` sin rutas explícitas.
+- Crear la rama es el paso cero de todo encargo, antes de leer nada. Sale siempre
+  de `main` actualizado, y se verifica con `git log --oneline main..HEAD`, que
+  tiene que salir vacío: un working tree limpio no dice de qué rama saliste.
+- El agente corre el git local: rama, `status`, `log`, `diff`, `add` por ruta
+  explícita, `commit`, `push` de su propia rama, y `gh pr create --draft`. Siempre
+  en draft, sin excepción.
+- El agente NUNCA marca "Ready for review" y NUNCA mergea. Esos dos clics son de
+  Iñaki y son el punto donde se toma la decisión.
+- Por qué draft y no un PR normal: un draft no se puede mergear, ni por accidente
+  ni por apuro. Así el freno de parar y mirar el diff deja de depender de la
+  disciplina y queda impuesto por la herramienta. Es la lección 17 de
+  `ESTADO-PROYECTO.md` aplicada al flujo de trabajo: cuando una regla importa, la
+  impone el sistema, no los buenos modales.
+- Prohibido para todos, agente e Iñaki: `reset --hard`, `rebase` (cualquiera, sin
+  distinguir si la rama fue pusheada o no), `push --force` en todas sus formas, y
+  cualquier commit o push directo a `main`. Es lo único irreversible del juego. El
+  rebase se prohíbe entero y no sólo sobre ramas pusheadas: la distinción no se
+  puede expresar en una regla automática, y una regla que dice cubrir algo que no
+  cubre es peor que no tenerla. Con un PR por encargo, el rebase local no hace
+  falta.
+- El deny de `.claude/settings.json` para push a `main` es cortesía, no garantía:
+  un patrón no puede ver en qué rama estás parado, así que un `git push` a secas
+  desde `main` no queda atrapado ahí. La garantía real es el ruleset de `main` del
+  lado del servidor —checks obligatorios, `bypass_actors: []`, ya verificado
+  rompiendo un test a propósito—.
+- Stagear por ruta explícita. Prohibido `git add .` y `git add -A`.
 - Un PR = un propósito. Nunca mezclar limpieza con feature.
 - Mensajes de commit en español, con prefijo (`feat:`, `fix:`, `docs:`, `chore:`).
+- Cláusula de reversión, escrita a propósito: si Iñaki se descubre aprobando un PR
+  sin haber leído el diff, se vuelve al corte estricto —el agente no commitea— y
+  listo. Esta regla es reversible y se evalúa con el uso, no de una vez y para
+  siempre.
+- `.claude/settings.json` lo edita Iñaki y sólo Iñaki, nunca el agente, ni
+  siquiera para endurecer una regla. Un agente que puede apretar sus permisos
+  también puede aflojarlos, y ese archivo es la garantía de todo lo demás. El deny
+  `Edit(.claude/**)` de F4-2 es lo que lo impone, y quedó confirmado en la
+  práctica el 29/7/2026: al intentar agregar sus propias restricciones, la
+  herramienta lo rechazó.
+- `gh pr merge` y `gh pr ready` están en el deny. Eso es lo que convierte el PR en
+  draft de una costumbre en una garantía: el agente no puede marcarlo listo ni
+  mergearlo aunque quiera.
+- El deny de comandos destructivos es cortesía, no garantía, por la lección 9 del
+  proyecto: es una lista negra sobre una CLI con banderas cortas y orden libre de
+  argumentos, así que siempre va a tener huecos —`git pull --rebase` no lo atrapa
+  `Bash(git rebase*)`, por ejemplo—. Frena el accidente, que es el caso real. La
+  garantía es el ruleset de `main` y que todo lo importante esté pusheado.
 
 ### Mantener los documentos al día
 

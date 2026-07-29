@@ -351,8 +351,8 @@ implementados y probados no le llegan a nadie — incluido el link de verificaci
 | Quién | De qué se ocupa |
 |---|---|
 | El chat | Diseño, decisiones, explicación, revisión, documentos, investigación |
-| Claude Code (en WSL) | Escribir archivos dentro del repo, correr lint y tests, cambios repetitivos |
-| Iñaki | Los comandos que enseñan, y aprobar lo que Claude Code propone |
+| Claude Code (en WSL) | Escribir archivos dentro del repo, correr lint y tests, cambios repetitivos, git local del propio encargo (rama, commit, push, `gh pr create --draft`) |
+| Iñaki | Los comandos que enseñan, editar `.claude/settings.json`, revisar el diff en el PR, marcarlo "Ready for review" y mergear |
 
 **Lo mecánico se delega, lo conceptual no.** Las instrucciones a Claude Code llevan siempre el formato ENCARGO — ver "Método de trabajo" en `CLAUDE.md`. La regla de verificar la API real de una librería antes de escribir, que vive ahí, evitó un bug grave en la Fase 3: el orden de los argumentos de `pwdlib.verify`.
 
