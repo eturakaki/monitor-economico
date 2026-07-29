@@ -183,8 +183,9 @@ backend/tests/
 ### FASE 4 — La Caja Registradora ⏳ (en curso)
 
 Roadmap de referencia: `docs/FASE-4.md`, con el detalle completo (los tres portones
-de seguridad, la secuencia de nueve PRs, la MISIÓN CUMPLIDA ampliada a siete puntos).
-Acá sólo el resumen de lo cerrado. Sin dependencias nuevas hasta F4-3.
+de seguridad, la secuencia de diez PRs —F4-4 se partió en F4-4a/F4-4b el 29/7—, la
+MISIÓN CUMPLIDA ampliada a siete puntos). Acá sólo el resumen de lo cerrado. Sin
+dependencias nuevas hasta F4-3.
 
 **F4-1 · TOCTOU en `POST /auth/register`** (PR #25) — el `INSERT` quedó envuelto en
 `try`/`except IntegrityError`, con las dos ramas (la del `SELECT` previo y la del
@@ -209,7 +210,7 @@ ya está completo, con `PUBLIC_BASE_URL` y `TERMS_VERSION` documentadas.
 - **`purchases`** — `id` (`pur_...`), `user_id` (FK a `users`, `ON DELETE CASCADE`
   porque es acceso vigente, no registro contable), `course_id` (FK a `courses`),
   `created_at`. `UNIQUE` sobre `(user_id, course_id)` impuesto por la base. Nace sin
-  `order_id`: la tabla `orders` llega en F4-4.
+  `order_id`: la tabla `orders` llega en F4-4a.
 
 #### Estructura de archivos
 
@@ -248,8 +249,11 @@ real.
 
 **La Fase 3 está cerrada.** Los cinco puntos que habían quedado afuera salieron, cada uno en su propio PR (regla de un propósito por PR): `pytest` en el CI (#13), verificación de email (#15), CLI del primer administrador (#17), recuperación/reset/reenvío (#18), caso positivo de `require_plan` (#19). Además salió `environment` obligatoria y restringida (#20), encontrada revisando la deuda técnica anotada — no era uno de los cinco puntos originales, pero cerraba el mismo tipo de agujero (fail-open por omisión).
 
-Lo que sigue es **F4-4** (modelo `Order` + `POST /checkout`), según la secuencia de
-`docs/FASE-4.md`. El bloqueante suave del dominio sigue vigente (ver más abajo): sin
+Lo que sigue es **F4-4a** (modelos `Order`/`OrderItem` + `POST /checkout` contra una
+interfaz de pagos falsa). F4-4 quedó partida en dos —F4-4a y F4-4b (integración real
+de MercadoPago)— el 29/7: un PR = un propósito, y el esquema de base y la integración
+con un tercero son dos. Detalle de la partición y de las decisiones de diseño en
+`docs/FASE-4.md` §6. El bloqueante suave del dominio sigue vigente (ver más abajo): sin
 dominio no hay proveedor de mail, y sin proveedor de mail los cuatro flujos de correo
 que ya están implementados y probados no le llegan a nadie.
 
@@ -293,6 +297,8 @@ que ya están implementados y probados no le llegan a nadie.
 18. **Una afirmación verdadera se vuelve falsa al mudarla de documento.** El calificador que la sostenía —"de la Fase 4", "en desarrollo", "para este endpoint"— suele estar en la frase anterior y no viaja con la cita. Al trasplantar una conclusión entre documentos, verificar que el alcance del destino sea el mismo que el del origen.
 19. **`gh pr create` usa la rama en la que estás parado, no la que nombraste en el push.** Si el `git push` falla y el `gh pr create` corre igual, se crea un PR contra la rama equivocada, con el título del trabajo que no contiene. Pasó con el PR #27: se llamaba "modelos Course y Purchase" y adentro tenía archivos de otro PR ya mergeado. Antes de crear un PR, `git branch --show-current`.
 20. **Para relajar un guardarraíl amplio, sacar el archivo del espacio protegido, no agregarle una excepción.** En los permisos de Claude Code `deny` le gana a `allow` siempre, así que no se puede exceptuar un archivo de un patrón que lo matchea. `.env.example` se destrabó renombrándolo a `env.example`, sin tocar el candado. Un archivo público no tiene que vivir en el espacio de nombres de los secretos.
+21. **Una llave de idempotencia tiene que apuntar al hecho externo, no al estado propio.** Llavear contra el estado local —"si mi registro no está en el estado que espero, ya lo procesé, devuelvo OK"— parece idempotencia y es una alcancía rota: descarta en silencio el evento legítimo que llega cuando el estado local se movió por otra razón. La llave correcta es el identificador del hecho que ya se procesó.
+22. **Un working tree limpio no dice nada sobre de qué rama saliste.** `git status --short` responde por los cambios sin commitear; `git checkout -b` hereda además todos los commits de la rama donde estabas parado, y esos entran al PR sin que nadie los vea. Pasó el 29/7: la rama de un PR de documentación salió de una rama de fix sin mergear y arrastraba su commit. Se verifica con `git log --oneline main..HEAD`, que tiene que salir vacío en una rama recién creada desde main. Es la misma familia que las lecciones 11 y 19: las tres son "git usa la rama en la que estás parado, no la que tenías en la cabeza".
 
 ---
 
@@ -417,6 +423,17 @@ Archivos con esta característica: `StatCard.jsx`, `Terminos.jsx`, `ApiDocs.jsx`
 - **El `TestClient` corre las tareas en segundo plano de forma síncrona**, así que la suite no prueba la propiedad de tiempo de respuesta constante de `/auth/recovery`. Esa propiedad la garantiza el diseño, no los tests.
 - **Van dos migraciones sólo para agregar valores al CHECK de `auth_events`.** Es el precio de que la base imponga el dominio y sigue siendo correcto, pero el riesgo real es que alguien deje de loguear un evento para no escribir una migración. Si aparece un tercer caso, revisarlo.
 - **Race condition en `POST /auth/register` (TOCTOU sobre el email duplicado) — resuelta en F4-1 (PR #25).** El endpoint hacía `SELECT` para ver si el email existía y después `INSERT`, sin `try`/`except` alrededor del insert; la segunda request de una carrera reventaba con `IntegrityError` sin atajar → 500 crudo en vez de un 409 prolijo. Diagnosticada leyendo el código el 28/7. F4-1 envolvió el `INSERT` en `try`/`except IntegrityError`, con las dos ramas —la del `SELECT` previo y la del `except`— saliendo por la misma función.
+- **`courses.price` está anotado `Mapped[float]` sobre una columna `Numeric(12,2)`.** Verificado
+  el 29/7: `asdecimal=True`, o sea que en runtime devuelve `Decimal` y la anotación miente. Hoy
+  es inofensivo porque nadie hace cuentas con ese campo; F4-4a es el primer código que lo lee, lo
+  copia a `order_items.unit_price` y lo suma en `orders.total`. El riesgo es que quien escriba
+  esa suma leyendo la anotación meta un `float()` para "arreglar" un error de tipos y reintroduzca
+  por esa puerta el bug que `FASE-4.md` prohibió por escrito. Se corrige a `Mapped[Decimal]`
+  **dentro** de F4-4a, que es el PR que empieza a hacer aritmética con la columna.
+- **`base.py` es un `DeclarativeBase` sin `naming_convention` en el `MetaData`.** Consecuencia:
+  Alembic no puede generar el downgrade de constraints que no tienen nombre explícito. Ponerla
+  ahora renombraría las que ya existen, así que no se toca; la convención de la casa mientras
+  tanto es nombrar a mano los `CHECK` y los `UNIQUE` y dejar las FK con el default de Postgres.
 
 ### Frontend
 
