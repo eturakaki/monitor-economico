@@ -472,6 +472,11 @@ conservación de datos del comprador por obligación fiscal (ARCA).
   sostener. El estado local no es autoridad sobre nada; la autoridad es la re-consulta y el
   registro de qué pagos ya se procesaron. Único estado terminal: `refunded`, que nunca vuelve a
   `paid`.
+- **El id del pago llega como número en el JSON de MercadoPago y se guarda como texto en
+  `provider_payment_id`.** La conversión a `str()` tiene que hacerse **siempre**, tanto al
+  escribir como al comparar. Si en algún punto se compara el texto guardado contra el número
+  que viene del proveedor, no coinciden, y esa comparación es exactamente donde vive la
+  idempotencia del webhook: un pago repetido se procesaría dos veces.
 - **Acceso y plata se resuelven por separado.** Son dos preguntas distintas y tratarlas como una
   sola bloquea F4-5 sin motivo:
   - Acceso: determinístico. El otorgamiento recorre los ítems con `INSERT ... ON CONFLICT DO
@@ -539,13 +544,39 @@ Estado del SDK al 29/7: paquete `mercadopago` 3.3.1, `requires_python >=3.10` (c
 es de F4-4b, con la API a la vista. Falta mirar el último commit del repo en GitHub: hay
 paquetes que publican releases automáticos sobre un repo muerto.
 
-### 7.1 — Resultado (verificado el 29/7)
+### 7.1 — Resultado (verificado el 29/7/2026)
 
-- Pregunta 1: los campos de vencimiento son `expires`, junto con `expiration_date_from` /
-  `expiration_date_to`, y se aceptan en formato ISO 8601 con huso horario.
-- Pregunta 2: `external_reference` se acepta de ida (al crear la preferencia).
-- Pregunta 4: **sí** se puede anular una preferencia ya creada, mandando un `PUT` con una fecha
-  de vencimiento pasada. MercadoPago responde con `preference_expired: true`.
-- Preguntas 3 y 5 quedan **abiertas**: ambas necesitan un pago completado para verificarse (tipo
-  y largo real del ID de pago, y si se permite un reembolso parcial sobre ese pago), y con cero
-  clientes no hay todavía un pago real contra el cual probarlas.
+Las cinco preguntas quedaron cerradas, verificadas contra la API real el 29/7/2026 con
+cuentas de prueba.
+
+1. **Vencimiento**: los campos son `expires` (booleano) y `expiration_date_to`, en ISO
+   8601 con huso horario (`2026-07-30T23:59:59.000-03:00`). Aceptados y devueltos.
+2. `external_reference` viaja de ida al crear la preferencia **y vuelve** al consultar
+   el pago. Confirma el diseño de correlación de §6.5.
+3. El id del pago es un **número entero de 12 dígitos** (ej. `171098070396`), no un
+   string.
+4. Se puede anular una preferencia ya creada con un `PUT` que le ponga una fecha de
+   vencimiento pasada. MercadoPago responde `preference_expired: true`.
+5. Se puede reembolsar parcialmente (`POST /v1/payments/{id}/refunds` con
+   `{"amount": N}`), y MercadoPago devuelve su comisión en proporción a lo
+   reembolsado. Esa llamada exige el header `X-Idempotency-Key`.
+
+Observaciones del mismo ejercicio:
+
+- `notification_url` es un campo de la **preferencia**, y en la prueba volvió en
+  `null` porque no se mandó. F4-4b tiene que setearlo al crear la preferencia; si no,
+  el webhook de F4-5 no llega a ningún lado.
+- El pago trae además un objeto `order` con su propio id (`type: "mercadopago"`),
+  distinto del id de la preferencia y del id del pago. Es un tercer identificador de
+  MercadoPago que no usamos, anotado para que no sorprenda.
+- Datos operativos de la verificación, para poder repetirla:
+  - Se hizo con dos cuentas de prueba: vendedor `3573047103` y comprador
+    `3573047111`.
+  - Las cuentas de prueba adicionales **no** se pueden crear vía API con
+    credenciales de test: devuelve `40311` `"caller.id must be a productive user"`.
+    Se crean (y se listan, si ya existen) desde el panel de developers, sección
+    Cuentas de prueba. Conviene mirar ahí primero: puede que ya estén creadas.
+  - `live_mode` figura como `true` incluso operando entre cuentas de prueba, así que
+    **no** sirve para saber si se está moviendo plata real. Lo que sí lo indica: la
+    etiqueta `test_user` en los tags del cobrador, y que el email del pagador
+    termine en `@testuser.com`.
