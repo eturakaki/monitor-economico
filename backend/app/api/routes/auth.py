@@ -16,6 +16,7 @@ from fastapi import (
 )
 from fastapi.responses import HTMLResponse
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.cookies import clear_session_cookie, set_session_cookie
@@ -68,6 +69,19 @@ def _pagina_html(titulo: str, cuerpo: str) -> str:
 </html>"""
 
 
+def _email_duplicado() -> HTTPException:
+    """Unico lugar del archivo que construye el 409 de email duplicado.
+
+    Lo usan las dos ramas de register() que pueden detectarlo: el SELECT
+    previo y el except del INSERT. Si el 409 cambia de forma, se toca
+    aca y no en dos lugares.
+    """
+    return HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Ya existe una cuenta con ese email",
+    )
+
+
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def register(
     datos: RegisterIn,
@@ -79,10 +93,7 @@ def register(
         select(User).where(User.email == datos.email)
     ).scalar_one_or_none()
     if existing is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Ya existe una cuenta con ese email",
-        )
+        raise _email_duplicado()
 
     ip, user_agent = get_client_info(request)
 
@@ -96,7 +107,23 @@ def register(
         terms_version=settings.terms_version,
     )
     db.add(user)
-    db.flush()
+    try:
+        db.flush()
+    except IntegrityError:
+        # Ventana de carrera entre el SELECT de arriba y este INSERT: otra
+        # request con el mismo email gano la carrera y ya lo inserto. El
+        # UNIQUE de la base es la garantia real -nunca hubo ni puede haber
+        # una fila duplicada-; esto solo evita que esta request reciba un
+        # 500 crudo en vez de un 409 prolijo. db.rollback() es necesario
+        # porque la sesion queda en estado abortado tras el IntegrityError.
+        # Bajo los savepoints del conftest (join_transaction_mode='create_savepoint') este
+        # rollback deshace solo el savepoint del intento fallido — verificado ejecutandolo.
+        # En produccion, con sesion plana, deshace la transaccion del request completa. Hoy
+        # eso es inocuo porque el INSERT fallido es la unica escritura del request.
+        # INVARIANTE: si register() alguna vez escribe algo antes de este INSERT, este
+        # rollback lo va a deshacer tambien — revisar este bloque.
+        db.rollback()
+        raise _email_duplicado()
 
     token = auth_service.create_session(db, user, ip=ip, user_agent=user_agent)
     set_session_cookie(response, token)

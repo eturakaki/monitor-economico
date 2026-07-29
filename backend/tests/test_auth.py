@@ -90,6 +90,77 @@ def test_registro_con_email_existente_devuelve_409(client, crear_usuario):
     assert r.status_code == 409
 
 
+def test_registro_race_condition_toctou_devuelve_409_identico_al_camino_normal(
+    client, db, monkeypatch, crear_usuario
+):
+    """Ejercita la rama del except IntegrityError de forma deterministica.
+
+    Primero registra la respuesta 409 "normal" (el SELECT de existencia
+    encuentra la fila). Despues parchea ese mismo SELECT -sin tocar el
+    codigo de register()- para que siempre diga "no existe": asi dos
+    registros seguidos con el mismo email pasan el chequeo, y el segundo
+    choca de verdad contra el UNIQUE de la base al hacer flush(). Ese es
+    el camino de la ventana de carrera.
+    """
+    crear_usuario(email="dup-normal@example.com")
+    r_normal = client.post(
+        "/auth/register",
+        json={
+            "email": "dup-normal@example.com",
+            "name": "Camino Normal",
+            "password": "contrasena-larga-123",
+            "acceptedTerms": True,
+        },
+    )
+    assert r_normal.status_code == 409
+
+    email_carrera = "toctou-race@example.com"
+    original_execute = db.execute
+    intercepciones = 0
+
+    def _execute_forzando_no_existe(statement, *args, **kwargs):
+        # "WHERE users.email", no solo "users.email": esta ultima tambien
+        # aparece en la lista de columnas de CUALQUIER select de User,
+        # incluido el refresh-por-id que dispara el propio commit() de
+        # register() al final (expire_on_commit). Filtrar solo por
+        # columnas interceptaba tambien ese refresh y rompia el primer
+        # registro (los atributos del User quedaban sin poder recargarse).
+        nonlocal intercepciones
+        sql = str(statement)
+        if "WHERE users.email" in sql:
+            intercepciones += 1
+
+            class _SinFilas:
+                def scalar_one_or_none(self) -> None:
+                    return None
+
+            return _SinFilas()
+        return original_execute(statement, *args, **kwargs)
+
+    monkeypatch.setattr(db, "execute", _execute_forzando_no_existe)
+
+    payload = {
+        "email": email_carrera,
+        "name": "Carrera Uno",
+        "password": "contrasena-larga-123",
+        "acceptedTerms": True,
+    }
+    r1 = client.post("/auth/register", json=payload)
+    assert r1.status_code == 201, "la primera request de la carrera debia registrarse"
+
+    r2 = client.post("/auth/register", json={**payload, "name": "Carrera Dos"})
+
+    assert r2.status_code == r_normal.status_code == 409
+    assert r2.json() == r_normal.json(), (
+        "la respuesta de la carrera tiene que ser identica a la del camino normal"
+    )
+    assert intercepciones > 0, (
+        "el parche no engancho ninguna consulta: si la consulta de existencia de "
+        "register() cambia de forma, este test deja de ejercitar la rama del "
+        "except IntegrityError y queda en verde sin probar nada"
+    )
+
+
 def test_registro_con_password_corta_devuelve_422(client):
     r = client.post(
         "/auth/register",
