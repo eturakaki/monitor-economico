@@ -130,15 +130,19 @@ en uno solo, `.env*`. Verificación: Claude Code puede editar `env.example` y no
 
 ### Bloque 1 — El catálogo, mínimo indispensable
 
-**F4-3 · Modelos `Course` y `Purchase` + migración + carga del catálogo**
-Prerrequisito real de todo lo demás (§1.2).
-- `courses`: id, slug, título, **precio como `Numeric`, nunca `float`** —los binarios de punto
-  flotante no representan exacto los decimales, y en dinero eso es plata que no cierra—,
-  moneda `ARS`, activo sí/no.
-- `purchases`: qué usuario compró qué curso, cuándo, y con qué orden. Único por
-  (usuario, curso), impuesto por la base y no sólo por el código.
-- Los precios se cargan desde los datos que ya existen en el frontend. El frontend deja de ser
-  la fuente de verdad del precio: pasa a serlo la base.
+**F4-3 · Modelos `Course` y `Purchase` + migración**
+Prerrequisito real de todo lo demás (§1.2). No hay catálogo que migrar: toda la data de
+`src/data/**` del frontend es utilería de maqueta, no un inventario real. `courses` nace vacía
+en producción; los datos de desarrollo y test son fixtures inequívocamente falsas
+(`course_test_uno`), no un seed que pueda filtrarse a producción.
+- `courses`: `id` (el slug estable, un solo campo — no `id` y `slug` por separado), título,
+  descripción, **precio como `Numeric`, nunca `float`** —los binarios de punto flotante no
+  representan exacto los decimales, y en dinero eso es plata que no cierra—, moneda `ARS`,
+  activo sí/no. Sin `estudiantes` ni `rating`: son números inventados de la maqueta, y un número
+  fabricado servido por una API es una medición falsa.
+- `purchases`: qué usuario compró qué curso y cuándo. Único por (usuario, curso), impuesto por
+  la base y no sólo por el código. Nace sin `order_id`: la tabla `orders` llega en F4-4 y ahí se
+  agregan la columna y la FK.
 - `GET /auth/me` empieza a devolver `purchasedCourses` de verdad. **El test que compara el
   conjunto completo de claves del contrato tiene que seguir pasando sin tocarlo.**
 
@@ -150,6 +154,12 @@ Prerrequisito real de todo lo demás (§1.2).
   la garantía tiene que estar en la base, no en un `if`—. Monto en `Numeric`.
 - **Columna del código público de arrepentimiento** (Portón C): aleatorio de alta entropía vía
   `secrets`, índice único.
+- `purchases` se borra en cascada con la cuenta porque es acceso vigente. Eso obliga a que
+  `orders` **sobreviva** al borrado de la cuenta: es la única prueba de que alguien pagó, y la
+  conservación de registros comerciales es una obligación legal cuyo alcance exacto hay que
+  confirmar con abogado, junto con lo del formulario de arrepentimiento. El patrón técnico ya
+  existe en la casa: `auth_events` con `ON DELETE SET NULL`. Decidirlo al crear la tabla, no
+  después.
 - `POST /checkout` crea la orden en `pending` y genera la preferencia de MercadoPago. **El
   precio lo lee de `courses` por ID.** Lo que viene en el request es qué se compra, nunca cuánto sale.
 - Test obligatorio: un request con un precio manipulado genera la preferencia con el precio real.
@@ -215,10 +225,15 @@ campo obligatorio faltante.
   falta a partir de F4-5.
 - **Convertir el roadmap a `docs/ROADMAP.md`** y commitearlo, para que deje de vivir afuera del repo.
 - **Consulta legal** sobre el botón de arrepentimiento (Portón C), con el matiz del CCyC art. 1116.
-- **Limpieza de `planes.js`**: features prometidas que no existen (API real-time, soporte 24/7
-  por WhatsApp, whitelabel), el precio visible que convive con "Contactar Ventas", y los
-  comentarios de generación sin resolver. No urgente para la Fase 4 —los planes no se cobran en
-  esta fase— pero es publicidad de algo que no existe, y eso tiene consecuencias en Argentina.
+- **Limpieza de `planes.js` y `cursos.js`**: los dos muestran cosas que no existen.
+  `planes.js` promete features inexistentes (API real-time, soporte 24/7 por
+  WhatsApp, whitelabel), tiene el precio visible conviviendo con "Contactar Ventas",
+  y comentarios de generación sin resolver. `cursos.js` tiene `estudiantes` y
+  `rating` inventados: cifras de maqueta que nunca fueron reales, presentadas como
+  si fueran medición. El plazo es el mismo para los dos y no es esta fase: el
+  despliegue (Fase 8), que es el primer momento en que una persona real puede
+  verlas. Hasta entonces todo corre en local y sobre mocks. El lugar práctico para
+  hacerlo es el PR de frontend de F4-7, que ya toca esa zona.
 
 ---
 

@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from datetime import datetime, timezone
+from decimal import Decimal
 from pathlib import Path
 from urllib.parse import quote_plus
 
@@ -19,6 +20,7 @@ from app.core.limiter import limiter
 from app.core.security import hash_password
 from app.db.session import get_db
 from app.main import app
+from app.models.course import Course
 from app.models.user import User
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -182,3 +184,33 @@ def crear_usuario(db: Session):
         return user
 
     return _crear_usuario
+
+
+@pytest.fixture()
+def crear_curso(db: Session):
+    """Devuelve una funcion para crear cursos de prueba. Datos
+    inequivocamente falsos: no heredan nada de la maqueta del frontend.
+    """
+
+    def _crear_curso(
+        id: str = "course_test_uno",
+        title: str = "Curso de prueba uno",
+        description: str = "Curso ficticio usado solo en tests.",
+        price: Decimal = Decimal("1000.00"),
+        currency: str = "ARS",
+        active: bool = True,
+    ) -> Course:
+        curso = Course(
+            id=id,
+            title=title,
+            description=description,
+            price=price,
+            currency=currency,
+            active=active,
+        )
+        db.add(curso)
+        db.commit()
+        db.refresh(curso)
+        return curso
+
+    return _crear_curso

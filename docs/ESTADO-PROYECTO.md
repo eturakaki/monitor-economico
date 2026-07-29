@@ -11,6 +11,11 @@ Documento de traspaso. Pegá esto (o su contenido) al arrancar un chat nuevo par
 **`docs/ROADMAP.md`**: lo que viene.
 **`docs/FASE-4.md`**: la fase en curso.
 
+**Toda la data en `src/data/**` (cursos, libros, indicadores) es utilería de
+maqueta:** esos registros no existen y nadie los compró. Lo único real hoy son las
+44 calculadoras, que hacen la matemática en el navegador sobre los números que
+ingresa el usuario — no leen nada de `src/data`.
+
 ---
 
 ## Qué es
