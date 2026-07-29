@@ -77,6 +77,17 @@ cambiar libremente.
   no tenga ya ese curso — cobrar y no poder entregar es peor que rechazar la compra.
 - Los precios actuales (40.000 el plan, ~45.000 los cursos) son hipótesis inicial; se
   corrigen con los primeros ~10 clientes reales, no antes.
+- **Costo real de cobrar (medido en sandbox el 29/7/2026).** Son mediciones de sandbox,
+  no precios nuevos: el punto anterior ya dice que los precios actuales son hipótesis a
+  corregir con clientes reales; esto es un insumo de costo para esa corrección.
+  - MercadoPago retuvo 4,1% de comisión (41 sobre 1.000; neto 959). La tasa real depende
+    del plan y de en cuántos días se cobra, así que hay que confirmarla contra la cuenta
+    real antes de fijar precios definitivos.
+  - La plata queda retenida: pago del 29/7/2026 con fecha de liberación el 16/8/2026.
+    Dieciocho días. Es flujo de caja, no margen, pero cambia cuándo se puede contar con
+    el dinero.
+  - Al reembolsar, la comisión vuelve en proporción, así que devolver plata no cuesta la
+    comisión de la parte devuelta.
 
 ## 6. Impacto técnico
 
