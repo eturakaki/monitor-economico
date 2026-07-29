@@ -147,3 +147,66 @@ def test_si_no_confirma_terminos_no_crea_nada(monkeypatch, db):
         select(User).where(User.email == "admin5@example.com")
     ).scalar_one_or_none()
     assert existente is None
+
+
+@pytest.mark.parametrize("valor", ["production", "staging", "prod"])
+def test_verificar_email_se_niega_fuera_de_development(monkeypatch, db, crear_usuario, valor):
+    # "prod" demuestra por que la comparacion va en positivo (== "development"):
+    # con una negativa (!= "production") este valor se colaria como si fuera
+    # development. "staging" es el caso peor: no es un typo, es un entorno
+    # real que tambien se colaria con esa negativa.
+    monkeypatch.setattr(settings, "environment", valor)
+    usuario = crear_usuario(email="pendiente@example.com", verificado=False)
+
+    codigo = cli.verificar_email(usuario.email)
+
+    assert codigo != 0
+    db.refresh(usuario)
+    assert usuario.email_verified_at is None
+
+
+def test_verificar_email_se_niega_sin_tty(monkeypatch, db, crear_usuario):
+    monkeypatch.setattr(settings, "environment", "development")
+    monkeypatch.setattr(cli.sys.stdin, "isatty", lambda: False)
+    usuario = crear_usuario(email="sin-tty@example.com", verificado=False)
+
+    codigo = cli.verificar_email(usuario.email)
+
+    assert codigo != 0
+    db.refresh(usuario)
+    assert usuario.email_verified_at is None
+
+
+def test_verificar_email_falla_si_el_email_no_existe(monkeypatch, db):
+    monkeypatch.setattr(settings, "environment", "development")
+
+    codigo = cli.verificar_email("no-existe@example.com")
+
+    assert codigo != 0
+
+
+def test_verificar_email_marca_email_verified_at_en_la_base(monkeypatch, db, crear_usuario):
+    monkeypatch.setattr(settings, "environment", "development")
+    usuario = crear_usuario(email="a-verificar@example.com", verificado=False)
+
+    codigo = cli.verificar_email(usuario.email)
+
+    assert codigo == 0
+    db.refresh(usuario)
+    assert usuario.email_verified_at is not None
+
+
+def test_verificar_email_es_idempotente_en_la_segunda_corrida(monkeypatch, db, crear_usuario):
+    monkeypatch.setattr(settings, "environment", "development")
+    usuario = crear_usuario(email="dos-veces@example.com", verificado=False)
+
+    primer_codigo = cli.verificar_email(usuario.email)
+    db.refresh(usuario)
+    primera_marca = usuario.email_verified_at
+
+    segundo_codigo = cli.verificar_email(usuario.email)
+    db.refresh(usuario)
+
+    assert primer_codigo == 0
+    assert segundo_codigo == 0
+    assert usuario.email_verified_at == primera_marca

@@ -44,6 +44,20 @@ Desde la carpeta `backend/`:
    uv run alembic upgrade head
    ```
 
+6. **(Solo development)** Sin proveedor de mail, el link de verificación de
+   email se escribe en el log del servidor. Para no tener que pescarlo a
+   mano en cada prueba manual del checkout, marcar un usuario como
+   verificado directamente:
+
+   ```bash
+   uv run python -m app.cli verificar-email correo@ejemplo.com
+   ```
+
+   Este comando **sólo corre con `ENVIRONMENT=development`**: con
+   cualquier otro valor se niega. No escribe en `auth_events` ni revoca
+   sesiones — es un atajo de desarrollo, no una simulación del flujo real
+   de `POST /auth/verify`.
+
 ### Variables de entorno
 
 `app/core/config.py` lee la configuración desde `backend/.env`. Las variables
