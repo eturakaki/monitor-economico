@@ -12,8 +12,14 @@ def _new_purchase_id() -> str:
 
 
 class Purchase(Base):
-    """Registra que un usuario compro un curso. Sin order_id todavia: la
-    tabla orders llega en F4-4 y ahi se agrega la columna y la FK.
+    """Registra que un usuario compro un curso.
+
+    order_id es nullable porque el otorgamiento administrativo
+    (cortesia, correccion a mano) no tiene orden detras, y porque las
+    filas creadas antes de F4-4 nacieron sin la columna. Sin ondelete:
+    no se puede borrar una orden que otorgo acceso. Esta columna llega
+    vacia a proposito en F4-4a: el otorgamiento real la escribe el
+    webhook de F4-5.
     """
 
     __tablename__ = "purchases"
@@ -29,6 +35,9 @@ class Purchase(Base):
     )
     course_id: Mapped[str] = mapped_column(
         String(64), ForeignKey("courses.id"), index=True
+    )
+    order_id: Mapped[str | None] = mapped_column(
+        String(32), ForeignKey("orders.id"), index=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

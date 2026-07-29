@@ -424,13 +424,24 @@ conservación de datos del comprador por obligación fiscal (ARCA).
   identificado antes de entrar. Es un lomo de burro para el ruido (un bug del frontend
   martillando el endpoint), no un candado: slowapi vive en memoria del proceso y con varios
   workers el límite es aproximado. El candado es el índice parcial.
+- Carrito vacío, con `course_id` repetido, o con más de **20 ítems**: 400, antes de tocar
+  `courses`. El límite es un techo de sentido común (nadie compra 20 cursos en un checkout), no
+  un valor que dependa del catálogo.
+- Si `create_preference` falla contra el proveedor: la orden recién creada pasa a `expired` y el
+  endpoint devuelve 502. Una orden `pending` sin link de pago es un estado que miente y
+  bloquearía el índice parcial sin representar nada.
+- Los montos del cuerpo de la respuesta (`total`, y cualquier otro que se agregue) viajan como
+  **string** en el JSON, no como número: un número JSON es coma flotante y reintroduciría el
+  mismo bug que `Course.price: Mapped[Decimal]` acaba de sacar del modelo.
 
 ### 6.4 — Vencimiento y reemplazo
 
 - La preferencia se crea con vencimiento de **24 horas**. El número no es técnico: es cuánto
   tiempo te comprometés a sostener un precio en Argentina. Sin esto, el link que quedó en una
   pestaña deja pagar el precio viejo tres semanas después, que es el mismo agujero que hizo
-  rechazar la reutilización de órdenes `pending`, entrando por otra puerta.
+  rechazar la reutilización de órdenes `pending`, entrando por otra puerta. Vive en
+  `settings.checkout_preference_ttl_hours` (default `24`): lleva default porque el número ya es
+  la decisión escrita acá, no un valor que dependa del entorno.
 - **De las dos piezas, sólo una es el guardarraíl.** Si la preferencia vence del lado de
   MercadoPago, esa orden no se puede pagar nunca y el precio viejo queda cerrado con o sin job.
   El estado `expired` local es **contabilidad**, no protección. Tratarlo como protección sería el
@@ -527,3 +538,14 @@ Estado del SDK al 29/7: paquete `mercadopago` 3.3.1, `requires_python >=3.10` (c
 3.12.3 del proyecto), release del 24/07/2026 — está vivo. La decisión SDK contra `httpx` a mano
 es de F4-4b, con la API a la vista. Falta mirar el último commit del repo en GitHub: hay
 paquetes que publican releases automáticos sobre un repo muerto.
+
+### 7.1 — Resultado (verificado el 29/7)
+
+- Pregunta 1: los campos de vencimiento son `expires`, junto con `expiration_date_from` /
+  `expiration_date_to`, y se aceptan en formato ISO 8601 con huso horario.
+- Pregunta 2: `external_reference` se acepta de ida (al crear la preferencia).
+- Pregunta 4: **sí** se puede anular una preferencia ya creada, mandando un `PUT` con una fecha
+  de vencimiento pasada. MercadoPago responde con `preference_expired: true`.
+- Preguntas 3 y 5 quedan **abiertas**: ambas necesitan un pago completado para verificarse (tipo
+  y largo real del ID de pago, y si se permite un reembolso parcial sobre ese pago), y con cero
+  clientes no hay todavía un pago real contra el cual probarlas.

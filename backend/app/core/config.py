@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     # prender el flag.
     email_verification_required: bool = False
     terms_version: str = "1.0"
+    # Cuanto tiempo se sostiene el precio de una preferencia de pago antes
+    # de vencer (FASE-4.md 6.4). Lleva default porque 24 horas ya es la
+    # decision escrita en el documento, no un valor tecnico que dependa
+    # del entorno: si faltara, el sistema no debe quedar mal en silencio.
+    checkout_preference_ttl_hours: int = 24
     # URL publica del backend, usada para armar los links de verificacion/reset
     # que van por mail. Nunca se construye con el header Host de la request:
     # eso permite Host Header Injection (un atacante manda un Host falso y el
