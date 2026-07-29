@@ -190,6 +190,16 @@ uno que pruebe que un cupón válido se aplica y baja el monto de la preferencia
 Bloqueado por el dominio. Se dispara desde el webhook confirmado, nunca desde la redirección.
 Al llegar acá, los cuatro flujos de correo de la Fase 3 dejan de escribirse en el log.
 
+**Prerrequisito**: `PUBLIC_BASE_URL` pasa a ser obligatoria, sin valor por defecto. Hoy
+`config.py` la define con default `http://localhost:8000`; mientras no haya proveedor de mail
+es inofensivo, pero el día que se conecte el dominio, el primer mail de verificación sale con
+un link a `localhost`. Alcance: sacar el default de `config.py` (conservando el comentario sobre
+Host Header Injection, que explica por qué no se usa el header `Host`), agregar la variable a
+`.env.example` con el valor de desarrollo, y un test que afirme que sin la variable falla la
+construcción de `Settings` — afirmando sobre el `loc` del error, que tiene que decir
+`public_base_url`. Afirmar sobre el tipo `ValidationError` no sirve: se satisface con cualquier
+campo obligatorio faltante.
+
 ### Fuera de la secuencia, en paralelo
 
 - **Dominio `monitoreco`**: verificar disponibilidad, comprar, configurar SPF y DKIM.

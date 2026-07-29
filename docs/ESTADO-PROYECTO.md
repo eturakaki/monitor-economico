@@ -7,6 +7,10 @@ Documento de traspaso. Pegá esto (o su contenido) al arrancar un chat nuevo par
 **Equipo:** Iñaki (economía + programación) y Sofía (psicología, no programa)
 **Última actualización:** 28 de julio de 2026, Fase 3 cerrada por completo, incluidos los cinco puntos que habían quedado afuera
 
+**`ESTADO-PROYECTO.md`** (este archivo): lo que hay construido.
+**`docs/ROADMAP.md`**: lo que viene.
+**`docs/FASE-4.md`**: la fase en curso.
+
 ---
 
 ## Qué es
@@ -227,6 +231,7 @@ Lo que sigue es la **Fase 4 (Pagos)**, con el bloqueante suave del dominio (ver 
 15. **Las tareas en segundo plano no pueden usar la sesión que inyecta `Depends(get_db)`: esa muere con el request.** Tienen que abrir la suya y cerrarla en un `finally`. En los tests eso apunta a la base equivocada si no se parchea.
 16. **Un grep mal anclado produce un diagnóstico falso con cara de dato duro.** Buscando variables en `.env.example` con un patrón anclado al inicio de línea, las que ya estaban documentadas como comentario (`# VAR=valor`) no aparecieron, y el resultado —"faltan diez"— era falso: faltaban dos. Antes de actuar sobre la salida de un comando, mirar el archivo.
 17. **El chequeo en código es cortesía; la garantía vive en la constraint de la base.** Un `SELECT` antes de un `INSERT` sirve para devolver un error prolijo, pero siempre tiene una ventana de carrera; el `UNIQUE` de la base no la tiene. Por eso el TOCTOU de `POST /auth/register` es robustez y no seguridad: la base aguantó y nunca se creó una cuenta duplicada. Cuando una regla importa de verdad, tiene que estar impuesta por la base, y el chequeo en código es sólo la capa de buenos modales.
+18. **Una afirmación verdadera se vuelve falsa al mudarla de documento.** El calificador que la sostenía —"de la Fase 4", "en desarrollo", "para este endpoint"— suele estar en la frase anterior y no viaja con la cita. Al trasplantar una conclusión entre documentos, verificar que el alcance del destino sea el mismo que el del origen.
 
 ---
 
@@ -244,7 +249,7 @@ Lo que sigue es la **Fase 4 (Pagos)**, con el bloqueante suave del dominio (ver 
 
 **Todavía no hay dominio comprado.** Sin dominio no hay proveedor de mail: Resend sólo permite enviar desde `onboarding@resend.dev` **y sólo a la dirección de registro de la cuenta**, como sandbox anti-abuso. Para escribirle a un usuario real hay que verificar un dominio propio con registros SPF y DKIM.
 
-Eso bloquea: verificación de email real, recuperación de contraseña real, y comprobantes de pago de la Fase 4. Un `.com` cuesta 12-15 USD al año; un `.com.ar` requiere CUIT.
+Eso bloquea: la verificación de email real, la recuperación de contraseña real, y los comprobantes de pago de la Fase 4. Lo que no bloquea es el arranque de la Fase 4: el dominio es un camino paralelo, se compra mientras se programa. Dentro de esa fase frena sólo dos cosas —el comprobante por mail y el reemplazo del 409 de `/auth/register`—; todo lo demás se construye y se prueba sin dominio. Razonamiento completo en `docs/FASE-4.md` §1.1. Un `.com` cuesta 12-15 USD al año; un `.com.ar` requiere CUIT.
 
 ### Recursos anotados para más adelante
 
@@ -408,6 +413,7 @@ Detalle completo en `docs/SEGURIDAD.md`.
 - **Verificar que `.env` no entre a Git** antes de cada commit del backend: `git add -n backend/`.
 - **Todo lo que exista en la base tiene que estar descrito en una migración de Alembic.** Nada de crear tablas a mano.
 - **Revisar la migración autogenerada antes de aplicarla.** Alembic no detecta todo.
+- **Config crítica = obligatoria, sin valor por defecto.** Si a una variable de entorno le falta el valor y el sistema puede seguir andando mal en silencio, no lleva default: la app no arranca sin ella. Ya aplicado a `postgres_user`, `postgres_password`, `postgres_db` y `environment`; pendiente en `public_base_url`.
 - Convenciones completas en `CLAUDE.md` (raíz del repo).
 
 ### Comandos frecuentes del backend
