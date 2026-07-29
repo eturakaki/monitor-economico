@@ -1,6 +1,7 @@
 """CLI de administracion del backend.
 
 Uso: uv run python -m app.cli crear-admin
+     uv run python -m app.cli verificar-email <email>
 """
 
 import argparse
@@ -130,15 +131,84 @@ def crear_admin() -> int:
         db.close()
 
 
+def verificar_email(email: str) -> int:
+    """Marca un usuario como verificado sin pasar por el mail real.
+
+    Herramienta de desarrollo: sin proveedor de mail, el link de
+    verificacion se escribe en el log del servidor, y pescarlo a mano en
+    cada prueba manual del checkout pierde tiempo.
+
+    No escribe en auth_events: el comando no puede correr fuera de
+    development, asi que ese evento nunca existiria en produccion, y
+    agregar un valor al CHECK de auth_events solo para esto es una
+    migracion de mas.
+
+    No revoca sesiones, a diferencia de POST /auth/verify. Esto es un
+    atajo de desarrollo, no una simulacion fiel del flujo real: revocar
+    solo obligaria a re-loguearse en dev sin ganar nada. No "corregir"
+    esto para que se parezca mas al endpoint real.
+
+    Devuelve el codigo de salida.
+    """
+    # "== development", no "!= production" (mismo criterio que el
+    # guardarrail del log en routes/auth.py): con la negativa, un .env
+    # que diga "prod" o "Production" dejaria el comando habilitado sin
+    # que nadie se entere.
+    es_development = settings.environment == "development"
+    if not es_development:
+        print(
+            "Este comando solo corre con environment=development. "
+            f"Environment actual: {settings.environment!r}.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if not sys.stdin.isatty():
+        print(
+            "Este comando es interactivo y necesita una terminal real.",
+            file=sys.stderr,
+        )
+        return 1
+
+    db = SessionLocal()
+    try:
+        user = db.execute(
+            select(User).where(User.email == email.strip().lower())
+        ).scalar_one_or_none()
+        if user is None:
+            print(f"No existe una cuenta con el email {email}.", file=sys.stderr)
+            return 1
+
+        if user.email_verified_at is not None:
+            print(f"{user.email} ya estaba verificado.")
+            return 0
+
+        user.email_verified_at = datetime.now(timezone.utc)
+        db.commit()
+
+        print(f"Email verificado: {user.id} <{user.email}>")
+        return 0
+    finally:
+        db.close()
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     subparsers = parser.add_subparsers(dest="comando", required=True)
     subparsers.add_parser("crear-admin", help="Crea el primer administrador")
+    verificar_email_parser = subparsers.add_parser(
+        "verificar-email",
+        help="Marca un email como verificado (solo development)",
+    )
+    verificar_email_parser.add_argument("email", help="Email de la cuenta a verificar")
 
     args = parser.parse_args(argv)
 
     if args.comando == "crear-admin":
         return crear_admin()
+
+    if args.comando == "verificar-email":
+        return verificar_email(args.email)
 
     parser.print_help()
     return 1

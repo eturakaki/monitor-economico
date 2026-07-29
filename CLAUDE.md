@@ -35,6 +35,7 @@ docker compose up -d                 # levantar Postgres
 uv run alembic upgrade head          # aplicar migraciones
 uv run uvicorn app.main:app --reload --port 8000
 uv run python -m app.cli crear-admin # crea el primer administrador
+uv run python -m app.cli verificar-email <email> # solo development
 uv run pytest -v
 docker compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"
 ```
