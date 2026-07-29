@@ -117,9 +117,16 @@ y la del `except`— saliendo por la misma función. Test nuevo: forzar el `Inte
 forma determinista y verificar que la respuesta es idéntica a la del camino con `SELECT`.
 
 **F4-2 · Patrón de `.claude/settings.json`**
-Independiente. Afinar el patrón para que bloquee los `.env` reales pero no `.env.example`.
-No es código de la aplicación; sale solo. Verificación: intentar que Claude Code edite
-`.env.example` (tiene que poder) y `.env` (no tiene que poder).
+Independiente. No es código de la aplicación; salió solo. La vía del `allow` no funciona:
+no se puede afinar el patrón para que bloquee los `.env` reales pero no `env.example`, porque
+en este esquema de permisos `deny` le gana a `allow` siempre. La solución fue sacar las
+plantillas del espacio de nombres de los secretos: se renombraron `.env.example` y
+`backend/.env.example` a `env.example`. Aparte, el deny de `Read(.env)`/`Read(.env.*)` no
+cubría la herramienta `Write`, así que se cerró ese hueco de escritura agregando
+`Edit(.env)` y `Edit(.env.*)`. Se aprovechó para consolidar los cinco patrones del
+`.gitignore` (`.env`, `.env.local`, `.env.*.local`, `.env.development`, `.env.production`)
+en uno solo, `.env*`. Verificación: Claude Code puede editar `env.example` y no puede editar
+`.env`.
 
 ### Bloque 1 — El catálogo, mínimo indispensable
 
@@ -195,7 +202,7 @@ Al llegar acá, los cuatro flujos de correo de la Fase 3 dejan de escribirse en 
 es inofensivo, pero el día que se conecte el dominio, el primer mail de verificación sale con
 un link a `localhost`. Alcance: sacar el default de `config.py` (conservando el comentario sobre
 Host Header Injection, que explica por qué no se usa el header `Host`), agregar la variable a
-`.env.example` con el valor de desarrollo, y un test que afirme que sin la variable falla la
+`env.example` con el valor de desarrollo, y un test que afirme que sin la variable falla la
 construcción de `Settings` — afirmando sobre el `loc` del error, que tiene que decir
 `public_base_url`. Afirmar sobre el tipo `ValidationError` no sirve: se satisface con cualquier
 campo obligatorio faltante.

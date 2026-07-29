@@ -24,11 +24,7 @@ dist-ssr
 *.sw?
 
 # Variables de entorno (NUNCA commitear: pueden contener credenciales)
-.env
-.env.local
-.env.*.local
-.env.development
-.env.production
+.env*
 
 # Certificados y llaves
 *.pem

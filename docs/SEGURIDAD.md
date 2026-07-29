@@ -54,7 +54,7 @@ El `.gitignore` no incluía `.env`. Si alguna vez creaban uno con credenciales, 
 
 Está bien para un mock de desarrollo, pero es crítico no olvidarlo. Le agregué un bloque de advertencia bien visible en el código.
 
-### 6. `.env.example`
+### 6. `env.example`
 
 Creado, documentando `VITE_API_URL` y `VITE_USE_MOCKS`, con una advertencia explícita sobre qué **nunca** poner en variables `VITE_*`.
 
@@ -144,7 +144,7 @@ Foto del estado de seguridad, organizada por quién es responsable de resolver c
 
 ### Cubierto (frontend, ya resuelto)
 
-- [x] `.env` protegido en `.gitignore`; `.env.example` documentado sin secretos.
+- [x] `.env` protegido en `.gitignore`; `env.example` documentado sin secretos.
 - [x] Sin token placeholder falso en el cliente HTTP (`api.client.js`).
 - [x] `IS_MOCK_MODE` respeta `VITE_USE_MOCKS` (no queda forzado a `true`).
 - [x] `ProtectedRoute` usa `allowedPlans`/`redirectPath` correctamente (bug de autorización corregido).

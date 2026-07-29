@@ -17,7 +17,7 @@ Desde la carpeta `backend/`:
 1. Copiar el archivo de ejemplo de variables de entorno:
 
    ```bash
-   cp .env.example .env
+   cp env.example .env
    ```
 
 2. Generar una contraseña para `POSTGRES_PASSWORD` y completarla en `.env`:
@@ -95,5 +95,5 @@ down` (sin `-v`).
 ## `.env` nunca se commitea
 
 El archivo `.env` contiene credenciales (usuario y contraseña de Postgres) y
-**no debe commitearse nunca**. Usar siempre `.env.example` como plantilla y
+**no debe commitearse nunca**. Usar siempre `env.example` como plantilla y
 mantener `.env` fuera del control de versiones.

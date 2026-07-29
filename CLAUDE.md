@@ -19,7 +19,7 @@ There is no test suite/framework configured in this repo (no Jest/Vitest). Don't
 
 ## Environment
 
-Copy `.env.example` to `.env`. Key variables:
+Copy `env.example` to `.env`. Key variables:
 - `VITE_API_URL` — backend base URL (defaults to `http://localhost:3000/api`)
 - `VITE_USE_MOCKS` — `true` (default) runs entirely on mock services/localStorage; set `false` to hit a real backend
 
