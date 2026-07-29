@@ -3,7 +3,8 @@
 Documento de trabajo. Deriva de `Operacion-Restaurante-Financiero-v2.docx` (Fase 4) y de
 `ESTADO-PROYECTO.md` al 28/7/2026. Destino sugerido en el repo: `docs/FASE-4.md`.
 
-**Estado**: los tres portones de seguridad quedaron resueltos el 28/7. Se arranca por F4-1.
+**Estado**: los tres portones de seguridad quedaron resueltos el 28/7. F4-1, F4-2 y
+F4-3 están cerrados. Sigue F4-4a.
 
 Modelo de negocio decidido: ver `docs/MODELO-NEGOCIO.md` (planes = datos + IA;
 Academia = cursos sueltos).
@@ -90,7 +91,7 @@ el contrato sin poder mandar mails no tiene respuesta buena.
 Se escribe con **salida compartida** entre la rama del `SELECT` y la del `except`, de modo que
 el día que el 409 cambie se toque un solo lugar. F4-1 se abre ya.
 
-### Portón C — Botón de arrepentimiento: **la columna va en F4-4; el formulario se decide con abogado** ✅
+### Portón C — Botón de arrepentimiento: **la columna va en F4-4a; el formulario se decide con abogado** ✅
 
 Las dos opciones que dejaban la puerta abierta coincidían en la columna, y la única que la omitía
 era la única con riesgo legal señalado. Agregarla ahora es una línea en el modelo; agregarla
@@ -144,28 +145,28 @@ en producción; los datos de desarrollo y test son fixtures inequívocamente fal
   activo sí/no. Sin `estudiantes` ni `rating`: son números inventados de la maqueta, y un número
   fabricado servido por una API es una medición falsa.
 - `purchases`: qué usuario compró qué curso y cuándo. Único por (usuario, curso), impuesto por
-  la base y no sólo por el código. Nace sin `order_id`: la tabla `orders` llega en F4-4 y ahí se
+  la base y no sólo por el código. Nace sin `order_id`: la tabla `orders` llega en F4-4a y ahí se
   agregan la columna y la FK.
 - `GET /auth/me` empieza a devolver `purchasedCourses` de verdad. **El test que compara el
   conjunto completo de claves del contrato tiene que seguir pasando sin tocarlo.**
 
 ### Bloque 2 — La caja
 
-**F4-4 · Modelo `Order` + `POST /checkout`**
-- `orders`: estados `pending` / `paid` / `failed` / `refunded`, impuestos por un `CHECK`.
-  Columna para el ID de pago del proveedor con índice **único** —ahí vive la idempotencia, y
-  la garantía tiene que estar en la base, no en un `if`—. Monto en `Numeric`.
-- **Columna del código público de arrepentimiento** (Portón C): aleatorio de alta entropía vía
-  `secrets`, índice único.
-- `purchases` se borra en cascada con la cuenta porque es acceso vigente. Eso obliga a que
-  `orders` **sobreviva** al borrado de la cuenta: es la única prueba de que alguien pagó, y la
-  conservación de registros comerciales es una obligación legal cuyo alcance exacto hay que
-  confirmar con abogado, junto con lo del formulario de arrepentimiento. El patrón técnico ya
-  existe en la casa: `auth_events` con `ON DELETE SET NULL`. Decidirlo al crear la tabla, no
-  después.
-- `POST /checkout` crea la orden en `pending` y genera la preferencia de MercadoPago. **El
-  precio lo lee de `courses` por ID.** Lo que viene en el request es qué se compra, nunca cuánto sale.
-- Test obligatorio: un request con un precio manipulado genera la preferencia con el precio real.
+> **F4-4 se partió en dos** (decisiones completas en §6). Contradice cómo estaba escrito
+> este documento hasta ahora, pero un PR = un propósito, y el esquema de base y la
+> integración con un tercero de pagos son dos propósitos distintos. El paso de
+> verificación de MercadoPago (§7) **no es un PR** — no lleva rama, no produce código, su
+> salida es conocimiento — y va **antes** de F4-4a: tres de sus cinco respuestas fijan
+> columnas del esquema.
+
+**F4-4a · Modelos `Order` y `OrderItem` + `POST /checkout`**
+Esquema completo, checkout contra una interfaz de proveedor de pagos con implementación
+falsa. El test del precio manipulado se prueba entero acá, sin salir a la red. Detalle
+de diseño en §6.
+
+**F4-4b · Integración real de MercadoPago**
+El SDK (o `httpx` a mano, decisión de este PR con la API a la vista), credenciales y
+llamadas reales.
 
 **F4-5 · El webhook**
 Según el Portón A: firma primero, re-consulta después.
@@ -245,10 +246,12 @@ campo obligatorio faltante.
 Regla de la casa, y la que evitó el bug del orden de argumentos de `pwdlib.verify`: la API real
 de la librería se verifica antes de escribir, no se escribe de memoria.
 
-Antes de F4-4 y F4-5 hay que confirmar contra la fuente, no contra una página que puede estar
+Antes de F4-4a y F4-5 hay que confirmar contra la fuente, no contra una página que puede estar
 cacheada: el nombre y la versión del SDK de Python, cómo se construye una preferencia y qué
 devuelve, el nombre exacto del header de firma y el algoritmo con que se calcula, y la forma
 del payload de notificación. Nada de eso se escribe hasta haberlo mirado.
+
+Lista concreta de qué se verifica y en qué orden: §7.
 
 ---
 
@@ -269,3 +272,258 @@ Del roadmap, más lo que salió de este análisis:
 7. **Agregado**: prueba de mutación sobre las **dos capas** de verificación del webhook, por
    separado. Romper la firma y romper la re-consulta tienen que hacer caer tests distintos.
    "52 passed" no prueba nada por sí solo.
+
+---
+
+## 6. Decisiones de diseño de F4-4 (29/07/2026)
+
+Estas decisiones se tomaron en conversación de diseño y se registran acá porque una decisión
+que no está en el repo no existe. No rediscutir sin motivo nuevo.
+
+### 6.1 — Alcance
+
+- El regalo de cursos **no** entra en la Fase 4, y no se le reserva lugar en el esquema. El
+  concepto ya está soportado por la separación existente: `orders` dice quién pagó, `purchases`
+  dice quién accede. El día que se implemente, un `recipient_user_id` nullable es una migración
+  aditiva barata. Lo que falta es el flujo (email del destinatario, qué pasa si no tiene
+  cuenta), y eso es otro propósito y otro PR.
+- Una orden sólo puede contener **cursos**. Los planes son suscripción y son capa posterior a
+  la Fase 4. Los libros no están decididos: si son físicos cambian el modelo entero (cantidad,
+  stock, envío).
+- **Multi-ítem**: `orders` + `order_items`, no un curso por orden. Motivos: el frontend ya tiene
+  carrito (`cartService`, `ShopProvider`, `CheckoutPage`); el contrato de la API dice
+  `createOrder(items, total)`, en plural; y agregar `order_items` después sería una migración
+  sobre órdenes reales más reescribir checkout y webhook.
+
+### 6.2 — Esquema
+
+Tipos verificados contra la base real el 29/7, no contra los modelos: `users.id varchar(32)`,
+`courses.id varchar(64)`, `price numeric(12,2)`. Patrón de id de la casa: `prefijo_ +
+uuid4().hex[:12]`. Convención de nombres leída de la base: los `CHECK` y los `UNIQUE` se
+nombran a mano (`ck_courses_currency`, `uq_purchases_user_course`), las FK se dejan con el
+default de Postgres (`purchases_user_id_fkey`). `base.py` es un `DeclarativeBase` pelado, sin
+`naming_convention`.
+
+```
+orders
+  id                   String(32), PK, "ord_" + uuid4().hex[:12]
+  user_id              String(32), NULLABLE, FK users ON DELETE SET NULL
+  status               String(16), default 'pending'
+  total                Numeric(12,2), anotado Mapped[Decimal]
+  currency             String(3), CHECK IN ('ARS')
+  cancellation_code    String(64), NOT NULL, UNIQUE
+  provider_payment_id  String(?), NULLABLE, UNIQUE   <- largo pendiente de §7
+  created_at / updated_at
+```
+
+- `user_id` es nullable **por el borrado de cuenta**, no porque exista checkout anónimo. Dejarlo
+  escrito en el docstring del modelo: un lector futuro va a leer "nullable" como "se puede
+  comprar sin cuenta". Efecto lateral bueno: en F4-6 el control de acceso compara
+  `order.user_id` contra el usuario de la sesión, y `NULL` no matchea nada, así que una orden
+  huérfana devuelve 404 por construcción.
+- `provider_payment_id` nullable **y** `UNIQUE` no es contradictorio: Postgres permite múltiples
+  `NULL` en un índice único. Todas las órdenes `pending` conviven sin chocar, y en cuanto el
+  webhook escribe el ID la base impide que una segunda orden reclame el mismo pago. Ahí vive la
+  idempotencia, impuesta por la base y no por un `if`.
+- `CHECK` de `status` con **seis** valores: `'pending'`, `'paid'`, `'failed'`, `'refunded'`,
+  `'expired'`, `'partially_refunded'`. Los dos últimos no se construyen hoy. Están para no pagar
+  dos migraciones futuras sobre una tabla con plata adentro — ya se pagaron dos por el `CHECK`
+  de `auth_events`.
+  **Límite conocido de `partially_refunded`**: describe la orden pero no puede decir qué ítem se
+  devolvió ni cuánto. Cuando la Fase 8 construya reembolsos de verdad (el botón de
+  arrepentimiento los va a exigir), van a necesitar su propio registro. No pedirle al `CHECK`
+  más de lo que puede.
+- `cancellation_code` **en claro, no hasheado**. Los tokens de auth se hashean porque son
+  credenciales que nadie debe leer; este hay que poder mostrárselo al usuario en el comprobante
+  de F4-9, y un hash no se des-hashea. Generador: `secrets.token_urlsafe(32)`, el mismo de la
+  casa. Se genera al **crear** la orden, no al pagarla: `NOT NULL` hace que la base garantice que
+  toda orden tiene exactamente un código. La validez (que la orden esté `paid`) la va a exigir el
+  formulario futuro. Existencia y validez son dos cosas y viven en dos lugares.
+
+```
+order_items
+  id          String(32), PK, "oit_" + uuid4().hex[:12]
+  order_id    String(32), FK orders ON DELETE CASCADE
+  course_id   String(64), FK courses, SIN ondelete (NO ACTION)
+  title       String(200)      <- snapshot
+  unit_price  Numeric(12,2)    <- snapshot
+  UNIQUE (order_id, course_id)
+```
+
+- El precio es **snapshot**: se lee de `courses` al crear la orden y ahí queda congelado. Si se
+  leyera de `courses` al mostrar una orden vieja, cambiar el precio de un curso reescribiría la
+  historia de lo que la gente pagó.
+- El título también es snapshot, por el mismo argumento: una orden es un comprobante, y un
+  comprobante dice qué se vendió con el nombre con el que se vendió.
+- Sin columna `quantity`: un curso es acceso permanente, no una unidad.
+- El `UNIQUE` impide el mismo curso dos veces en la misma orden, que sería cobrar el doble sin
+  poder entregar el doble.
+
+**`purchases` (modificación)**
+
+```
+  + order_id  String(32), NULLABLE, FK orders, SIN ondelete (NO ACTION)
+```
+
+- Sin `ondelete`: no se puede borrar una orden que otorgó acceso.
+- Nullable porque el otorgamiento administrativo (cortesía, corrección a mano) no tiene orden
+  detrás, y porque las filas que ya existen nacieron sin la columna.
+
+**Índice único parcial**
+
+```sql
+CREATE UNIQUE INDEX uq_orders_una_pending_por_usuario
+    ON orders (user_id) WHERE status = 'pending';
+```
+
+- Una sola orden `pending` por usuario, garantizada por Postgres.
+- **No** se usa un `SELECT COUNT` antes del `INSERT`: eso es el mismo TOCTOU que F4-1 acaba de
+  enterrar en `/auth/register`. Dos requests simultáneas cuentan lo mismo y las dos insertan. "No
+  depende del worker" no es "no tiene race".
+- **No** se puede usar `(user_id, course_id)`: `orders` es multi-ítem y los cursos viven en
+  `order_items`. Un índice parcial es de una tabla y Postgres no tiene constraints únicos que
+  crucen tablas. Denormalizar `status` dentro de `order_items` para poder indexarlo ahí queda
+  descartado: una copia del estado que hay que sincronizar en cada transición del webhook se
+  desincroniza justo en la fila que importa.
+- Una sola `pending` por usuario no molesta porque el producto tiene carrito: el flujo real es
+  "A y B en el carrito, un checkout", no dos checkouts en paralelo.
+
+**Orden huérfana**: `SET NULL` a secas, sin denormalizar el email del comprador. La asimetría
+decide: no guardarlo cuesta cero — según `MODELO-NEGOCIO.md` §7 no se puede vender hasta grabar
+un curso —, guardarlo y arrepentirse es haber conservado datos personales de gente que pidió ser
+borrada. Agregar la columna después es migración aditiva. Va a la consulta legal, que tiene
+**dos** patas que tiran para lados opuestos: derecho de supresión (Ley 25.326) contra
+conservación de datos del comprador por obligación fiscal (ARCA).
+
+### 6.3 — `POST /checkout`
+
+- Lleva `require_verified_email`. Verificado en `deps.py`: esa dependencia es **incondicional**,
+  no mira `EMAIL_VERIFICATION_REQUIRED` (ese flag es el portón del login entero, otro portón).
+  Consecuencia asumida: nadie compra hasta que exista proveedor de mail, porque hoy el link de
+  verificación se escribe en el log. Se acepta porque F4-9 está dentro de esta fase y no se puede
+  vender antes de grabar un curso. Sacar el portón "por ahora" sería fail-open en el endpoint
+  donde se mueve plata.
+- Hoy `require_verified_email` sólo tiene consumidor en `conftest.py`. `/checkout` la estrena en
+  producción, así que van los **dos** tests espejo: el que prueba que sin verificar da 403 y el
+  que prueba que verificando entra. Es el mismo agujero que destapó el PR #19 en `require_plan`.
+- El precio lo lee de `courses` por ID. Lo que viene en el request es qué se compra, nunca cuánto
+  sale.
+- Carrito con un curso que el usuario **ya compró**: 409 al checkout **completo**, con la lista
+  de `course_id` conflictivos en el cuerpo. No se filtra el ítem para cobrar el resto: el
+  servidor manda sobre el precio y **no** manda sobre el contenido. Cambiar qué se compra sin que
+  el usuario lo confirme es la clase de sorpresa que termina en disputa. El frontend corrige el
+  carrito y reintenta. Virtud adicional: el 409 sale **antes** de crear la orden, así que no
+  interactúa con el índice parcial ni con el reemplazo — el reintento es un checkout nuevo y
+  limpio.
+- Ese chequeo tiene ventana de carrera y **se acepta**. Ojo con la lección 17 del proyecto: acá el
+  chequeo en código **no** es cortesía, es lo único que existe entre el usuario y el cobro. La
+  constraint lo agarra igual, pero lo agarra después de cobrar. Se acepta porque para perder
+  plata harían falta dos checkouts simultáneos del mismo usuario por el mismo curso **y** dos
+  pagos completados, y el costo es un reembolso, no un agujero.
+- Rate limit **por usuario**, no por IP: el endpoint ya exige sesión, así que el atacante está
+  identificado antes de entrar. Es un lomo de burro para el ruido (un bug del frontend
+  martillando el endpoint), no un candado: slowapi vive en memoria del proceso y con varios
+  workers el límite es aproximado. El candado es el índice parcial.
+
+### 6.4 — Vencimiento y reemplazo
+
+- La preferencia se crea con vencimiento de **24 horas**. El número no es técnico: es cuánto
+  tiempo te comprometés a sostener un precio en Argentina. Sin esto, el link que quedó en una
+  pestaña deja pagar el precio viejo tres semanas después, que es el mismo agujero que hizo
+  rechazar la reutilización de órdenes `pending`, entrando por otra puerta.
+- **De las dos piezas, sólo una es el guardarraíl.** Si la preferencia vence del lado de
+  MercadoPago, esa orden no se puede pagar nunca y el precio viejo queda cerrado con o sin job.
+  El estado `expired` local es **contabilidad**, no protección. Tratarlo como protección sería el
+  error.
+- Segundo checkout con una `pending` viva: **reemplazo, no reutilización**. En la misma
+  transacción, la anterior pasa a `expired` y se crea una nueva al precio de hoy. Reutilizar
+  devolvería el precio viejo, que es exactamente lo que el snapshot quiere evitar. Si dos
+  checkouts corren en paralelo, uno gana y el otro recibe `IntegrityError` contra el índice
+  parcial: se maneja con el mismo `try`/`except` de F4-1.
+- Invalidar la preferencia vieja del lado de MercadoPago al reemplazar: **best-effort**, si la
+  API lo permite (pregunta 4 de §7). Es una llamada de red que puede fallar y el checkout no
+  puede depender de ella. La corrección viene de la política del webhook de 6.5; la invalidación
+  es higiene.
+- El job que barre `pending` viejas **no** entra acá: queda en la deuda ya anotada de F4-6
+  (APScheduler, que llega en la Fase 5, con el advisory lock de Postgres para que no corra una
+  vez por worker).
+
+### 6.5 — Consecuencias para F4-5 (decididas acá, aplican al webhook)
+
+- `external_reference` = el id de la orden, mandado al crear la preferencia. **Se lee de la
+  re-consulta, nunca del payload de la notificación.** Es el mismo campo, y de dónde se lee es la
+  diferencia entre correlación y agujero: leerlo del mensaje dejaría que el atacante elija qué
+  orden marcás como pagada. Es el Portón A aplicado al campo de correlación.
+- **La idempotencia se llavea contra `provider_payment_id`, no contra el estado local de la
+  orden.** Escribir `if order.status != "pending": return 200` parece idempotencia y es una
+  alcancía rota: se come pagos reales. Una orden `expired` que recibe un pago aprobado **tiene**
+  que pasar a `paid` y otorgar, porque la plata entró dentro de las 24 horas que se aceptó
+  sostener. El estado local no es autoridad sobre nada; la autoridad es la re-consulta y el
+  registro de qué pagos ya se procesaron. Único estado terminal: `refunded`, que nunca vuelve a
+  `paid`.
+- **Acceso y plata se resuelven por separado.** Son dos preguntas distintas y tratarlas como una
+  sola bloquea F4-5 sin motivo:
+  - Acceso: determinístico. El otorgamiento recorre los ítems con `INSERT ... ON CONFLICT DO
+    NOTHING` contra el `UNIQUE (user_id, course_id)` de `purchases`. El duplicado no revienta, no
+    tira 500, no dispara reintentos de MercadoPago. El usuario termina con todos los cursos.
+  - Plata: decisión de negocio, fuera del camino del pago. Con cero clientes se resuelve a mano.
+    No hace falta columna ni rama.
+- Consulta de detección del caso (textual, para no re-derivarla el día que aparezca; una consulta
+  que nadie corre es una política que nadie ejecuta):
+
+```sql
+SELECT o.id AS orden, o.user_id, oi.course_id, oi.unit_price
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.id
+JOIN purchases p
+  ON p.user_id = o.user_id AND p.course_id = oi.course_id
+WHERE o.status IN ('paid', 'partially_refunded')
+  AND (p.order_id IS NULL OR p.order_id <> o.id);
+```
+
+  Devuelve los ítems que la orden cobró pero cuyo acceso vino de otro lado: candidatos a
+  devolución.
+
+### 6.6 — Herramienta de desarrollo
+
+Subcomando `verificar-email` en `app.cli`, PR propio y **antes** de F4-4a, porque sin él cada
+prueba manual del checkout choca contra el 403 y hay que ir a pescar el link al log del servidor
+cada vez que se recrea la base. Frenos, no negociables: exige TTY real como `crear-admin`, y se
+niega salvo que `settings.environment` sea **exactamente** `"development"`, escrito en positivo.
+Con `!= "production"`, un `.env` que diga `prod` o `Production` deja el comando habilitado sin
+que nadie se entere.
+
+### 6.7 — Notas para los tests de F4-4a
+
+- Todo test que ejercite un checkout exitoso tiene que crear el usuario con
+  `email_verified_at` seteado. Si no, la suite entera devuelve 403 y se pierde una tarde
+  buscándolo en el lugar equivocado.
+- Los tests que creen varias órdenes van a chocar contra el índice único parcial: usuarios
+  distintos por test, o expirar la anterior.
+- Test obligatorio del roadmap: un request con precio manipulado desde el cliente genera la
+  preferencia con el precio real leído de la base.
+
+---
+
+## 7. Paso de verificación de MercadoPago — cinco preguntas
+
+No es un PR: no lleva rama y no produce código. Su salida es conocimiento y va antes de F4-4a,
+porque tres de las cinco respuestas fijan columnas del esquema. Regla de §4 y lección 10: se
+verifica contra la API o contra el paquete instalado, nunca contra una página que puede estar
+cacheada.
+
+1. Nombre y formato del campo de vencimiento de la preferencia.
+2. Si `external_reference` vuelve en la re-consulta del pago.
+3. Tipo y largo del ID de pago (fija el largo de `provider_payment_id`).
+4. Si se puede invalidar una preferencia ya creada.
+5. Si permite reembolsos parciales sobre un pago.
+
+Orden: la 4 antes que la 5. Si se puede invalidar, la orden reemplazada casi no se puede pagar y
+el escenario de la 5 pasa de probable a raro; si no se puede, es probable, porque el usuario que
+reabre el checkout arma casi siempre el mismo carrito. La 5 hace falta igual para la Fase 8: el
+botón de arrepentimiento implica devolver plata.
+
+Estado del SDK al 29/7: paquete `mercadopago` 3.3.1, `requires_python >=3.10` (compatible con el
+3.12.3 del proyecto), release del 24/07/2026 — está vivo. La decisión SDK contra `httpx` a mano
+es de F4-4b, con la API a la vista. Falta mirar el último commit del repo en GitHub: hay
+paquetes que publican releases automáticos sobre un repo muerto.
