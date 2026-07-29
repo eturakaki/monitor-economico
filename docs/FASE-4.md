@@ -455,6 +455,10 @@ conservación de datos del comprador por obligación fiscal (ARCA).
   API lo permite (pregunta 4 de §7). Es una llamada de red que puede fallar y el checkout no
   puede depender de ella. La corrección viene de la política del webhook de 6.5; la invalidación
   es higiene.
+  **Orden de operaciones**: primero se anula la preferencia vieja en el proveedor, después se
+  crea la nueva. Al revés, si la creación de la preferencia nueva falla, la vieja queda sin
+  anular y su link sigue vivo con el precio viejo, que es exactamente el agujero que el
+  vencimiento vino a cerrar.
 - El job que barre `pending` viejas **no** entra acá: queda en la deuda ya anotada de F4-6
   (APScheduler, que llega en la Fase 5, con el advisory lock de Postgres para que no corra una
   vez por worker).
